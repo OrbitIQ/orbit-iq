@@ -22,7 +22,7 @@ def get_db_connection():
     )
     return conn
 
-@app.route('/satellites')
+@app.route('/confirmed/satellites')
 def get_satellites():
     """Get all satellites from the official_satellites table."""
     conn = get_db_connection()
