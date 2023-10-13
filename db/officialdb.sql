@@ -26,7 +26,8 @@ CREATE TABLE official_satellites (
     cospar_number  VARCHAR(20),
     norad_number integer,
     comment_note VARCHAR(255),
-    source_orbit VARCHAR(255)
+    source_orbit VARCHAR(255),
+    source_satellite text[]
     );
 
 COPY official_satellites(    
@@ -56,7 +57,8 @@ COPY official_satellites(
     cospar_number,
     norad_number,
     comment_note,
-    source_orbit
+    source_orbit,
+	source_satellite
     ) 
 FROM './UCS-Satellite-Database-Officialname-1-1-2023.csv' 
 WITH (FORMAT CSV, DELIMITER ',', QUOTE '"');
