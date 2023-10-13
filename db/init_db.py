@@ -50,6 +50,8 @@ CREATE TABLE IF NOT EXISTS official_satellites (
     );
 """)
 
+# Should probably first check that the table is empty before inserting, or was just created above.
+
 conn.commit()
 cursor.close()
 conn.close()
