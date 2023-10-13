@@ -12,6 +12,14 @@ services:
       context: ./api
     ports:
       - "8080:8080"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    depends_on:
+      - db
 
   website:
     build:
