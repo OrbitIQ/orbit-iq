@@ -45,7 +45,8 @@ CREATE TABLE IF NOT EXISTS official_satellites (
     cospar_number  VARCHAR(20),
     norad_number integer,
     comment_note VARCHAR(255),
-    source_orbit VARCHAR(255)
+    source_orbit VARCHAR(255),
+    source_satellite text[]
     );
 """)
 
