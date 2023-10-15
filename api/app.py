@@ -1,8 +1,10 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 import psycopg2
 import os
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Database connection configurations using os.environ
 DB_HOST = os.environ.get('DB_HOST', 'db')  # Default to 'db' if not set
@@ -22,7 +24,7 @@ def get_db_connection():
     )
     return conn
 
-@app.route('/confirmed/satellites')
+@app.route('/confirmed/satellites', methods=["GET"])
 def get_satellites():
     """
     Retrieve satellites from the official_satellites table with optional pagination.
@@ -70,6 +72,8 @@ def get_satellites():
     satellites_as_dict = [dict(zip(columns, row)) for row in satellites]
 
     return jsonify({'satellites': satellites_as_dict})
+    
+
 
 
 if __name__ == '__main__':
