@@ -1,8 +1,16 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 import psycopg2
 import os
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+@app.after_request
+def add_cors_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+    return response
 
 # Database connection configurations using os.environ
 DB_HOST = os.environ.get('DB_HOST', 'db')  # Default to 'db' if not set
@@ -22,7 +30,7 @@ def get_db_connection():
     )
     return conn
 
-@app.route('/confirmed/satellites')
+@app.route('/confirmed/satellites', methods=["GET"])
 def get_satellites():
     """
     Retrieve satellites from the official_satellites table with optional pagination.
@@ -70,7 +78,12 @@ def get_satellites():
     satellites_as_dict = [dict(zip(columns, row)) for row in satellites]
 
     return jsonify({'satellites': satellites_as_dict})
+    
 
+@app.after_request
+def log_response(response):
+    print("Headers:", response.headers)
+    return response
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=8080, debug=True)
