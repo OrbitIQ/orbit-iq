@@ -10,19 +10,19 @@ function App() {
   const [satellites, setSatellites] = useState<SatelliteData>({satellites: []})
 
   useEffect(() => {
-    setSatellites(placeholder);
+    //setSatellites(placeholder);
     
 
-    // const getData = async () =>{
-    //   try{
-    //     const satelliteData = await Axios.get<SatelliteData>("http://localhost:8080/confirmed/satellites?limit=10");
-    //     setSatellites(satelliteData.data);
-    //   }
-    //   catch(error){
-    //     console.error("An error occurred fetching satellite data.", error);
-    //   }
-    // }    
-    // getData();
+     const getData = async () =>{
+     try{
+         const satelliteData = await Axios.get<SatelliteData>("http://localhost:8080/confirmed/satellites?limit=10");
+         setSatellites(satelliteData.data);
+       }
+       catch(error){
+         console.error("An error occurred fetching satellite data.", error);
+       }
+     }    
+     getData();
   }, []);
 
 
