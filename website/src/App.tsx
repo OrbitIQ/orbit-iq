@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import Axios from 'axios';
-import placeholder from './assets/placeholderData.json'
+//import placeholder from './assets/placeholderData.json'
 import './App.css'
 import {SatelliteData} from './types/Satellite';
 import SatelliteTable from './components/satelliteTable';

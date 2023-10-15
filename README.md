@@ -22,6 +22,11 @@ The `orbit-iq` project comprises several services, which are defined in the `doc
     docker-compose up
     ```
 
+    We probably should be running the following command, which will force docker to rebuild the images. So that we don't run into weird caching issues with Docker using old images even if we've made changes.
+    ```bash
+    docker-compose up --build --force-recreate
+    ```
+
     If you want to run the services in the background, you can use the `-d` flag:
     ```bash
     docker-compose up -d
