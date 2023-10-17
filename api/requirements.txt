@@ -1,3 +1,4 @@
 Flask==3.0.0
 psycopg2==2.9.9
 Flask-Cors==4.0.0
+pytest==7.4.2

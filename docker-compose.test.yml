@@ -1,49 +1,50 @@
 version: '3'
 
 x-shared-environment: &shared-environment
-  POSTGRES_DB: mydatabase
+  POSTGRES_DB: test_mydatabase
   POSTGRES_USER: user
   POSTGRES_PASSWORD: password
-  DB_HOST: db
+  DB_HOST: db_test
+  DB_PORT: 5432
 
 services:
-  api:
+  api_test:
     build:
       context: ./api
     ports:
-      - "8080:8080"
+      - "8080:8080" 
     environment:
-      DB_HOST: db
+      DB_HOST: db_test
       DB_PORT: 5432
-      POSTGRES_DB: mydatabase
+      POSTGRES_DB: test_mydatabase
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
     depends_on:
-      - db
-      - init-db
+      - db_test
+      - init-db_test
 
-  website:
-    build:
-      context: ./website
-    ports:
-      - "3000:3000"
-  db:
+  db_test:
     image: postgres:13
     environment:
       <<: *shared-environment
     ports:
       - "5432:5432"
-    volumes:
-      - db-data:/var/lib/postgresql/data
 
-  init-db:
+  init-db_test:
     build:
       context: ./db
       dockerfile: Dockerfile-db-init
     environment:
       <<: *shared-environment
     depends_on:
-      - db
+      - db_test
 
-volumes:
-  db-data:
+  api_integration_test:
+    build:
+      context: ./api
+    command: pytest test.py
+    depends_on:
+      - api_test
+      - init-db_test
+    environment:
+      <<: *shared-environment
