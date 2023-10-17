@@ -18,6 +18,9 @@ jobs:
       run: |
         docker-compose -f docker-compose.test.yml run api_integration_test
 
+    - name: Wait for a few seconds
+      run: sleep 10
+
     - name: Run pytest in api_test
       run: |
         docker-compose -f docker-compose.test.yml run api_test pytest
