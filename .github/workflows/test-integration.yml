@@ -13,6 +13,10 @@ jobs:
     - name: Build and run Docker Compose
       run: |
         docker-compose -f docker-compose.test.yml up --build --force-recreate -d
+        
+    - name: Docker PS
+      run: |
+        docker-compose ps
 
     - name: Run pytest in api_test
       run: |
