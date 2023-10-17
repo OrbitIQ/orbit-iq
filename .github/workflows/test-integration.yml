@@ -20,9 +20,9 @@ jobs:
 
     - name: Run pytest in api_test
       run: |
-        docker-compose run api_test pytest
+        docker-compose -f docker-compose.test.yml run api_test pytest
 
     - name: Stop and remove Docker Compose services
       run: |
-        docker-compose down
+        docker-compose -f docker-compose.test.yml down
       if: always()
