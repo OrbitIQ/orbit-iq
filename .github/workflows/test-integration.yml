@@ -1,0 +1,20 @@
+name: Integration Test
+
+on: [push, pull_request] # Trigger the workflow on push or pull request
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Run pytest in api_test
+      run: |
+        docker-compose -f docker-compose.test.yml up -d
+
+    - name: Run
+      run: |
+        docker-compose -f docker-compose.test.yml run api_test /bin/bash -c "sleep 10 && pytest test.py"
+

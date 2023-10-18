@@ -13,11 +13,14 @@ def add_cors_headers(response):
     return response
 
 # Database connection configurations using os.environ
-DB_HOST = os.environ.get('DB_HOST', 'db')  # Default to 'db' if not set
-DB_PORT = int(os.environ.get('DB_PORT', 5432))  # Default to 5432 if not set
-DB_NAME = os.environ.get('POSTGRES_DB', 'mydatabase')  # Default to 'mydatabase' if not set
-DB_USER = os.environ.get('POSTGRES_USER', 'user')  # Default to 'user' if not set
-DB_PASSWORD = os.environ.get('POSTGRES_PASSWORD', 'password')  # Default to 'password' if not set
+DB_HOST = os.environ.get('DB_HOST')
+DB_PORT = os.environ.get('DB_PORT')
+DB_NAME = os.environ.get('POSTGRES_DB')
+DB_USER = os.environ.get('POSTGRES_USER')
+DB_PASSWORD = os.environ.get('POSTGRES_PASSWORD')
+
+if any(v is None for v in [DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD]):
+    raise Exception("One or more environment variables are missing.")
 
 def get_db_connection():
     """Get a connection to the database."""
