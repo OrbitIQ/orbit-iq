@@ -20,7 +20,7 @@ def test_get_satellites_with_pagination(client):
     assert response.status_code == 200
     data = response.get_json()
     assert 'satellites' in data
-    assert len(data['satellites']) == 5  # Assumes you have more than 5 records in the test DB
+    assert len(data['satellites']) == 5
 
 def test_database_connection():
     """Test database connection."""
@@ -34,5 +34,3 @@ def test_cors_headers(client):
     assert response.headers['Access-Control-Allow-Origin'] == '*'
     assert 'Content-Type' in response.headers['Access-Control-Allow-Headers']
     assert 'Authorization' in response.headers['Access-Control-Allow-Headers']
-
-# Add even more tests as needed...
