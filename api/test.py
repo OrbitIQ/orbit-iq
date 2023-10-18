@@ -1,3 +1,4 @@
+import time
 import pytest
 from app import app, get_db_connection
 
@@ -9,6 +10,7 @@ def client():
 
 def test_get_all_satellites(client):
     """Test getting all satellites without pagination."""
+    time.sleep(25)
     response = client.get('/confirmed/satellites')
     assert response.status_code == 200
     data = response.get_json()
@@ -16,6 +18,7 @@ def test_get_all_satellites(client):
 
 def test_get_satellites_with_pagination(client):
     """Test getting satellites with pagination."""
+    time.sleep(25)
     response = client.get('/confirmed/satellites?limit=5&page=2')
     assert response.status_code == 200
     data = response.get_json()

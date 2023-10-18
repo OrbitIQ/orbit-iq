@@ -6,14 +6,17 @@ import csv
 DB_NAME = os.environ.get('POSTGRES_DB')
 DB_USER = os.environ.get('POSTGRES_USER')
 DB_PASSWORD = os.environ.get('POSTGRES_PASSWORD')
-DB_HOST = os.environ.get('DB_HOST', 'db')  # Default to 'db' if not specified
+DB_HOST = os.environ.get('DB_HOST')
+
+if any(v is None for v in [DB_NAME, DB_USER, DB_PASSWORD, DB_HOST]):
+    raise Exception("One or more environment variables are missing.")
 
 # Connect to PostgreSQL
 conn = psycopg2.connect(
     dbname=DB_NAME,
     user=DB_USER,
     password=DB_PASSWORD,
-    host=DB_HOST
+    host=DB_HOST,
 )
 cursor = conn.cursor()
 
