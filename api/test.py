@@ -6,7 +6,7 @@ from app import app, get_db_connection
 @pytest.fixture
 def client():
     with app.test_client() as client:
-        yield client
+        yield
 
 def test_get_all_satellites(client):
     """Test getting all satellites without pagination."""
