@@ -1,7 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { Satellite } from "../../types/Satellite"
 
-
 export const satelliteColumns: ColumnDef<Satellite>[] = [
   {
     accessorKey: "apogee",
@@ -19,8 +18,6 @@ export const satelliteColumns: ColumnDef<Satellite>[] = [
     accessorKey: "contractor_country",
     header: "Contractor Country",
   },
-
-
   {
     accessorKey: "cospar",
     header: "Cospar",
@@ -55,8 +52,6 @@ export const satelliteColumns: ColumnDef<Satellite>[] = [
     accessorKey: "launch_site",
     header: "Launch Site",
   },
-
-
   {
     accessorKey: "launch_vehicle",
     header: "Launch Vehicle",
@@ -71,9 +66,8 @@ export const satelliteColumns: ColumnDef<Satellite>[] = [
   },
   {
     accessorKey: "norad",
-    header: "norad",
+    header: "Norad",
   },
-
   {
     accessorKey: "official_name",
     header: "Official Name",
@@ -92,47 +86,66 @@ export const satelliteColumns: ColumnDef<Satellite>[] = [
   },
 
   {
-    accessorKey: "official_name",
-    header: "Official Name",
+    accessorKey: "owner_name",
+    header: "Owner Name",
   },
   {
-    accessorKey: "orbit_class",
-    header: "Orbit Class",
+    accessorKey: "perigee",
+    header: "Perigee",
   },
   {
-    accessorKey: "orbit_type",
-    header: "Orbit Type",
+    accessorKey: "period_min",
+    header: "Period Min",
   },
   {
-    accessorKey: "own_country",
-    header: "Own Country",
+    accessorKey: "power_watts",
+    header: "Power (Watts)",
   },
-
+  {
+    accessorKey: "purposes",
+    header: "Purposes",
+  },
+  {
+    accessorKey: "reg_country",
+    header: "Registered Coutnry",
+  },
+  {
+    accessorKey: "source_orbit",
+    header: "Source Orbit",
+  },
+  {
+    accessorKey: "source_satellite",
+    header: "Source Satellite",
+  },
+  {
+    accessorKey: "user_type",
+    header: "User Type",
+  }
 ];
 
 
 
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
-export type Payment = {
-  id: string
-  amount: number
-  status: "pending" | "processing" | "success" | "failed"
-  email: string
-}
+// // This type is used to define the shape of our data.
+// // You can use a Zod schema here if you want.
+// export type Payment = {
+//   id: string
+//   amount: number
+//   status: "pending" | "processing" | "success" | "failed"
+//   email: string
+// }
 
-export const columns: ColumnDef<Payment>[] = [
-  {
-    accessorKey: "status",
-    header: "Status",
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
-  },
-  {
-    accessorKey: "amount",
-    header: "Amount",
-  },
-]
+// export const columns: ColumnDef<Satellite>[] = [
+//   {
+//     accessorKey: "status",
+//     header: "Status",
+//   },
+//   {
+//     accessorKey: "email",
+//     header: "Email",
+//   },
+//   {
+//     accessorKey: "amount",
+//     header: "Amount",
+//   },
+// ]
