@@ -8,7 +8,7 @@ function App() {
       <div style = {{
         margin: "auto",
         width: 1600,
-        paddingTop: "1rem"
+        paddingTop: "0.3rem"
       }}>
         <h1>Satellite Data</h1>
         <SatelliteTable/>  
