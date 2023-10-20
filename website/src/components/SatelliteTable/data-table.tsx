@@ -60,7 +60,7 @@ export function DataTable<TData, TValue>({
               Filter Columns
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="max-h-64 overflow-y-auto">
             {table
               .getAllColumns()
               .filter(
@@ -75,6 +75,7 @@ export function DataTable<TData, TValue>({
                     onCheckedChange={(value) =>
                       column.toggleVisibility(!!value)
                     }
+                    
                   >
                     {column.id}
                   </DropdownMenuCheckboxItem>
