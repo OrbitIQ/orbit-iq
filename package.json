@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "@types/react-dom": "^18.2.13",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-svg": "^16.1.29"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.28",
+    "vite-svg-loader": "^4.0.0"
+  }
+}
