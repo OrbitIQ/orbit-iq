@@ -1,35 +1,10 @@
-from flask import Flask, request
-from flask_cors import CORS
-import psycopg2
-import os
+from flask import Blueprint, jsonify, request
+from utils import get_db_connection
 
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+# Create a Blueprint for this subpath
+user_subpath = Blueprint('user', __name__)
 
-DB_HOST = os.environ.get('DB_HOST')
-DB_PORT = os.environ.get('DB_PORT')
-DB_NAME = os.environ.get('POSTGRES_DB')
-DB_USER = os.environ.get('POSTGRES_USER')
-DB_PASSWORD = os.environ.get('POSTGRES_PASSWORD')
-
-if any(v is None for v in [DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD]):
-    raise Exception("One or more environment variables are missing.")
-
-def get_db_connection():
-    """Get a connection to the database."""
-    conn = psycopg2.connect(
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        host=DB_HOST,
-        port=DB_PORT
-    )
-    return conn
-
-conn = get_db_connection()
-cursor = conn.cursor()
-
-@app.route('/get', methods=['GET'])
+@user_subpath.route('/get', methods=['GET'])
 def get_data():
     """
     Executes a read function , such as SELECT statement on the edit table.
@@ -40,6 +15,9 @@ def get_data():
         return {
             "message": "User ID is required"
         }, 401  
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
     try:
         cursor.execute("SELECT * FROM edit WHERE user_id = %s", (user_id,))
@@ -60,8 +38,11 @@ def get_data():
             "error": str(e),
              "message": "An internal server error occurred. Please contact admin."
              }, 500
+    finally:
+        cursor.close()
+        conn.close()
 
-@app.route('/create', methods=['POST'])
+@user_subpath.route('/create', methods=['POST'])
 def create_edit():
     """
     Executes a creat function , such as an INSERT INTO statement on the edit table.
@@ -80,6 +61,9 @@ def create_edit():
         return {
             "message": "User ID is required"
         }, 422 
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
     try:
         cursor.execute(
@@ -105,9 +89,13 @@ def create_edit():
             "error": str(e),
              "message": "An internal server error occurred. Please contact admin."
         }, 500
+    
+    finally:
+        cursor.close()
+        conn.close()
           
 
-@app.route('/update', methods=['PUT'])
+@user_subpath.route('/update', methods=['PUT'])
 def update_edit():
     """
     Executes a update function , such as an UPDATE statement on the edit table.
@@ -127,6 +115,9 @@ def update_edit():
         return {
             "message": "User ID is required"
         }, 422 
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
     try:
         cursor.execute("UPDATE edit SET edit_data = %s WHERE user_id = %s", (edit_data, user_id))
@@ -141,8 +132,12 @@ def update_edit():
             "message": "An internal server error occurred. Please contact admin.",
             "error": str(e)
         }, 500 
+    
+    finally:
+        cursor.close()
+        conn.close()
 
-@app.route('/delete>', methods=['DELETE'])
+@user_subpath.route('/delete', methods=['DELETE'])
 def delete_edit():
     """
     Executes a delete function , such as an DELETE statement on the edit table.
@@ -153,6 +148,10 @@ def delete_edit():
         return {
             "message": "User ID is required"
         }, 422  
+
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
     try:
         cursor.execute("DELETE FROM edit WHERE user_id = %s", (user_id,))
@@ -167,5 +166,9 @@ def delete_edit():
             "message": "An internal server error occurred. Please contact admin.",
             "error": str(e)
         }, 500  
+    
+    finally:
+        cursor.close()
+        conn.close()
 
 

@@ -30,10 +30,3 @@ def test_database_connection():
     conn = get_db_connection()
     assert conn is not None
     conn.close()
-
-def test_cors_headers(client):
-    """Test CORS headers are set correctly."""
-    response = client.get('/confirmed/satellites')
-    assert response.headers['Access-Control-Allow-Origin'] == '*'
-    assert 'Content-Type' in response.headers['Access-Control-Allow-Headers']
-    assert 'Authorization' in response.headers['Access-Control-Allow-Headers']
