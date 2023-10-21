@@ -25,5 +25,7 @@ def get_db_conn():
 class EnhancedJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, pd.Timestamp):
-            return obj.strftime('%Y-%m-%d %H:%M:%S')
+            return obj.isoformat() if pd.notna(obj) else None
+        elif pd.isna(obj) or obj is pd.NaT:
+            return None
         return super(EnhancedJSONEncoder, self).default(obj)

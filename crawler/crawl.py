@@ -67,9 +67,23 @@ def count_crawler_dump():
 
     return count
 
+def drop_crawler_dump():
+    # TODO: This is a dangerous function, only use it for testing
+    conn = get_db_conn()
+    cur = conn.cursor()
+
+    cur.execute("""
+        DROP TABLE IF EXISTS crawler_dump;
+    """)
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
 def main():
     logging.basicConfig(level=logging.INFO)
     logging.info("Starting crawler")
+    drop_crawler_dump() # TODO: remove in prod maybe toggle env var
     setup_sources() # create sources table and add sources
     setup_crawler_dump() # create crawler_dump table
 
@@ -79,7 +93,7 @@ def main():
 
     after_count = count_crawler_dump()
 
-    logging.info("Added {} new records to crawler_dump".format(after_count - before_count))
+    print("Added {} new records to crawler_dump".format(after_count - before_count))
 
 if __name__ == "__main__":
     main()
