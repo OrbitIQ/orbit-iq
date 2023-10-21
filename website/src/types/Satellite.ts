@@ -16,7 +16,7 @@ export interface Satellite {
     launch_date:        string;
     launch_site:        string;
     launch_vehicle:     string;
-    mass_dry:           null;
+    mass_dry:           string | null;
     mass_launch:        string;
     norad:              number;
     official_name:      string;
@@ -26,10 +26,10 @@ export interface Satellite {
     owner_name:         string;
     perigee:            string;
     period_min:         string;
-    power_watts:        null;
+    power_watts:        string | null;
     purposes:           string;
     reg_country:        string;
-    source_orbit:       null;
+    source_orbit:       string | null;
     source_satellite:   Array<null | string>;
     user_type:          string;
 }

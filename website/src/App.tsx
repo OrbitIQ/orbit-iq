@@ -1,44 +1,44 @@
-import { useEffect, useState } from 'react'
-import Axios from 'axios';
-//import placeholder from './assets/placeholderData.json'
-import './App.css'
-import {SatelliteData} from './types/Satellite';
-import SatelliteTable from './components/satelliteTable';
+import "./App.css";
+import SatelliteTable from "./components/SatelliteTable/page";
+import logo from "./components/Sidebar/ucslogo.webp";
+import { Button } from "./components/ui/button";
 
 function App() {
-
-  const [satellites, setSatellites] = useState<SatelliteData>({satellites: []})
-
-  useEffect(() => {
-    //setSatellites(placeholder);
-    
-
-     const getData = async () =>{
-     try{
-         const satelliteData = await Axios.get<SatelliteData>("http://localhost:8080/confirmed/satellites?limit=10");
-         setSatellites(satelliteData.data);
-       }
-       catch(error){
-         console.error("An error occurred fetching satellite data.", error);
-       }
-     }    
-     getData();
-  }, []);
-
-
   return (
     <>
-      <div style = {{
-        margin: "auto",
-        width: 800,
-        paddingTop: "1rem"
-      }}>
+      <div
+        style={{
+          margin: "auto",
+          width: 1600,
+          paddingTop: "2.3rem",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "left",
+        }}
+      >
+        <img src={logo} width={200} height={200} />
+        <Button variant="outline" size="icon">
+          Data
+        </Button>
+        <Button variant="outline" size="icon">
+          Update
+        </Button>
+      </div>
+      <div
+        style={{
+          margin: "auto",
+          width: 1600,
+          paddingTop: "2.3rem",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
         <h1>Satellite Data</h1>
-        <SatelliteTable satellites={satellites.satellites}/>
-
+        <SatelliteTable />
       </div>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
