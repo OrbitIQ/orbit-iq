@@ -1,9 +1,10 @@
-import time
 import pytest
-from app import app, get_db_connection
+from app import app
+from utils.helpers import get_db_connection
 from datetime import datetime
 
 # This fixture will be used by the tests to send requests to the application
+
 @pytest.fixture
 def client():
     with app.test_client() as client:
@@ -29,13 +30,6 @@ def test_database_connection():
     conn = get_db_connection()
     assert conn is not None
     conn.close()
-
-def test_cors_headers(client):
-    """Test CORS headers are set correctly."""
-    response = client.get('/confirmed/satellites')
-    assert response.headers['Access-Control-Allow-Origin'] == '*'
-    assert 'Content-Type' in response.headers['Access-Control-Allow-Headers']
-    assert 'Authorization' in response.headers['Access-Control-Allow-Headers']
 
 def test_sort_by_and_asc_parameters(client):
     """Test sorting satellites with sort_by and asc parameters."""

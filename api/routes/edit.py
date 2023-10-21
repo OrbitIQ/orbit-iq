@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from utils import get_db_connection
+from utils.helpers import get_db_connection
 
 # Create a Blueprint for this subpath
 edit_subpath = Blueprint('edit', __name__)
