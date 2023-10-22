@@ -4,13 +4,13 @@ from utils.helpers import get_db_connection
 # Create a Blueprint for this subpath
 edit_subpath = Blueprint('edit', __name__)
 
-@edit_subpath.route('/int:satellite_id', methods=['PUT'])
+@edit_subpath.route('/str:satellite_id', methods=['PUT'])
 def update(satellite_id):
     """
-     Update a record in the official_satellites table.
+    Update a record in the official_satellites table.
 
     Parameters:
-        - satellite_id (int): The unique identifier of the satellite to update.
+        - satellite_id (str): The unique identifier of the satellite to update.
 
     Request Data:
         - data (str): The updated data for the satellite.
@@ -37,7 +37,7 @@ def update(satellite_id):
     cursor.execute(update_query, (data, source, satellite_id))
 
     # The SQL query to retrieve data and source
-    cursor.execute("SELECT data, source FROM official_satellites WHERE id = %s", (satellite_id,))
+    cursor.execute("SELECT data, source FROM official_satellites WHERE id = %s", (satellite_id))
     edited_data, edited_source = cursor.fetchone()
 
      # The SQL query to create log table if it doesn't exist.
@@ -62,4 +62,3 @@ def update(satellite_id):
     conn.close()
 
     return jsonify({'message': 'Edit successful', 'data': edited_data, 'source': edited_source})
-
