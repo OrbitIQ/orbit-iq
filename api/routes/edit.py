@@ -49,8 +49,8 @@ def update(satellite_id):
     """
     cursor.execute(create_log_table_query)
 
-    # The SQL query to insert a log into the log table
-    log_query = "INSERT INTO log (satellite_id, action, data, source) VALUES (%s, 'edit', %s, %s)"
+    # The SQL query to insert a log into the official_satellite_changelog table
+    log_query = "INSERT INTO official_satellite_changelog (satellite_id, action, data, source) VALUES (%s, 'edit', %s, %s)"
     cursor.execute(log_query, (id, data, source))
 
     conn.commit()
