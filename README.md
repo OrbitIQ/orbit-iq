@@ -8,6 +8,8 @@ The `orbit-iq` project comprises several services, which are defined in the `doc
 2. **Website**: This is the frontend service, built from the context in `./website`. It runs on port `3000`.
 3. **Database (DB)**: A PostgreSQL database service running on port `5432`.
 4. **init-db**: A service to initialize the database.
+5. **crawler**: A service that runs every 24h to crawl various websites for satellite data and dump it into the table `crawler_dump`
+6. **validator**: A service that creates proposed changes to the `official_satellites` table based on the data in `crawler_dump` after doing some validation and data integrity checks.
 
 ## Prerequisites
 
@@ -93,3 +95,15 @@ If you're developing for the website, you might not want to run the website serv
 
 - Ensure that the ports 8080 (for API), 3000 (for Website), and 5432 (for PostgreSQL) are available on your machine, if you get an error in the docker logs about the port being in use, you should stop the service using that port.
 - The database data is persisted using Docker volumes. If you want to reset the database, you can remove the volume using `docker volume rm orbit-iq_db-data`.
+
+## Documentation
+
+### Tables
+
+`official_satellites` - The list of confirmed satellites, the goal of this table is to be a single source of truth for all confirmed satellites. This is what should be exported when UCS publishes a new list of satellites.
+
+`official_satellite_changelog` - A log of all changes to the `official_satellites` table. This is used to see historical changes and trends to the list of satellites.
+
+`crawler_dump` - Pretty unstructured data of the data that the web crawler finds. This is just raw data that is used by the `validator` to create proposed changes
+
+`proposed_changes` - These are proposed changes that the `validator` creates from combining data from the `crawler_dump` data and doing data integrity and validation on the data the web crawler has detected which may be incorrect.
