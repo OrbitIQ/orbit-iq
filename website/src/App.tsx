@@ -3,8 +3,8 @@ import "./App.css";
 //import logo from "./components/Navbar/ucslogo.webp";
 //import { Button } from "./components/ui/button";
 import Navbar from "./components/Navbar/Navbar"
-import DataPage from "./components/DataPage/DataPage";
-import UpdatesPage from "./components/UpdatesPage/UpdatesPage";
+import DataPage from "./pages/DataPage";
+import UpdatesPage from "./pages/UpdatesPage";
 import { Routes, Route } from "react-router-dom";
 
 function App() {
