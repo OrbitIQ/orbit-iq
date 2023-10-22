@@ -37,7 +37,7 @@ def update(satellite_id):
     cursor.execute(update_query, (data, source, satellite_id))
 
     # The SQL query to retrieve data and source
-    cursor.execute("SELECT data, source FROM official_satellites WHERE id = %s", (satellite_id,))
+    cursor.execute("SELECT data, source FROM official_satellites WHERE id = %s", (satellite_id))
     edited_data, edited_source = cursor.fetchone()
 
      # The SQL query to create log table if it doesn't exist.
