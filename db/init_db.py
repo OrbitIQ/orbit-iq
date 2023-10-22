@@ -62,6 +62,45 @@ CREATE TABLE IF NOT EXISTS official_satellites (
 );
 """)
 
+# Create changelog table "edit" if it doesn't exist
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS edit ( 
+    cid UUID PRIMARY KEY,
+    update_user VARCHAR(255),
+    update_action VARCHAR(255),
+    update_time DATE,
+    update_notes text,
+    official_name VARCHAR(255) REFERENCES official_satellites(official_name),
+    reg_country VARCHAR(255),
+    own_country VARCHAR(255),
+    owner_name VARCHAR(255),
+    user_type VARCHAR(255),
+    purposes VARCHAR(255),
+    detailed_purpose text,
+    orbit_class VARCHAR(255), 
+    orbit_type VARCHAR(255),
+    geo_longitude VARCHAR(255),
+    perigee VARCHAR(255),
+    apogee VARCHAR(255),
+    eccentricity VARCHAR(255),
+    inclination VARCHAR(255),
+    period_min VARCHAR(255),
+    mass_launch VARCHAR(255),
+    mass_dry VARCHAR(255),
+    power_watts VARCHAR(255),
+    launch_date DATE,
+    exp_lifetime VARCHAR(255),
+    contractor VARCHAR(255),
+    contractor_country VARCHAR(255),
+    launch_site VARCHAR(255),
+    launch_vehicle VARCHAR(255),
+    cospar  VARCHAR(20),
+    norad integer,
+    comment_note text,
+    source_orbit text,
+    source_satellite text[]
+);
+""")
 
 # Should probably first check that the table is empty before inserting, or was just created above.
 
