@@ -42,7 +42,7 @@ services:
   api_integration_test:
     build:
       context: ./api
-    command: pytest test.py
+    command: pytest tests
     depends_on:
       - api_test
       - init-db_test
