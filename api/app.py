@@ -8,9 +8,6 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 from routes.confirmed import confirmed_subpath
 app.register_blueprint(confirmed_subpath, url_prefix='/confirmed')
 
-from routes.user import user_subpath
-app.register_blueprint(user_subpath, url_prefix='/user')
-
 from routes.edit import edit_subpath
 app.register_blueprint(edit_subpath, url_prefix='/edit')
 
