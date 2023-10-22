@@ -36,11 +36,13 @@ def update(satellite_id):
     update_query = "UPDATE official_satellites SET data = %s, source = %s WHERE id = %s"
     cursor.execute(update_query, (data, source, satellite_id))
 
+    # The SQL query to retrieve data and source
     cursor.execute("SELECT data, source FROM official_satellites WHERE id = %s", (satellite_id,))
     edited_data, edited_source = cursor.fetchone()
 
+     # The SQL query to create log table if it doesn't exist.
     create_log_table_query = """
-        CREATE TABLE IF NOT EXISTS log (
+        CREATE TABLE IF NOT EXISTS official_satellite_changelog (
             official_name VARCHAR(255) PRIMARY KEY,
             action VARCHAR(10),
             log_data VARCHAR(255),
@@ -51,7 +53,7 @@ def update(satellite_id):
 
     # The SQL query to insert a log into the official_satellite_changelog table
     log_query = "INSERT INTO official_satellite_changelog (satellite_id, action, data, source) VALUES (%s, 'edit', %s, %s)"
-    cursor.execute(log_query, (id, data, source))
+    cursor.execute(log_query, (satellite_id, data, source))
 
     conn.commit()
 
