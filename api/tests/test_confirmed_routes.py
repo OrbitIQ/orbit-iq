@@ -1,9 +1,10 @@
-import time
 import pytest
-from app import app, get_db_connection
+from app import app
+from utils.helpers import get_db_connection
 from datetime import datetime
 
 # This fixture will be used by the tests to send requests to the application
+
 @pytest.fixture
 def client():
     with app.test_client() as client:
