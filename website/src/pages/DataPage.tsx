@@ -1,8 +1,6 @@
-import SatelliteTable from "../SatelliteTable/page";
+import SatelliteTable from "../components/SatelliteTable/page";
 
 function DataPage() {
-    console.log("DataPage rendered!");
-    
     return (
         <>
             <div
