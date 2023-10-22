@@ -16,5 +16,5 @@ jobs:
 
     - name: Run
       run: |
-        docker-compose -f docker-compose.test.yml run api_test /bin/bash -c "sleep 10 && pytest test.py"
+        docker-compose -f docker-compose.test.yml run api_test /bin/bash -c "sleep 10 && pytest tests"
 
