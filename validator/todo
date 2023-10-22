@@ -1,0 +1,2 @@
+* will need to maintain mapping of the jsonb for a source type into its own abstracted out types
+* should throw warnings if the type has changed (new cols added, less cols) than expected for a given soruce

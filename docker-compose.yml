@@ -5,6 +5,7 @@ x-shared-environment: &shared-environment
   POSTGRES_USER: user
   POSTGRES_PASSWORD: password
   DB_HOST: db
+  DB_PORT: 5432
 
 services:
   api:
@@ -40,6 +41,14 @@ services:
     build:
       context: ./db
       dockerfile: Dockerfile-db-init
+    environment:
+      <<: *shared-environment
+    depends_on:
+      - db
+
+  crawler:
+    build:
+      context: ./crawler
     environment:
       <<: *shared-environment
     depends_on:
