@@ -66,13 +66,13 @@ def get_satellites():
     return jsonify({'satellites': satellites_as_dict})
 
 # Add a route to retrieve a satellite by name
-@confirmed_subpath.route('/satellites/<satellite_name>', methods=["GET"])
-def get_satellite_by_name(satellite_name):
+@confirmed_subpath.route('/satellites/<official_name>', methods=["GET"])
+def get_satellite_by_name(official_name):
     """
     Retrieve a satellite from the official_satellites table by name.
 
     Parameters:
-        - satellite_name (str): The name of the satellite to retrieve.
+        - official_name (str): The name of the satellite to retrieve.
 
     Example Usage:
         - /confirmed/satellites/Starlink: Returns the Starlink satellite record
@@ -84,7 +84,7 @@ def get_satellite_by_name(satellite_name):
     cursor = conn.cursor()
 
     # The SQL query to retrieve a satellite by name
-    cursor.execute("SELECT * FROM official_satellites WHERE official_name = %s", (satellite_name))
+    cursor.execute("SELECT * FROM official_satellites WHERE official_name = %s", (official_name,))
     satellite = cursor.fetchone()
 
     # Close the connection

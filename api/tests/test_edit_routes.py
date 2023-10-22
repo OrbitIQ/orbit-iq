@@ -15,7 +15,7 @@ def test_update_satellite(client):
     # Test updating a satellite
     # Actual data values
     official_name = "Aalto-1"
-    reg_country = "Bruhland"
+    reg_country = "Finland"
     own_country = "Finland"
     owner_name = "Aalto University"
     user_type = "Civil"
