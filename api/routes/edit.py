@@ -49,6 +49,9 @@ def update(official_name):
     retrieve_old_data = "SELECT * FROM official_satellites WHERE official_name = %s"
     cursor.execute(retrieve_old_data, (official_name,))
     old_data = cursor.fetchone()
+    # If the satellite is not found, return a 404 error
+    if not old_data:
+        return jsonify({'error': 'Satellite not found'}), 404
 
     # serialize old_data
     columns = [desc[0] for desc in cursor.description]
@@ -68,11 +71,12 @@ def update(official_name):
     data_dict['mass_launch'], data_dict['mass_dry'], data_dict['power_watts'], data_dict['launch_date'], data_dict['exp_lifetime'], 
     data_dict['contractor'], data_dict['contractor_country'], data_dict['launch_site'], data_dict['launch_vehicle'], data_dict['cospar'], 
     data_dict['norad'], data_dict['comment_note'], data_dict['source_orbit'], data_dict['source_satellite'], official_name))
-    
+
     # The SQL query to retrieve data and source
     cursor.execute("SELECT * FROM official_satellites WHERE official_name = %s", (official_name,))
     updated_data = cursor.fetchone()
-
+    if not updated_data:
+        return jsonify({'error': 'unknown error from update'}), 500
 
     # The SQL query to insert a log into the official_satellite_changelog table
     log_query = """
@@ -97,7 +101,7 @@ def update(official_name):
     cursor.close()
     conn.close()
 
-    return jsonify({'message': 'Update successful', 'data': updated_data, "user": update_user, "time": update_time, "notes": update_notes})
+    return jsonify({'message': 'Update successful', 'data': updated_data, "user": update_user, "time": update_time, "notes": update_notes}), 200
 
 
 @edit_subpath.route('/history', methods=['GET'])
@@ -129,4 +133,4 @@ def get_all():
     columns = [desc[0] for desc in cursor.description]
     satellites_as_dict = [dict(zip(columns, row)) for row in satellites]
 
-    return jsonify({'satellites': satellites_as_dict})
+    return jsonify({'satellites': satellites_as_dict}), 200
