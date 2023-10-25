@@ -17,6 +17,23 @@ def test_get_all_satellites(client):
     data = response.get_json()
     assert 'satellites' in data
 
+def test_get_satellites_with_name(client):
+    """Test getting satellites with name."""
+    response = client.get('/confirmed/satellites/Aalto-1')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert 'satellite' in data
+    satellite = data['satellite']
+    assert 'Aalto-1' in satellite['official_name']
+
+def test_get_satellites_with_name_not_found(client):
+    """Test getting satellites with name not found."""
+    response = client.get('/confirmed/satellites/Not-Found')
+    assert response.status_code == 404
+    data = response.get_json()
+    assert 'error' in data
+    assert 'Satellite not found' in data['error']
+
 def test_get_satellites_with_pagination(client):
     """Test getting satellites with pagination."""
     response = client.get('/confirmed/satellites?limit=5&page=2')

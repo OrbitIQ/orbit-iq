@@ -64,3 +64,38 @@ def get_satellites():
     satellites_as_dict = [dict(zip(columns, row)) for row in satellites]
 
     return jsonify({'satellites': satellites_as_dict})
+
+# Add a route to retrieve a satellite by name
+@confirmed_subpath.route('/satellites/<official_name>', methods=["GET"])
+def get_satellite_by_name(official_name):
+    """
+    Retrieve a satellite from the official_satellites table by name.
+
+    Parameters:
+        - official_name (str): The name of the satellite to retrieve.
+
+    Example Usage:
+        - /confirmed/satellites/Starlink: Returns the Starlink satellite record
+
+    Returns:
+        A JSON representation of the selected satellite record.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # The SQL query to retrieve a satellite by name
+    cursor.execute("SELECT * FROM official_satellites WHERE official_name = %s", (official_name,))
+    satellite = cursor.fetchone()
+    # If the satellite is not found, return a 404 error
+    if not satellite:
+        return jsonify({'error': 'Satellite not found'}), 404
+
+    # Close the connection
+    cursor.close()
+    conn.close()
+
+    # Convert the results to a dictionary for JSON serialization
+    columns = [desc[0] for desc in cursor.description]
+    satellite_as_dict = dict(zip(columns, satellite))
+
+    return jsonify({'satellite': satellite_as_dict}), 200
