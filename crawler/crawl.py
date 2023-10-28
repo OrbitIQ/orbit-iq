@@ -1,4 +1,5 @@
 import os
+import time
 import psycopg2
 import logging
 
@@ -27,27 +28,6 @@ def setup_sources():
         ON CONFLICT DO NOTHING;
     """)
    
-
-    conn.commit()
-    cur.close()
-    conn.close()
-
-def setup_crawler_dump():
-    conn = get_db_conn()
-    cur = conn.cursor()
-
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS crawler_dump (
-            id SERIAL PRIMARY KEY,
-            external_data_row_id text, /* this is the id that the source uses to identify the row that it scraped */
-            source_id INTEGER REFERENCES sources(id),
-            data JSONB NOT NULL,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE (external_data_row_id, source_id)
-        );
-    """)
-
     conn.commit()
     cur.close()
     conn.close()
@@ -56,36 +36,35 @@ def count_crawler_dump():
     conn = get_db_conn()
     cur = conn.cursor()
 
-    cur.execute("""
-        SELECT COUNT(*) FROM crawler_dump;
-    """)
-
-    count = cur.fetchone()[0]
+    tries = 0
+    count = 0
+    while tries < 5:
+        try:
+            cur.execute("""
+                SELECT COUNT(*) FROM crawler_dump;
+            """)
+            count = cur.fetchone()[0]
+            break
+        except psycopg2.errors.UndefinedTable:
+            # wait for table to be created if it doesn't exist yet
+            conn.rollback()  # rollback the transaction
+            time.sleep(3)
+        except Exception as e:
+            logging.error(f"Failed to count crawler_dump: {e}")
+            break
+        finally:
+            tries += 1
 
     cur.close()
     conn.close()
 
     return count
 
-def drop_crawler_dump():
-    # TODO: This is a dangerous function, only use it for testing
-    conn = get_db_conn()
-    cur = conn.cursor()
-
-    cur.execute("""
-        DROP TABLE IF EXISTS crawler_dump;
-    """)
-
-    conn.commit()
-    cur.close()
-    conn.close()
 
 def main():
     logging.basicConfig(level=logging.INFO)
     logging.info("Starting crawler")
-    drop_crawler_dump() # TODO: remove in prod maybe toggle env var
     setup_sources() # create sources table and add sources
-    setup_crawler_dump() # create crawler_dump table
 
     before_count = count_crawler_dump()
 
