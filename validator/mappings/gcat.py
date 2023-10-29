@@ -2,10 +2,10 @@ from proposed_change import ProposedChange
 from utils.helpers import get_proposed_changes_columns
 
 def from_gcat(record):
-    data = record['data']
-    
+    data = record[3]
+     
     columns = get_proposed_changes_columns()
-    
+    print(data)
     proposed_data = {
         'official_name': data.get('Name', ''),
         'reg_country': '',
@@ -30,12 +30,11 @@ def from_gcat(record):
         'contractor_country': '',
         'launch_site': '',
         'launch_vehicle': '',
-        'cospar_number': data.get('Satcat', ''),
-        'norad_number': int(data.get('Satcat', 0)),
+        'cospar': data.get('Satcat', ''),
+        'norad': int(data['Satcat']) if data.get('Satcat') is not None else 0,
         'comment_note': '',
         'source_orbit': data.get('Primary', ''),
-        'source_satellite': [],
-        'scraped_website_source': 'GCAT',
+        'source_satellite': ["GCAT"], # TODO: Idk if this is right?
         'confidence_score': 1.0
     }
     

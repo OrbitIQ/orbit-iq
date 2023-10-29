@@ -11,17 +11,22 @@ source_id_to_mapper = {
 }
 
 # Needs to pull from crawler_dump table
+# Ignore records that have a proposed change already
 def crawler_dump(conn=None):
     if conn is None:
         conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=extras.DictCursor)
     sql = """
-        SELECT * FROM crawler_dump
+        SELECT crawler_dump.* FROM crawler_dump
+        LEFT JOIN crawler_dump_proposed_changes
+        ON crawler_dump.id = crawler_dump_proposed_changes.crawler_dump_id
+        WHERE crawler_dump_proposed_changes.crawler_dump_id IS NULL
     """
     cursor.execute(sql)
     results = cursor.fetchall()
     conn.close()
     return results
+
 
 # Need to consider the source it came from and map the fields to a
 # single object/format of proposed_changes columns
@@ -32,7 +37,7 @@ def map_to_proposed_change(record) -> Optional[ProposedChange]:
 
 # Send it to the proposed_changes table
 if __name__ == "__main__":
-    time.sleep(60) # TODO: remove this in production, just waiting for crawler to finish while debugging, this function will be scheduled to run every X hours
+    time.sleep(10) # TODO: remove this in production, just waiting for crawler to finish while debugging, this function will be scheduled to run every X hours
     conn = get_db_connection()
     records = crawler_dump(conn=conn)
 

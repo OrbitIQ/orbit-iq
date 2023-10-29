@@ -59,4 +59,9 @@ def get_proposed():
     # Close the connection
     cursor.close()
     conn.close()
-    return jsonify(proposed_changes)
+
+    # Convert the results to a dictionary for JSON serialization
+    columns = [desc[0] for desc in cursor.description]
+    proposed_changes_list = [dict(zip(columns, record)) for record in proposed_changes]
+
+    return jsonify({'proposed_changes': proposed_changes_list}), 200

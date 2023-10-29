@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS official_satellites (
 # Create changelog table
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS official_satellites_changelog ( 
-    cid UUID PRIMARY KEY,
+    cid SERIAL PRIMARY KEY,
     update_user VARCHAR(255),
     update_action VARCHAR(10),
     update_time DATE,
@@ -117,16 +117,62 @@ CREATE TABLE IF NOT EXISTS official_satellites_changelog (
 # TODO: @stevenlai1688 to finish up schema
 # David - I added this bc I needed it for schema change
 cursor.execute("""
+    DO $$ 
+    BEGIN 
+        CREATE TYPE approve_denied_flag_enum AS ENUM('approved', 'denied', 'pending'); 
+    EXCEPTION 
+    WHEN duplicate_object THEN 
+    -- Type already exists, do nothing
+    NULL; 
+    END $$;
+""")
+
+cursor.execute("""
 CREATE TABLE IF NOT EXISTS proposed_changes ( 
-    id UUID PRIMARY KEY,
-    official_name VARCHAR(255)
+    id SERIAL PRIMARY KEY,
+    official_name VARCHAR(255),
+    reg_country VARCHAR(255),
+    own_country VARCHAR(255),
+    owner_name VARCHAR(255),
+    user_type VARCHAR(255),
+    purposes VARCHAR(255),
+    detailed_purpose text,
+    orbit_class VARCHAR(255), 
+    orbit_type VARCHAR(255),
+    geo_longitude VARCHAR(255),
+    perigee VARCHAR(255),
+    apogee VARCHAR(255),
+    eccentricity VARCHAR(255),
+    inclination VARCHAR(255),
+    period_min VARCHAR(255),
+    mass_launch VARCHAR(255),
+    mass_dry VARCHAR(255),
+    power_watts VARCHAR(255),
+    launch_date DATE,
+    exp_lifetime VARCHAR(255),
+    contractor VARCHAR(255),
+    contractor_country VARCHAR(255),
+    launch_site VARCHAR(255),
+    launch_vehicle VARCHAR(255),
+    cospar  VARCHAR(20),
+    norad integer,
+    comment_note text,
+    source_orbit text,
+    source_satellite text[],
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    confidence_score float,
+    approve_denied_flag approve_denied_flag_enum DEFAULT 'pending',
+    approved_personnel VARCHAR(255),
+    notes text,
+    flagged boolean
 );
 """)
 
 # TODO: DANGER DANGER DANGER
-cursor.execute("""
-    DROP TABLE IF EXISTS crawler_dump CASCADE;
-""")
+#cursor.execute("""
+#    DROP TABLE IF EXISTS crawler_dump CASCADE;
+#""")
 
 # Set up the crawler dump table
 cursor.execute("""
@@ -147,7 +193,7 @@ cursor.execute("""
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS crawler_dump_proposed_changes (
     crawler_dump_id SERIAL REFERENCES crawler_dump(id),
-    proposed_change_id UUID REFERENCES proposed_changes(id),
+    proposed_change_id SERIAL REFERENCES proposed_changes(id),
     PRIMARY KEY (crawler_dump_id, proposed_change_id)
 );""")
 

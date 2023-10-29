@@ -28,16 +28,14 @@ class ProposedChange:
     contractor_country: str = ''
     launch_site: str = ''
     launch_vehicle: str = ''
-    cospar_number: str = ''
-    norad_number: int = 0
+    cospar: str = ''
+    norad: int = 0
     comment_note: str = ''
     source_orbit: str = ''
     source_satellite: List[str] = field(default_factory=list)
-    scraped_website_source: str = ''
     confidence_score: float = 0
     change_id: Optional[int] = field(default=None)
     approve_denied_flag: Optional[bool] = field(default=None)
-    time: Optional[str] = field(default=None)
     approved_personnel: Optional[str] = field(default=None)
     notes: Optional[str] = field(default=None)
     flagged: Optional[bool] = field(default=None)
@@ -52,32 +50,33 @@ def insert_proposed_change(proposed_change: ProposedChange, used_row_ids: List[i
             orbit_class, orbit_type, geo_longitude, perigee, apogee, eccentricity,
             inclination, period_min, mass_launch, mass_dry, power_watts, launch_date,
             exp_lifetime, contractor, contractor_country, launch_site, launch_vehicle,
-            cospar_number, norad_number, comment_note, source_orbit, source_satellite,
-            scraped_website_source, confidence_score, approve_denied_flag, time,
-            approved_personnel, notes, flagged
+            cospar, norad, comment_note, source_orbit, source_satellite, confidence_score,
+            approve_denied_flag, approved_personnel, notes, flagged
         )
         VALUES (
             %(official_name)s, %(reg_country)s, %(own_country)s, %(owner_name)s, %(user_type)s, %(purposes)s,
             %(orbit_class)s, %(orbit_type)s, %(geo_longitude)s, %(perigee)s, %(apogee)s, %(eccentricity)s,
             %(inclination)s, %(period_min)s, %(mass_launch)s, %(mass_dry)s, %(power_watts)s, %(launch_date)s,
             %(exp_lifetime)s, %(contractor)s, %(contractor_country)s, %(launch_site)s, %(launch_vehicle)s,
-            %(cospar_number)s, %(norad_number)s, %(comment_note)s, %(source_orbit)s, %(source_satellite)s,
-            %(scraped_website_source)s, %(confidence_score)s, %(approve_denied_flag)s, %(time)s,
-            %(approved_personnel)s, %(notes)s, %(flagged)s
+            %(cospar)s, %(norad)s, %(comment_note)s, %(source_orbit)s, %(source_satellite)s,
+            %(confidence_score)s, %(approve_denied_flag)s, %(approved_personnel)s, %(notes)s, %(flagged)s
         )
+        RETURNING id
     """
     cursor.execute(sql, asdict(proposed_change))
     change_id = cursor.fetchone()[0]
     conn.commit()
-    
+
+    # Insert associations into crawler_dump_proposed_changes
     sql = """
-        UPDATE crawler_dump
-        SET proposed_change_ids = array_append(proposed_change_ids, %s)
-        WHERE id = ANY(%s)
+        INSERT INTO crawler_dump_proposed_changes (crawler_dump_id, proposed_change_id)
+        VALUES (%s, %s)
     """
-    cursor.execute(sql, (change_id, used_row_ids))
+    for row_id in used_row_ids:
+        cursor.execute(sql, (row_id, change_id))
     conn.commit()
 
     cursor.close()
     conn.close()
     return change_id
+
