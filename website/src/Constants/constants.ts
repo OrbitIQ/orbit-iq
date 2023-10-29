@@ -131,12 +131,12 @@ export const columnVisibilityDefaults= {
     period_min: false,
     perigee: false,
     mass_launch: false,
-    mass_dry: false
 }
 
 
 //Params
 export const paginationSize: number = 10;
+export const pageSize: number = 4
 
 //Endpoint URLs
-export const confirmedSatellitesURL: string = `http://localhost:8080/confirmed/satellites?limit=${paginationSize}`;
+export const confirmedSatellitesURL: string = `http://localhost:8080/confirmed/satellites`;
