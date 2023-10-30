@@ -380,20 +380,7 @@ def save_all_approved_or_denied_changes():
         return jsonify({'error': 'No approved changes found.'}), 404
     
     print(approved_changes)
-    # # Execute SQL query to get all denied changes
-    # query = sql.SQL("SELECT * FROM proposed_changes WHERE is_approved = {};").format(
-    #     sql.Literal("denied")
-    # )
-    # cur.execute(query)
-    # denied_changes = cur.fetchall()
 
-    # if denied_changes is None:
-    #     return jsonify({'error': 'No denied changes found.'}), 404
-    
-    # # Execute SQL query to delete all denied changes
-    # query = sql.SQL("DELETE FROM proposed_changes WHERE is_approved = {};").format(
-    #     sql.Literal("denied")
-    # )
     cur.execute(query)
     # Execute SQL query to delete all approved changes
     query = sql.SQL("UPDATE proposed_changes SET is_approved = {} WHERE is_approved = {};").format(
@@ -402,7 +389,7 @@ def save_all_approved_or_denied_changes():
     )
     cur.execute(query)
     
-    # Execute SQL query to update official_satellites table with approved changes
+    # Execute SQL query to update official_satellites table with approved changes and also update the change log
     for row in approved_changes:
         cur.execute("""
             INSERT INTO official_satellites (official_name, reg_country, own_country, owner_name, user_type, purposes, detailed_purpose, orbit_class, orbit_type, geo_longitude, perigee, apogee, eccentricity, inclination, period_min, mass_launch, mass_dry, power_watts, launch_date, exp_lifetime, contractor, contractor_country, launch_site, launch_vehicle, cospar, norad, comment_note, source_orbit, source_satellite) 
