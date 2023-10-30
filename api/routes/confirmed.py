@@ -99,3 +99,30 @@ def get_satellite_by_name(official_name):
     satellite_as_dict = dict(zip(columns, satellite))
 
     return jsonify({'satellite': satellite_as_dict}), 200
+
+# Delete a satellite by name
+# Note: This route is for Testing purpose only, deleting test data from the official table is not allowed. 
+# It is not meant to be part of the API. DO NOT USE THIS IN PRODUCTION
+@confirmed_subpath.route('/satellites/<official_name>', methods=["DELETE"])
+def delete_satellite_by_name(official_name):
+    # DO NOT USE THIS IN PRODUCTION
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # The SQL query to delete a satellite by name
+    cursor.execute("DELETE FROM official_satellites WHERE official_name = %s", (official_name,))
+    
+    # Commit the transaction to persist the deletion
+    conn.commit()
+
+    # If the satellite is not found, return a 404 error
+    if cursor.rowcount == 0:
+        cursor.close()
+        conn.close()
+        return jsonify({'error': 'Satellite not found'}), 404
+
+    # Close the connection
+    cursor.close()
+    conn.close()
+
+    return jsonify({'message': 'Satellite deleted successfully'}), 200
