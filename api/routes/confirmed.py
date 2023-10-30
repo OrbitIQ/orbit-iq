@@ -116,7 +116,7 @@ def export_to_excel():
     Export the official_satellites data to an Excel file and return it as a downloadable response.
 
     Returns:
-        A Excel file of the confirmed satellite record.
+        A CSV file of the confirmed satellite record.
     """
     # Connect to the database and fetch all records from the official_satellites table
        # Connect to the database
@@ -139,20 +139,15 @@ def export_to_excel():
                 array_str_items = []
                 for item in row[-1]:
                     if item is not None:
-                        array_str_items.append(f'"{item}"')  # Wrap non-None items with single quotes
+                        array_str_items.append(f"'{item}'")  # Wrap non-None items with single quotes
                     else:
                         array_str_items.append("None")
-                array_str = '[' + ', '.join(array_str_items) + ']'
+                array_str = '"'+'[' + ', '.join(array_str_items) + ']'+ '"'
                 row = list(row[:-1]) + [array_str]
             
             # Process the rest of the row
-            processed_row = [str(value) if value is not None else "None" for value in row]
-            
-            # Check if the last item is a 2D array and enclose in double quotes
-            if processed_row[-1].startswith('[') and processed_row[-1].endswith(']'):
-                processed_row[-1] = f'"{processed_row[-1]}"'
-            processed_rows.append(processed_row)
-
+            processed_row = [value if value is not None else "None" for value in row]
+             
         # Convert the results to CSV format
         csv_data = ",".join(columns) + "\n"  # Column headers
 
