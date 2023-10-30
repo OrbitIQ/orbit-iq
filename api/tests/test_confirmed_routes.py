@@ -2,8 +2,6 @@ import pytest
 from app import app
 from utils.helpers import get_db_connection
 from datetime import datetime
-import pandas as pd
-from io import BytesIO
 from utils.helpers import SessionLocal
 from sqlalchemy import text
 import csv
