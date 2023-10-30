@@ -21,6 +21,14 @@ conn = psycopg2.connect(
 )
 cursor = conn.cursor()
 
+# TODO: remove this with production data, this is used for tests only
+cursor.execute("""
+    DROP TABLE IF EXISTS proposed_changes;
+    DROP TYPE IF EXISTS approval;
+    DROP TABLE IF EXISTS official_satellites_changelog;
+    DROP TABLE IF EXISTS official_satellites;          
+""")
+
 # Create table if it doesn't exist
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS official_satellites ( 
@@ -59,7 +67,7 @@ CREATE TABLE IF NOT EXISTS official_satellites (
 # Create changelog table
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS official_satellites_changelog ( 
-    cid UUID PRIMARY KEY,
+    cid SERIAL PRIMARY KEY,
     update_user VARCHAR(255),
     update_action VARCHAR(10),
     update_time DATE,
@@ -96,17 +104,12 @@ CREATE TABLE IF NOT EXISTS official_satellites_changelog (
 );
 """)
 
-# todo: remove this with production data
-cursor.execute("""
-    DROP TABLE IF EXISTS proposed_changes;
-    DROP TYPE IF EXISTS approval;
-""")
 
 #Create Proposed Changes Table
 cursor.execute("""
-CREATE TYPE approval AS ENUM('approved', 'denied', 'pending');
+CREATE TYPE approval AS ENUM('approved', 'denied', 'pending', 'persisted');
 CREATE TABLE IF NOT EXISTS proposed_changes ( 
-    id UUID PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     proposed_user VARCHAR(255),
     created_at DATE,
     proposed_notes text,

@@ -4,9 +4,11 @@ from flask import Blueprint, jsonify, request
 from utils.helpers import get_db_connection
 from psycopg2 import sql
 import psycopg2
+import datetime
 
 proposed_changes_subpath = Blueprint('proposed_changes', __name__)
 
+# TODO: might be good for future workflow like hitting edit on the frontend's production table actually creates a proposed change
 # Create a new proposed change
 @proposed_changes_subpath.route('/changes', methods=['POST'])
 def create_proposed_change():
@@ -42,17 +44,15 @@ def create_proposed_change():
 
     # Create a cursor object
     cur = conn.cursor()
-    uuid_str = str(uuid.uuid4())
     # Execute SQL query to insert new proposed change, 34 fields
     query = sql.SQL("""INSERT INTO proposed_changes 
-                    (id, proposed_user, created_at, proposed_notes, is_approved, official_name, 
+                    (proposed_user, created_at, proposed_notes, is_approved, official_name, 
                     reg_country, own_country, owner_name, user_type, purposes, detailed_purpose, orbit_class,
                      orbit_type, geo_longitude, perigee, apogee, eccentricity, inclination, period_min, mass_launch,
                      mass_dry, power_watts, launch_date, exp_lifetime, contractor, contractor_country, launch_site,
                      launch_vehicle, cospar, norad, comment_note, source_orbit, source_satellite) 
-                    VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
+                    VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
                      {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {} ) RETURNING id;""").format(
-        sql.Literal(uuid_str),
         sql.Literal(proposed_user),
         sql.Literal(created_at),
         sql.Literal(proposed_notes),
@@ -224,7 +224,7 @@ def update_proposed_change(id):
     cur = conn.cursor()
     # Execute SQL query to update proposed change by ID
     query = sql.SQL("""UPDATE proposed_changes SET 
-                        proposed_user = {}, created_at = {}, proposed_notes = {},
+                        proposed_user = {}, created_at = {}, proposed_notes = {},  is_approved = {},
                         official_name = {}, reg_country = {}, own_country = {}, owner_name = {}, user_type = {},
                         purposes = {}, detailed_purpose = {}, orbit_class = {}, orbit_type = {}, geo_longitude = {},
                         perigee = {}, apogee = {}, eccentricity = {}, inclination = {}, period_min = {},
@@ -236,6 +236,7 @@ def update_proposed_change(id):
         sql.Literal(proposed_user),
         sql.Literal(created_at),
         sql.Literal(proposed_notes),
+        sql.Literal("pending"),
         sql.Literal(data_dict['official_name']),
         sql.Literal(data_dict['reg_country']),
         sql.Literal(data_dict['own_country']),
@@ -280,43 +281,9 @@ def update_proposed_change(id):
     # Return ID of updated proposed change
     return jsonify({'id': id}), 200
 
-# Delete a specific proposed change by ID
-@proposed_changes_subpath.route('/changes/<id>', methods=['DELETE'])
-def delete_proposed_change(id):
-    """
-    Request Data:
-        - None
-    Example Usage:
-        DELETE /proposed/changes/<id>
-    
-    Returns:
-        - id (str): The ID of the deleted proposed change.
-    """
-    # Connect to PostgreSQL database
-    conn = get_db_connection()
-
-    # Create a cursor object
-    cur = conn.cursor()
-    # Execute SQL query to delete proposed change by ID
-    query = sql.SQL("DELETE FROM proposed_changes WHERE id = {} RETURNING id;").format(
-        sql.Literal(id)
-    )
-    cur.execute(query)
-    # Commit changes to database
-    conn.commit()
-    # Get ID of deleted proposed change
-    id = cur.fetchone()[0]
-    # Close database connection
-    cur.close()
-    conn.close()
-    if id is None:
-        return jsonify({'error': 'Proposed change not found.'}), 404
-    # Return ID of deleted proposed change
-    return jsonify({'id': id}), 200
-
 
 #approve API
-@proposed_changes_subpath.route('/approve/changes/<id>', methods=['PUT'])
+@proposed_changes_subpath.route('/changes/approve/<id>', methods=['PUT'])
 def approve_proposed_change(id):
     """
     Request Data:
@@ -351,7 +318,7 @@ def approve_proposed_change(id):
     return jsonify({'id': id}), 200
 
 #deny API
-@proposed_changes_subpath.route('/deny/changes/<id>', methods=['PUT'])
+@proposed_changes_subpath.route('/changes/deny/<id>', methods=['PUT'])
 def deny_proposed_change(id):
     """
     Request Data:
@@ -385,8 +352,8 @@ def deny_proposed_change(id):
     # Return ID of denied proposed change
     return jsonify({'id': id}), 200
 
-# Persist save all satellite API: persist and delete all the proposed changes which has been approved, 
-# and delete all the proposed changes which has been denied, and update the official_satellites table, 
+# Persist save all satellite API: persist and mark all the proposed changes which has been approved as 'persisted', 
+# all the proposed changes which has been denied will not be modified, and update the official_satellites table, 
 # if the proposed change is neither approve nor denied, leave it in the proposed_changes table.
 @proposed_changes_subpath.route('/changes/persist', methods=['POST'])
 def save_all_approved_or_denied_changes():
@@ -413,35 +380,41 @@ def save_all_approved_or_denied_changes():
         return jsonify({'error': 'No approved changes found.'}), 404
     
     print(approved_changes)
-    # Execute SQL query to get all denied changes
-    query = sql.SQL("SELECT * FROM proposed_changes WHERE is_approved = {};").format(
-        sql.Literal("denied")
-    )
-    cur.execute(query)
-    denied_changes = cur.fetchall()
+    # # Execute SQL query to get all denied changes
+    # query = sql.SQL("SELECT * FROM proposed_changes WHERE is_approved = {};").format(
+    #     sql.Literal("denied")
+    # )
+    # cur.execute(query)
+    # denied_changes = cur.fetchall()
 
-    if denied_changes is None:
-        return jsonify({'error': 'No denied changes found.'}), 404
+    # if denied_changes is None:
+    #     return jsonify({'error': 'No denied changes found.'}), 404
     
-    # Execute SQL query to delete all denied changes
-    query = sql.SQL("DELETE FROM proposed_changes WHERE is_approved = {};").format(
-        sql.Literal("denied")
-    )
+    # # Execute SQL query to delete all denied changes
+    # query = sql.SQL("DELETE FROM proposed_changes WHERE is_approved = {};").format(
+    #     sql.Literal("denied")
+    # )
     cur.execute(query)
     # Execute SQL query to delete all approved changes
-    query = sql.SQL("DELETE FROM proposed_changes WHERE is_approved = {};").format(
+    query = sql.SQL("UPDATE proposed_changes SET is_approved = {} WHERE is_approved = {};").format(
+        sql.Literal("persisted"),
         sql.Literal("approved")
     )
     cur.execute(query)
     
     # Execute SQL query to update official_satellites table with approved changes
     for row in approved_changes:
-         cur.execute("""
+        cur.execute("""
             INSERT INTO official_satellites (official_name, reg_country, own_country, owner_name, user_type, purposes, detailed_purpose, orbit_class, orbit_type, geo_longitude, perigee, apogee, eccentricity, inclination, period_min, mass_launch, mass_dry, power_watts, launch_date, exp_lifetime, contractor, contractor_country, launch_site, launch_vehicle, cospar, norad, comment_note, source_orbit, source_satellite) 
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
             """, row[5:34]
-         )
-        
+        )
+        # persist into change log
+        cur.execute("""
+            INSERT INTO official_satellites_changelog (update_user, update_action, update_time, update_notes, official_name, reg_country, own_country, owner_name, user_type, purposes, detailed_purpose, orbit_class, orbit_type, geo_longitude, perigee, apogee, eccentricity, inclination, period_min, mass_launch, mass_dry, power_watts, launch_date, exp_lifetime, contractor, contractor_country, launch_site, launch_vehicle, cospar, norad, comment_note, source_orbit, source_satellite)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+            """, [ "admin", "persisted", datetime.datetime.now(), "changes persisted from proposed table"] + list(row[5:34]))
+
     # Commit changes to database
     conn.commit()
     # Close database connection

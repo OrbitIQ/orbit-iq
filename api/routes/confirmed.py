@@ -100,6 +100,7 @@ def get_satellite_by_name(official_name):
 
     return jsonify({'satellite': satellite_as_dict}), 200
 
+# TODO: test only. Remove before production
 # Delete a satellite by name
 # Note: This route is for Testing purpose only, deleting test data from the official table is not allowed. 
 # It is not meant to be part of the API. DO NOT USE THIS IN PRODUCTION

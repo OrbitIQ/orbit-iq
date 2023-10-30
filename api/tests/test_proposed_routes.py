@@ -105,8 +105,8 @@ def test_get_proposed_change(client):
     # Add more assertions to validate the response data
 
 def test_get_proposed_change_not_found(client):
-    random_uuid = '00000000-0000-0000-0000-000000000000'
-    response = client.get(f'/proposed/changes/{random_uuid}')
+    random_id = 123
+    response = client.get(f'/proposed/changes/{random_id}')
     assert response.status_code == 404  # Check for a failed retrieval
 
 def test_update_proposed_change(client):
@@ -195,53 +195,6 @@ def test_update_proposed_change(client):
     response_data = json.loads(response.data)
     assert 'id' in response_data  # Check if the response contains the ID of the updated proposed change
 
-def test_delete_proposed_change(client):
-    # Create a test proposed change first and get its ID
-    created_response = client.post('/proposed/changes', data={
-        'data': json.dumps({
-            'official_name': 'Test Satellite',
-            'reg_country': 'USA',
-            'own_country': 'USA',
-            'owner_name': 'Owner Name',
-            'user_type': 'User Type',
-            'purposes': 'Purposes',
-            'detailed_purpose': 'Detailed Purpose',
-            'orbit_class': 'Orbit Class',
-            'orbit_type': 'Orbit Type',
-            'geo_longitude': 0,
-            'perigee': 497,
-            'apogee': 517,
-            'eccentricity': 0.00145,
-            'inclination': 97.45,
-            'period_min': 94.7,
-            'mass_launch': 5,
-            'mass_dry': 50,
-            'power_watts': 4.5,
-            'launch_date': '2023-10-29',
-            'exp_lifetime': 2,
-            'contractor': 'Contractor',
-            'contractor_country': 'Contractor Country',
-            'launch_site': 'Launch Site',
-            'launch_vehicle': 'Launch Vehicle',
-            'cospar': "2017-036L",
-            'norad': 42775,
-            'comment_note': 'Comment Note',
-            'source_orbit': 'Source Orbit',
-            'source_satellite': ['Source Satellite']
-        }),
-        'proposed_user': 'Test User',
-        'created_at': '2023-10-29',
-        'proposed_notes': 'Test Notes',
-    })
-    created_data = created_response.get_json()
-    print(created_data)
-    created_id = created_data['id']  # Use get_json() to access the JSON response
-
-    response = client.delete(f'/proposed/changes/{created_id}')
-    assert response.status_code == 200  # Check for a successful deletion
-    response_data = json.loads(response.data)
-    assert 'id' in response_data  # Check if the response contains the ID of the deleted proposed change
-
 
 def test_approve_proposed_change(client):
     # Create a test proposed change first and get its ID
@@ -285,14 +238,10 @@ def test_approve_proposed_change(client):
     created_id = created_data['id']  # Use get_json() to access the JSON response
 
     # Approve the created proposed change
-    response = client.put(f'/proposed/approve/changes/{created_id}')
+    response = client.put(f'/proposed/changes/approve/{created_id}')
     assert response.status_code == 200  # Check for a successful approval
     response_data = json.loads(response.data)
     assert 'id' in response_data  # Check if the response contains the ID of the approved proposed change
-
-    # delete the approved change
-    response = client.delete(f'/proposed/changes/{created_id}')
-    assert response.status_code == 200  # Check for a successful deletion
 
 
 def test_deny_proposed_change(client):
@@ -337,14 +286,11 @@ def test_deny_proposed_change(client):
     created_id = created_data['id']  # Use get_json() to access the JSON response
 
     # Deny the created proposed change
-    response = client.put(f'/proposed/deny/changes/{created_id}')
+    response = client.put(f'/proposed/changes/deny/{created_id}')
     assert response.status_code == 200  # Check for a successful denial
     response_data = json.loads(response.data)
     assert 'id' in response_data  # Check if the response contains the ID of the denied proposed change
 
-    # delete the approved change
-    response = client.delete(f'/proposed/changes/{created_id}')
-    assert response.status_code == 200  # Check for a successful deletion
 
 
 def test_save_all_approved_or_denied_changes(client):    
@@ -391,7 +337,7 @@ def test_save_all_approved_or_denied_changes(client):
     approved_id = approved_res['id']
 
     # approve the approved change
-    client.put(f'/proposed/approve/changes/{approved_id}')
+    client.put(f'/proposed/changes/approve/{approved_id}')
 
     # Create a test proposed change that is denied
     denied_data = {
@@ -436,7 +382,7 @@ def test_save_all_approved_or_denied_changes(client):
     denied_id = denied_res['id']
 
     # deny the denied change
-    client.put(f'/proposed/deny/changes/{denied_id}')
+    client.put(f'/proposed/changes/deny/{denied_id}')
 
     # Create a test proposed change that is neither approved nor denied
     pending_data = {
@@ -485,19 +431,17 @@ def test_save_all_approved_or_denied_changes(client):
 
     # Check that the API returns a 200 status code
     assert response.status_code == 200
-    
+
     # Check that the message in the response confirms the persisted changes
     response_data = response.get_json()
     assert 'persisted' in response_data['message'].lower()
 
-    # # Check that the approved and denied changes have been deleted
-    # # You can use the get API for these changes and check that they return a 404 status code
-
+    # verify approved data is persisted properly
     approved_response = client.get(f'/proposed/changes/{approved_id}')
-    denied_response = client.get(f'/proposed/changes/{denied_id}')
-
-    assert approved_response.status_code == 404
-    assert denied_response.status_code == 404
+    assert approved_response.status_code == 200
+    # check that the approved_data in proposed_table is marked as "persisted"
+    approved_satellite_dict = approved_response.get_json()
+    assert approved_satellite_dict['is_approved'] == 'persisted'
 
     # Check that the pending change still exists in the proposed_changes table
     pending_response = client.get(f'/proposed/changes/{pending_id}')
@@ -509,10 +453,8 @@ def test_save_all_approved_or_denied_changes(client):
     official_satellite_response = client.get(f'/confirmed/satellites/{official_name}')
     assert official_satellite_response.status_code == 200
 
-    # delete the persisted change
-    delete_response = client.delete(f'/confirmed/satellites/{official_name}')
-    assert delete_response.status_code == 200
-
-    # Cleanup: Delete the remaining changes
-    pending_response = client.delete(f'/proposed/changes/{pending_id}')
-    assert pending_response.status_code == 200
+    # check that the official_satellites_changelog has been updated with approved changes
+    official_satellite_changelog_response = client.get('/edit/history')
+    assert official_satellite_changelog_response.status_code == 200
+    # check that the approved satellite name is in the response
+    assert official_name in official_satellite_changelog_response.get_data(as_text=True)
