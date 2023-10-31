@@ -409,7 +409,7 @@ def save_all_approved_or_denied_changes():
             else:
                 launch_date = datetime.datetime.strptime(row_dict['launch_date'], '%Y-%m-%d').date()
         except ValueError:
-            return jsonify({'error': 'Invalid date format for launch_date.'}), 400
+            return jsonify({'error': f'Invalid date format for launch_date. Got {type(row_dict["launch_date"])}'}), 400
 
         # Prepare values for official_satellites table
         official_satellite_values = {key: row_dict[key] for key in row_dict if key in official_satellite_columns}

@@ -427,7 +427,7 @@ def test_save_all_approved_or_denied_changes(client):
     pending_id = pending_data['id']
 
     # Call the API to persist approved and denied changes
-    response = client.post('/proposed/changes/persist')
+    response = client.post('/proposed/changes/persist', json={'approved_user': 'Test User'})
 
     # Check that the API returns a 200 status code
     assert response.status_code == 200
