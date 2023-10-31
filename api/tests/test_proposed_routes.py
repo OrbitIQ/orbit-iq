@@ -105,7 +105,7 @@ def test_get_proposed_change(client):
     # Add more assertions to validate the response data
 
 def test_get_proposed_change_not_found(client):
-    random_id = 123
+    random_id = 123456789
     response = client.get(f'/proposed/changes/{random_id}')
     assert response.status_code == 404  # Check for a failed retrieval
 
@@ -427,7 +427,8 @@ def test_save_all_approved_or_denied_changes(client):
     pending_id = pending_data['id']
 
     # Call the API to persist approved and denied changes
-    response = client.post('/proposed/changes/persist')
+    response = client.post('/proposed/changes/persist', data={'approved_user': 'Test User'})
+    print(response.data)
 
     # Check that the API returns a 200 status code
     assert response.status_code == 200

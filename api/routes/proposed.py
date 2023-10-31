@@ -130,7 +130,6 @@ def get_proposed():
     page = request.args.get('page', default=1, type=int)
     sort_by = request.args.get('sort_by', default='created_at', type=str)
     asc = request.args.get('asc', default=False, type=lambda v: v.lower() == 'true')
-
     # Calculate offset based on limit and page
     offset = (page - 1) * limit if limit else 0
 
@@ -147,13 +146,17 @@ def get_proposed():
         cursor.execute(query, (limit, offset))
     else:
         cursor.execute(query)
-
     proposed_changes = cursor.fetchall()
 
     # Close the connection
     cursor.close()
     conn.close()
-    return jsonify(proposed_changes)
+
+    # For each row map the column -> value to a dictionary
+    columns = [desc[0] for desc in cursor.description]
+    proposed_changes = [dict(zip(columns, row)) for row in proposed_changes]
+
+    return jsonify({'proposed_changes': proposed_changes})
 
 # Get a specific proposed change by id
 @proposed_changes_subpath.route('/changes/<id>', methods=['GET'])
@@ -359,7 +362,7 @@ def deny_proposed_change(id):
 def save_all_approved_or_denied_changes():
     """
     Request Data:
-        - None
+        - approved_user (str): The user who approved the changes.
     Example Usage:
         POST /proposed/changes/persist
     Returns:
@@ -370,41 +373,80 @@ def save_all_approved_or_denied_changes():
 
     # Create a cursor object
     cur = conn.cursor()
+
     # Execute SQL query to get all approved changes
     query = sql.SQL("SELECT * FROM proposed_changes WHERE is_approved = {};").format(
         sql.Literal("approved")
     )
     cur.execute(query)
     approved_changes = cur.fetchall()
-    if approved_changes is None:
-        return jsonify({'error': 'No approved changes found.'}), 404
-    
-    print(approved_changes)
 
-    cur.execute(query)
-    # Execute SQL query to delete all approved changes
-    query = sql.SQL("UPDATE proposed_changes SET is_approved = {} WHERE is_approved = {};").format(
+    # Get column names from the cursor description
+    colnames = [desc[0] for desc in cur.description]
+
+    if not approved_changes:
+        return jsonify({'error': 'No approved changes found.'}), 404
+
+    # Execute SQL query to update is_approved status
+    query = sql.SQL("UPDATE proposed_changes SET is_approved = {}, approved_user = {} WHERE is_approved = {};").format(
         sql.Literal("persisted"),
+        sql.Literal(request.form['approved_user']),
         sql.Literal("approved")
     )
     cur.execute(query)
-    
+
+    cur.execute("SELECT * FROM official_satellites LIMIT 1;")
+    official_satellite_columns = [desc[0] for desc in cur.description]
+
     # Execute SQL query to update official_satellites table with approved changes and also update the change log
     for row in approved_changes:
-        cur.execute("""
-            INSERT INTO official_satellites (official_name, reg_country, own_country, owner_name, user_type, purposes, detailed_purpose, orbit_class, orbit_type, geo_longitude, perigee, apogee, eccentricity, inclination, period_min, mass_launch, mass_dry, power_watts, launch_date, exp_lifetime, contractor, contractor_country, launch_site, launch_vehicle, cospar, norad, comment_note, source_orbit, source_satellite) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-            """, row[5:34]
+        row_dict = dict(zip(colnames, row))
+
+        # Convert launch_date to valid date format
+        try:
+            if isinstance(row_dict['launch_date'], datetime.date):
+                launch_date = row_dict['launch_date']
+            else:
+                launch_date = datetime.datetime.strptime(row_dict['launch_date'], '%Y-%m-%d').date()
+        except ValueError:
+            return jsonify({'error': f'Invalid date format for launch_date. Got {row_dict["launch_date"]} ({type(row_dict["launch_date"])})'}), 400
+
+        # Prepare values for official_satellites table
+        official_satellite_values = {key: row_dict[key] for key in row_dict if key in official_satellite_columns}
+        official_satellite_values['launch_date'] = launch_date
+
+        # Insert into official_satellites table or update on conflict
+        cur.execute(f"""
+            INSERT INTO official_satellites ({', '.join(official_satellite_values.keys())}) 
+            VALUES ({', '.join(['%s'] * len(official_satellite_values))})
+            ON CONFLICT (official_name)
+            DO UPDATE SET
+                {', '.join([f'{key} = excluded.{key}' for key in official_satellite_values.keys()])};
+            """, list(official_satellite_values.values())
         )
-        # persist into change log
-        cur.execute("""
-            INSERT INTO official_satellites_changelog (update_user, update_action, update_time, update_notes, official_name, reg_country, own_country, owner_name, user_type, purposes, detailed_purpose, orbit_class, orbit_type, geo_longitude, perigee, apogee, eccentricity, inclination, period_min, mass_launch, mass_dry, power_watts, launch_date, exp_lifetime, contractor, contractor_country, launch_site, launch_vehicle, cospar, norad, comment_note, source_orbit, source_satellite)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-            """, [ "admin", "persisted", datetime.datetime.now(), "changes persisted from proposed table"] + list(row[5:34]))
+
+
+        # Prepare values for change log
+        changelog_values = {
+            'update_user': 'admin',
+            'update_action': 'persisted',
+            'update_time': datetime.datetime.now(),
+            'update_notes': 'changes persisted from proposed table',
+            **official_satellite_values
+        }
+
+        # Insert into change log
+        cur.execute(f"""
+            INSERT INTO official_satellites_changelog ({', '.join(changelog_values.keys())}) 
+            VALUES ({', '.join(['%s'] * len(changelog_values))});
+            """, list(changelog_values.values())
+        )
 
     # Commit changes to database
     conn.commit()
+
     # Close database connection
     cur.close()
     conn.close()
+
     return jsonify({'message': 'All approved changes have been persisted.'}), 200

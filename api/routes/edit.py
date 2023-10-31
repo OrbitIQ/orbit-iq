@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify, request
 from utils.helpers import get_db_connection
 import datetime
-import uuid
 import json
 
 # Create a Blueprint for this subpath
