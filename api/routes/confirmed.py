@@ -7,7 +7,7 @@ import csv
 from io import StringIO
 
 # Create a Blueprint for this subpath
-confirmed_subpath = Blueprint('confirmed_subpath', __name__)
+confirmed_subpath = Blueprint('confirmed', __name__)
 
 @confirmed_subpath.route('/satellites', methods=["GET"])
 def get_satellites():
