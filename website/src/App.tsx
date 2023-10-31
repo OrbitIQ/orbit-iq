@@ -2,7 +2,7 @@ import "./App.css";
 //import SatelliteTable from "./components/SatelliteTable/page";
 //import logo from "./components/Navbar/ucslogo.webp";
 //import { Button } from "./components/ui/button";
-import Navbar from "./components/Navbar/Navbar"
+import Navbar from "./components/Navbar/Navbar";
 import DataPage from "./pages/DataPage";
 import UpdatesPage from "./pages/UpdatesPage";
 import { Routes, Route } from "react-router-dom";
@@ -11,7 +11,6 @@ function App() {
   return (
     <>
       <Navbar />
-
       <Routes>
         <Route path="/" element={<DataPage />} />
         <Route path="/data" element={<DataPage />} />
@@ -19,7 +18,6 @@ function App() {
       </Routes>
     </>
   );
-
 }
 
 export default App;

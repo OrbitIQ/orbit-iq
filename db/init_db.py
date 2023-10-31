@@ -37,6 +37,13 @@ while tries < 5:
     
 cursor = conn.cursor()
 
+# TODO: remove this with production data, this is used for tests only
+cursor.execute("""
+    DROP TABLE IF EXISTS proposed_changes;
+    DROP TYPE IF EXISTS approval;
+    DROP TABLE IF EXISTS official_satellites_changelog;
+    DROP TABLE IF EXISTS official_satellites;          
+""")
 
 # Create table if it doesn't exist
 cursor.execute("""
@@ -113,13 +120,10 @@ CREATE TABLE IF NOT EXISTS official_satellites_changelog (
 );
 """)
 
-# Create proposed_changes table
-# TODO: @stevenlai1688 to finish up schema
-# David - I added this bc I needed it for schema change
 cursor.execute("""
     DO $$ 
     BEGIN 
-        CREATE TYPE approve_denied_flag_enum AS ENUM('approved', 'denied', 'pending'); 
+        CREATE TYPE approval AS ENUM('approved', 'denied', 'pending', 'persisted'); 
     EXCEPTION 
     WHEN duplicate_object THEN 
     -- Type already exists, do nothing
@@ -130,6 +134,11 @@ cursor.execute("""
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS proposed_changes ( 
     id SERIAL PRIMARY KEY,
+    proposed_user VARCHAR(255),
+    created_at DATE,
+    proposed_notes text,
+    is_approved approval,
+>>>>>>> main
     official_name VARCHAR(255),
     reg_country VARCHAR(255),
     own_country VARCHAR(255),
@@ -158,52 +167,11 @@ CREATE TABLE IF NOT EXISTS proposed_changes (
     norad integer,
     comment_note text,
     source_orbit text,
-    source_satellite text[],
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    confidence_score float,
-    approve_denied_flag approve_denied_flag_enum DEFAULT 'pending',
-    approved_personnel VARCHAR(255),
-    notes text,
-    flagged boolean
+    source_satellite text[]
 );
 """)
 
-# TODO: DANGER DANGER DANGER
-#cursor.execute("""
-#    DROP TABLE IF EXISTS crawler_dump CASCADE;
-#""")
-
-# Set up the crawler dump table
-cursor.execute("""
-    CREATE TABLE IF NOT EXISTS crawler_dump (
-        id SERIAL PRIMARY KEY,
-        external_data_row_id text, /* this is the id that the source uses to identify the row that it scraped */
-        source_id INTEGER REFERENCES sources(id),
-        data JSONB NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE (external_data_row_id, source_id)
-    );
-""")             
-
-# I want to map what crawler dumps went into creating a proposed change
-# I cannot do a 1:many on proposed_changes bc of psql limitation on array for foreign key constraints isn't allowed
-# so we make a mapping table.
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS crawler_dump_proposed_changes (
-    crawler_dump_id SERIAL REFERENCES crawler_dump(id),
-    proposed_change_id SERIAL REFERENCES proposed_changes(id),
-    PRIMARY KEY (crawler_dump_id, proposed_change_id)
-);""")
-
-# Create an index bc the validator wants to (mostly) ignore records that already have been
-# used in a crawler dump
-cursor.execute("""
-CREATE INDEX IF NOT EXISTS idx_crawler_dump_id
-ON crawler_dump_proposed_changes (crawler_dump_id);
-""")
-
+# backfilling script:
 # Should probably first check that the table is empty before inserting, or was just created above.
 cursor.execute("SELECT COUNT(*) FROM official_satellites")
 count = cursor.fetchone()[0]

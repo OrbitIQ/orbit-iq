@@ -11,8 +11,8 @@ app.register_blueprint(confirmed_subpath, url_prefix='/confirmed')
 from routes.edit import edit_subpath
 app.register_blueprint(edit_subpath, url_prefix='/edit')
 
-from routes.proposed import proposed_subpath
-app.register_blueprint(proposed_subpath, url_prefix='/proposed')
+from routes.proposed import proposed_changes_subpath
+app.register_blueprint(proposed_changes_subpath, url_prefix='/proposed')
 
 def print_routes(app):
     print("Routes defined in the application:")
