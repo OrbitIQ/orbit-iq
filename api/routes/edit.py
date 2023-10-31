@@ -80,14 +80,14 @@ def update(official_name):
 
     # The SQL query to insert a log into the official_satellite_changelog table
     log_query = """
-    INSERT INTO official_satellites_changelog (cid, update_user, update_action, update_time, update_notes, official_name, 
+    INSERT INTO official_satellites_changelog (update_user, update_action, update_time, update_notes, official_name, 
     reg_country, own_country, owner_name, user_type, purposes, detailed_purpose, orbit_class, orbit_type, geo_longitude, perigee, apogee, 
     eccentricity, inclination, period_min, mass_launch, mass_dry, power_watts, launch_date, exp_lifetime, contractor, contractor_country, 
     launch_site, launch_vehicle, cospar, norad, comment_note, source_orbit, source_satellite) 
-    VALUES (%s, %s, 'edit', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    VALUES (%s, 'edit', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
 
-    cursor.execute(log_query, (str(uuid.uuid4()), update_user, update_time, update_notes, 
+    cursor.execute(log_query, (update_user, update_time, update_notes, 
     old_data_as_dict['official_name'], old_data_as_dict['reg_country'], old_data_as_dict['own_country'], old_data_as_dict['owner_name'], old_data_as_dict['user_type'], 
     old_data_as_dict['purposes'], old_data_as_dict['detailed_purpose'], old_data_as_dict['orbit_class'], old_data_as_dict['orbit_type'], old_data_as_dict['geo_longitude'], 
     old_data_as_dict['perigee'], old_data_as_dict['apogee'], old_data_as_dict['eccentricity'], old_data_as_dict['inclination'], old_data_as_dict['period_min'], 

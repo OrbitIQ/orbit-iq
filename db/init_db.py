@@ -21,6 +21,14 @@ conn = psycopg2.connect(
 )
 cursor = conn.cursor()
 
+# TODO: remove this with production data, this is used for tests only
+cursor.execute("""
+    DROP TABLE IF EXISTS proposed_changes;
+    DROP TYPE IF EXISTS approval;
+    DROP TABLE IF EXISTS official_satellites_changelog;
+    DROP TABLE IF EXISTS official_satellites;          
+""")
+
 # Create table if it doesn't exist
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS official_satellites ( 
@@ -59,7 +67,7 @@ CREATE TABLE IF NOT EXISTS official_satellites (
 # Create changelog table
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS official_satellites_changelog ( 
-    cid UUID PRIMARY KEY,
+    cid SERIAL PRIMARY KEY,
     update_user VARCHAR(255),
     update_action VARCHAR(10),
     update_time DATE,
@@ -96,6 +104,49 @@ CREATE TABLE IF NOT EXISTS official_satellites_changelog (
 );
 """)
 
+
+#Create Proposed Changes Table
+cursor.execute("""
+CREATE TYPE approval AS ENUM('approved', 'denied', 'pending', 'persisted');
+CREATE TABLE IF NOT EXISTS proposed_changes ( 
+    id SERIAL PRIMARY KEY,
+    proposed_user VARCHAR(255),
+    created_at DATE,
+    proposed_notes text,
+    is_approved approval,
+    official_name VARCHAR(255),
+    reg_country VARCHAR(255),
+    own_country VARCHAR(255),
+    owner_name VARCHAR(255),
+    user_type VARCHAR(255),
+    purposes VARCHAR(255),
+    detailed_purpose text,
+    orbit_class VARCHAR(255), 
+    orbit_type VARCHAR(255),
+    geo_longitude VARCHAR(255),
+    perigee VARCHAR(255),
+    apogee VARCHAR(255),
+    eccentricity VARCHAR(255),
+    inclination VARCHAR(255),
+    period_min VARCHAR(255),
+    mass_launch VARCHAR(255),
+    mass_dry VARCHAR(255),
+    power_watts VARCHAR(255),
+    launch_date DATE,
+    exp_lifetime VARCHAR(255),
+    contractor VARCHAR(255),
+    contractor_country VARCHAR(255),
+    launch_site VARCHAR(255),
+    launch_vehicle VARCHAR(255),
+    cospar  VARCHAR(20),
+    norad integer,
+    comment_note text,
+    source_orbit text,
+    source_satellite text[]
+);
+""")
+
+# backfilling script:
 # Should probably first check that the table is empty before inserting, or was just created above.
 cursor.execute("SELECT COUNT(*) FROM official_satellites")
 count = cursor.fetchone()[0]
