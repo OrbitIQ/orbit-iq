@@ -63,7 +63,7 @@ services:
   api_integration_test:
     build:
       context: ./api
-    command: /bin/bash -c "sleep 30 && pytest tests"
+    command: /bin/bash -c "pytest tests"
     depends_on:
       - api_test
       - init-db_test

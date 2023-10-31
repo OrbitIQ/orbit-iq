@@ -362,7 +362,7 @@ def deny_proposed_change(id):
 def save_all_approved_or_denied_changes():
     """
     Request Data:
-        - None
+        - approved_user (str): The user who approved the changes.
     Example Usage:
         POST /proposed/changes/persist
     Returns:
@@ -388,8 +388,9 @@ def save_all_approved_or_denied_changes():
         return jsonify({'error': 'No approved changes found.'}), 404
 
     # Execute SQL query to update is_approved status
-    query = sql.SQL("UPDATE proposed_changes SET is_approved = {} WHERE is_approved = {};").format(
+    query = sql.SQL("UPDATE proposed_changes SET is_approved = {}, approved_user = {} WHERE is_approved = {};").format(
         sql.Literal("persisted"),
+        sql.Literal(request.form['approved_user']),
         sql.Literal("approved")
     )
     cur.execute(query)
