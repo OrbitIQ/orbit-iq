@@ -415,12 +415,16 @@ def save_all_approved_or_denied_changes():
         official_satellite_values = {key: row_dict[key] for key in row_dict if key in official_satellite_columns}
         official_satellite_values['launch_date'] = launch_date
 
-        # Insert into official_satellites table
+        # Insert into official_satellites table or update on conflict
         cur.execute(f"""
             INSERT INTO official_satellites ({', '.join(official_satellite_values.keys())}) 
-            VALUES ({', '.join(['%s'] * len(official_satellite_values))});
+            VALUES ({', '.join(['%s'] * len(official_satellite_values))})
+            ON CONFLICT (official_name)
+            DO UPDATE SET
+                {', '.join([f'{key} = excluded.{key}' for key in official_satellite_values.keys()])};
             """, list(official_satellite_values.values())
         )
+
 
         # Prepare values for change log
         changelog_values = {
