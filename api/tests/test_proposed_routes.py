@@ -105,7 +105,7 @@ def test_get_proposed_change(client):
     # Add more assertions to validate the response data
 
 def test_get_proposed_change_not_found(client):
-    random_id = 123
+    random_id = 123456789
     response = client.get(f'/proposed/changes/{random_id}')
     assert response.status_code == 404  # Check for a failed retrieval
 

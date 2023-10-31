@@ -7,30 +7,29 @@ from sources.gcat import gcat
 from utils import get_db_conn
 
 def setup_sources():
-    conn = get_db_conn()
-    cur = conn.cursor()
+    tries = 0
+    while tries < 5:
+        try:
+            conn = get_db_conn()
+            cur = conn.cursor()
 
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS sources (
-            id SERIAL PRIMARY KEY,
-            name VARCHAR(255) NOT NULL UNIQUE,
-            url VARCHAR(255) NOT NULL UNIQUE,
-            description text NOT NULL
-        );
-    """)
+            # Now add the sources, lets make sure our IDs are fixed here
 
-    # Now add the sources, lets make sure our IDs are fixed here
+            # 1 - GCAT - General Catalog of Artificial Space Objects
+            cur.execute("""
+                INSERT INTO sources (id, name, url, description) VALUES
+                (1, 'GCAT', 'https://planet4589.org/space/gcat/', 'General Catalog of Artificial Space Objects (GCAT)')
+                ON CONFLICT DO NOTHING;
+            """)
+        
+            conn.commit()
+            cur.close()
+            conn.close()
+            return
+        except psycopg2.errors.UndefinedTable:
+            time.sleep(5)
+            tries += 1
 
-    # 1 - GCAT - General Catalog of Artificial Space Objects
-    cur.execute("""
-        INSERT INTO sources (id, name, url, description) VALUES
-        (1, 'GCAT', 'https://planet4589.org/space/gcat/', 'General Catalog of Artificial Space Objects (GCAT)')
-        ON CONFLICT DO NOTHING;
-    """)
-   
-    conn.commit()
-    cur.close()
-    conn.close()
 
 def count_crawler_dump():
     conn = get_db_conn()

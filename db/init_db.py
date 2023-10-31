@@ -174,6 +174,15 @@ CREATE TABLE IF NOT EXISTS proposed_changes (
 );
 """)
 
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS sources (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL UNIQUE,
+        url VARCHAR(255) NOT NULL UNIQUE,
+        description text NOT NULL
+    );
+""")
+
 # Set up the crawler dump table
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS crawler_dump (
