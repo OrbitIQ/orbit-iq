@@ -32,12 +32,12 @@ class ProposedChange:
     norad: int = 0
     comment_note: str = ''
     source_orbit: str = ''
+    proposed_user: str = field(default='validator')
     source_satellite: List[str] = field(default_factory=list)
     confidence_score: float = 0
     change_id: Optional[int] = field(default=None)
-    approve_denied_flag: Optional[bool] = field(default=None)
-    approved_personnel: Optional[str] = field(default=None)
-    notes: Optional[str] = field(default=None)
+    is_approved: Optional[str] = field(default='pending')
+    proposed_notes: Optional[str] = field(default=None)
     flagged: Optional[bool] = field(default=None)
 
 def insert_proposed_change(proposed_change: ProposedChange, used_row_ids: List[int]):
@@ -51,7 +51,7 @@ def insert_proposed_change(proposed_change: ProposedChange, used_row_ids: List[i
             inclination, period_min, mass_launch, mass_dry, power_watts, launch_date,
             exp_lifetime, contractor, contractor_country, launch_site, launch_vehicle,
             cospar, norad, comment_note, source_orbit, source_satellite, confidence_score,
-            approve_denied_flag, approved_personnel, notes, flagged
+            is_approved, proposed_notes, flagged, proposed_user
         )
         VALUES (
             %(official_name)s, %(reg_country)s, %(own_country)s, %(owner_name)s, %(user_type)s, %(purposes)s,
@@ -59,7 +59,7 @@ def insert_proposed_change(proposed_change: ProposedChange, used_row_ids: List[i
             %(inclination)s, %(period_min)s, %(mass_launch)s, %(mass_dry)s, %(power_watts)s, %(launch_date)s,
             %(exp_lifetime)s, %(contractor)s, %(contractor_country)s, %(launch_site)s, %(launch_vehicle)s,
             %(cospar)s, %(norad)s, %(comment_note)s, %(source_orbit)s, %(source_satellite)s,
-            %(confidence_score)s, %(approve_denied_flag)s, %(approved_personnel)s, %(notes)s, %(flagged)s
+            %(confidence_score)s, %(is_approved)s, %(proposed_notes)s, %(flagged)s, %(proposed_user)s
         )
         RETURNING id
     """

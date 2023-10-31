@@ -5,7 +5,6 @@ def from_gcat(record):
     data = record[3]
      
     columns = get_proposed_changes_columns()
-    print(data)
     proposed_data = {
         'official_name': data.get('Name', ''),
         'reg_country': '',

@@ -151,7 +151,12 @@ def get_proposed():
     # Close the connection
     cursor.close()
     conn.close()
-    return jsonify(proposed_changes)
+
+    # For each row map the column -> value to a dictionary
+    columns = [desc[0] for desc in cursor.description]
+    proposed_changes = [dict(zip(columns, row)) for row in proposed_changes]
+
+    return jsonify({'proposed_changes': proposed_changes})
 
 # Get a specific proposed change by id
 @proposed_changes_subpath.route('/changes/<id>', methods=['GET'])
@@ -376,8 +381,6 @@ def save_all_approved_or_denied_changes():
     approved_changes = cur.fetchall()
     if approved_changes is None:
         return jsonify({'error': 'No approved changes found.'}), 404
-    
-    print(approved_changes)
 
     cur.execute(query)
     # Execute SQL query to delete all approved changes

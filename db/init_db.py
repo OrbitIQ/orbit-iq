@@ -39,10 +39,11 @@ cursor = conn.cursor()
 
 # TODO: remove this with production data, this is used for tests only
 cursor.execute("""
-    DROP TABLE IF EXISTS proposed_changes;
+    DROP TABLE IF EXISTS proposed_changes CASCADE;
+    DROP TABLE IF EXISTS crawler_dump_proposed_changes CASCADE;
     DROP TYPE IF EXISTS approval;
-    DROP TABLE IF EXISTS official_satellites_changelog;
-    DROP TABLE IF EXISTS official_satellites;          
+    DROP TABLE IF EXISTS official_satellites_changelog CASCADE;
+    DROP TABLE IF EXISTS official_satellites CASCADE;          
 """)
 
 # Create table if it doesn't exist
@@ -135,10 +136,10 @@ cursor.execute("""
 CREATE TABLE IF NOT EXISTS proposed_changes ( 
     id SERIAL PRIMARY KEY,
     proposed_user VARCHAR(255),
+    approved_user VARCHAR(255),
     created_at DATE,
     proposed_notes text,
     is_approved approval,
->>>>>>> main
     official_name VARCHAR(255),
     reg_country VARCHAR(255),
     own_country VARCHAR(255),
@@ -167,8 +168,40 @@ CREATE TABLE IF NOT EXISTS proposed_changes (
     norad integer,
     comment_note text,
     source_orbit text,
-    source_satellite text[]
+    source_satellite text[],
+    confidence_score float,
+    flagged boolean DEFAULT false /* if the user/validator flags the change as suspicious */
 );
+""")
+
+# Set up the crawler dump table
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS crawler_dump (
+        id SERIAL PRIMARY KEY,
+        external_data_row_id text, /* this is the id that the source uses to identify the row that it scraped */
+        source_id INTEGER REFERENCES sources(id),
+        data JSONB NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (external_data_row_id, source_id)
+    );
+""")             
+
+# I want to map what crawler dumps went into creating a proposed change
+# I cannot do a 1:many on proposed_changes bc of psql limitation on array for foreign key constraints isn't allowed
+# so we make a mapping table.
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS crawler_dump_proposed_changes (
+    crawler_dump_id SERIAL REFERENCES crawler_dump(id),
+    proposed_change_id SERIAL REFERENCES proposed_changes(id),
+    PRIMARY KEY (crawler_dump_id, proposed_change_id)
+);""")
+
+# Create an index bc the validator wants to (mostly) ignore records that already have been
+# used in a crawler dump
+cursor.execute("""
+CREATE INDEX IF NOT EXISTS idx_crawler_dump_id
+ON crawler_dump_proposed_changes (crawler_dump_id);
 """)
 
 # backfilling script:
