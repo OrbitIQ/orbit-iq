@@ -1,5 +1,10 @@
 from flask import Blueprint, jsonify, request
 from utils.helpers import get_db_connection
+from flask import Response
+from utils.helpers import SessionLocal
+from sqlalchemy import text
+import csv
+from io import StringIO
 
 # Create a Blueprint for this subpath
 confirmed_subpath = Blueprint('confirmed', __name__)
@@ -99,3 +104,87 @@ def get_satellite_by_name(official_name):
     satellite_as_dict = dict(zip(columns, satellite))
 
     return jsonify({'satellite': satellite_as_dict}), 200
+
+@confirmed_subpath.route('/satellites/export', methods=["GET"])
+def export_to_excel():
+    """
+    Export the official_satellites data to an Excel file and return it as a downloadable response.
+
+    Returns:
+        A CSV file of the confirmed satellite record.
+    """
+    # Connect to the database and fetch all records from the official_satellites table
+       # Connect to the database
+       # Connect to the database and fetch all records from the official_satellites table
+    # Connect to the database
+    session = SessionLocal()
+
+    try:
+        # Fetch all records from the official_satellites table using SQLAlchemy
+        result = session.execute(text("SELECT * FROM official_satellites"))
+        
+        # Get column names and rows
+        columns = result.keys()
+        rows = result.fetchall()
+
+        processed_rows = []
+        for row in rows:
+            # Convert the 2D array (last item) into a proper string representation
+            if isinstance(row[-1], list):  # Check for 2D array
+                array_str_items = []
+                for item in row[-1]:
+                    if item is not None:
+                        array_str_items.append(f"'{item}'")  # Wrap non-None items with single quotes
+                    else:
+                        array_str_items.append("None")
+                array_str = '"'+'[' + ', '.join(array_str_items) + ']'+ '"'
+                row = list(row[:-1]) + [array_str]
+            
+            # Process the rest of the row
+            processed_row = [value if value is not None else "None" for value in row]
+             
+        # Convert the results to CSV format
+        csv_data = ",".join(columns) + "\n"  # Column headers
+
+        output = StringIO()
+        writer = csv.writer(output, quoting=csv.QUOTE_MINIMAL)
+        writer.writerows(processed_rows)
+
+        csv_data += output.getvalue()
+        
+        # Create a response with the CSV data
+        response = Response(csv_data, content_type="text/csv")
+        response.headers["Content-Disposition"] = "attachment; filename=confirmed_official_satellites.csv"
+        
+        return response
+    
+    finally:
+        session.close() 
+        
+# TODO: test only. Remove before production
+# Delete a satellite by name
+# Note: This route is for Testing purpose only, deleting test data from the official table is not allowed. 
+# It is not meant to be part of the API. DO NOT USE THIS IN PRODUCTION
+@confirmed_subpath.route('/satellites/<official_name>', methods=["DELETE"])
+def delete_satellite_by_name(official_name):
+    # DO NOT USE THIS IN PRODUCTION
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # The SQL query to delete a satellite by name
+    cursor.execute("DELETE FROM official_satellites WHERE official_name = %s", (official_name,))
+    
+    # Commit the transaction to persist the deletion
+    conn.commit()
+
+    # If the satellite is not found, return a 404 error
+    if cursor.rowcount == 0:
+        cursor.close()
+        conn.close()
+        return jsonify({'error': 'Satellite not found'}), 404
+
+    # Close the connection
+    cursor.close()
+    conn.close()
+
+    return jsonify({'message': 'Satellite deleted successfully'}), 200

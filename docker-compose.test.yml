@@ -29,6 +29,8 @@ services:
       <<: *shared-environment
     ports:
       - "5432:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
 
   init-db_test:
     build:
@@ -39,12 +41,33 @@ services:
     depends_on:
       - db_test
 
-  api_integration_test:
+  crawler_test:
+    build:
+      context: ./crawler
+    environment:
+      <<: *shared-environment
+    depends_on:
+      - db_test
+      - init-db_test
+
+  validator_test:
+    build:
+      context: ./validator
+    environment:
+      <<: *shared-environment
+    depends_on:
+      - db_test
+      - init-db_test
+      - crawler_test
+
+  integration_api_test:
     build:
       context: ./api
-    command: pytest tests
+    command: /bin/bash -c "sleep 10 && pytest tests"
     depends_on:
       - api_test
       - init-db_test
+      - crawler_test
+      - validator_test
     environment:
       <<: *shared-environment

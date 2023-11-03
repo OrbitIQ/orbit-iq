@@ -2,6 +2,7 @@ import os
 import psycopg2
 import csv
 from datetime import datetime
+import time
 
 # Read from environment variables
 DB_NAME = os.environ.get('POSTGRES_DB')
@@ -13,13 +14,37 @@ if any(v is None for v in [DB_NAME, DB_USER, DB_PASSWORD, DB_HOST]):
     raise Exception("One or more environment variables are missing.")
 
 # Connect to PostgreSQL
-conn = psycopg2.connect(
-    dbname=DB_NAME,
-    user=DB_USER,
-    password=DB_PASSWORD,
-    host=DB_HOST,
-)
+tries = 0
+conn = None
+while tries < 5:
+    try:
+        conn = psycopg2.connect(
+            dbname=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            host=DB_HOST,
+        )
+    except psycopg2.OperationalError:
+        # assume this just failed bc db is still starting up
+        pass
+
+    if conn is not None:
+        break
+
+    tries += 1
+    time.sleep(5)
+
+    
 cursor = conn.cursor()
+
+# TODO: remove this with production data, this is used for tests only
+cursor.execute("""
+    DROP TABLE IF EXISTS proposed_changes CASCADE;
+    DROP TABLE IF EXISTS crawler_dump_proposed_changes CASCADE;
+    DROP TYPE IF EXISTS approval;
+    DROP TABLE IF EXISTS official_satellites_changelog CASCADE;
+    DROP TABLE IF EXISTS official_satellites CASCADE;          
+""")
 
 # Create table if it doesn't exist
 cursor.execute("""
@@ -59,7 +84,7 @@ CREATE TABLE IF NOT EXISTS official_satellites (
 # Create changelog table
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS official_satellites_changelog ( 
-    cid UUID PRIMARY KEY,
+    cid SERIAL PRIMARY KEY,
     update_user VARCHAR(255),
     update_action VARCHAR(10),
     update_time DATE,
@@ -96,6 +121,99 @@ CREATE TABLE IF NOT EXISTS official_satellites_changelog (
 );
 """)
 
+cursor.execute("""
+    DO $$ 
+    BEGIN 
+        CREATE TYPE approval AS ENUM('approved', 'denied', 'pending', 'persisted'); 
+    EXCEPTION 
+    WHEN duplicate_object THEN 
+    -- Type already exists, do nothing
+    NULL; 
+    END $$;
+""")
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS proposed_changes ( 
+    id SERIAL PRIMARY KEY,
+    proposed_user VARCHAR(255),
+    approved_user VARCHAR(255),
+    created_at DATE,
+    proposed_notes text,
+    is_approved approval,
+    official_name VARCHAR(255),
+    reg_country VARCHAR(255),
+    own_country VARCHAR(255),
+    owner_name VARCHAR(255),
+    user_type VARCHAR(255),
+    purposes VARCHAR(255),
+    detailed_purpose text,
+    orbit_class VARCHAR(255), 
+    orbit_type VARCHAR(255),
+    geo_longitude VARCHAR(255),
+    perigee VARCHAR(255),
+    apogee VARCHAR(255),
+    eccentricity VARCHAR(255),
+    inclination VARCHAR(255),
+    period_min VARCHAR(255),
+    mass_launch VARCHAR(255),
+    mass_dry VARCHAR(255),
+    power_watts VARCHAR(255),
+    launch_date DATE,
+    exp_lifetime VARCHAR(255),
+    contractor VARCHAR(255),
+    contractor_country VARCHAR(255),
+    launch_site VARCHAR(255),
+    launch_vehicle VARCHAR(255),
+    cospar  VARCHAR(20),
+    norad integer,
+    comment_note text,
+    source_orbit text,
+    source_satellite text[],
+    confidence_score float,
+    flagged boolean DEFAULT false /* if the user/validator flags the change as suspicious */
+);
+""")
+
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS sources (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL UNIQUE,
+        url VARCHAR(255) NOT NULL UNIQUE,
+        description text NOT NULL
+    );
+""")
+
+# Set up the crawler dump table
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS crawler_dump (
+        id SERIAL PRIMARY KEY,
+        external_data_row_id text, /* this is the id that the source uses to identify the row that it scraped */
+        source_id INTEGER REFERENCES sources(id),
+        data JSONB NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (external_data_row_id, source_id)
+    );
+""")             
+
+# I want to map what crawler dumps went into creating a proposed change
+# I cannot do a 1:many on proposed_changes bc of psql limitation on array for foreign key constraints isn't allowed
+# so we make a mapping table.
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS crawler_dump_proposed_changes (
+    crawler_dump_id SERIAL REFERENCES crawler_dump(id),
+    proposed_change_id SERIAL REFERENCES proposed_changes(id),
+    PRIMARY KEY (crawler_dump_id, proposed_change_id)
+);""")
+
+# Create an index bc the validator wants to (mostly) ignore records that already have been
+# used in a crawler dump
+cursor.execute("""
+CREATE INDEX IF NOT EXISTS idx_crawler_dump_id
+ON crawler_dump_proposed_changes (crawler_dump_id);
+""")
+
+# backfilling script:
 # Should probably first check that the table is empty before inserting, or was just created above.
 cursor.execute("SELECT COUNT(*) FROM official_satellites")
 count = cursor.fetchone()[0]

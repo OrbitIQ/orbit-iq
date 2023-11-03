@@ -23,8 +23,8 @@ CREATE TABLE official_satellites (
     contractor_country VARCHAR(255),
     launch_site VARCHAR(255),
     launch_vehicle VARCHAR(255),
-    cospar_number  VARCHAR(20),
-    norad_number integer,
+    cospar  VARCHAR(20),
+    norad integer,
     comment_note VARCHAR(255),
     source_orbit VARCHAR(255),
     source_satellite text[]
@@ -54,8 +54,8 @@ COPY official_satellites(
     contractor_country,
     launch_site,
     launch_vehicle,
-    cospar_number,
-    norad_number,
+    cospar,
+    norad,
     comment_note,
     source_orbit,
 	source_satellite

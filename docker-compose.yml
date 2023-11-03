@@ -53,6 +53,16 @@ services:
       <<: *shared-environment
     depends_on:
       - db
+      - init-db
+
+  validator:
+    build:
+      context: ./validator
+    environment:
+      <<: *shared-environment
+    depends_on:
+      - db
+      - init-db
 
 volumes:
   db-data:
