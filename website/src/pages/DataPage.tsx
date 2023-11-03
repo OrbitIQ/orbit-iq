@@ -1,15 +1,16 @@
 import SatelliteTable from "../components/SatelliteTable/SatelliteTable";
 import {Switch} from "../components/ui/switch";
 import {Label} from "../components/ui/label";
-import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { Pencil2Icon } from "@radix-ui/react-icons"
+import { useEffect, useState, cloneElement} from "react";
 
+//To add canEdit prop to the satellite table.
 
 
 function DataPage() {
 
   const [canEdit, setCanEdit] = useState(false)
+
+
 
   return (
     <>
@@ -25,15 +26,15 @@ function DataPage() {
       >
         <h1>Satellite Data</h1>
 
-        <SatelliteTable />
+
+        <SatelliteTable canEdit={canEdit}/>
+        {/* <h1>{canEdit.toString()}</h1> */}
         <div className="mb-5 flex items-center space-x-2">
           <Switch id="edit-mode" onCheckedChange={() => {
               setCanEdit(!canEdit)
-              console.log(canEdit)
             }
           }/>
           <Label htmlFor="edit-mode">Edit</Label>
-
         </div>        
 
 
