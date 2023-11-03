@@ -17,14 +17,13 @@ function Navbar() {
             >
                 <img src={logo} width={200} height={200} />
                 <Link to="/data">
-                <Button variant="outline" size="icon">
-                    Data
-                </Button>
+                    <Button variant="outline" size="icon">Data</Button>
                 </Link>
                 <Link to="/updates">
-                <Button variant="outline" size="icon">
-                    Update
-                </Button>
+                    <Button variant="outline" size="icon">Update</Button>
+                </Link>
+                <Link to="/changelog">
+                    <Button variant="outline" size="icon">Changelog</Button>
                 </Link>
             </div>
         </>
