@@ -27,29 +27,96 @@ import {
 
 import { Button } from "@/components/ui/button";
 
-import { useState } from "react";
+import { useState, useEffect} from "react";
 import { columnVisibilityDefaults } from "@/Constants/constants";
+import { Satellite } from "@/types/Satellite";
+
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  isEditable: boolean;
 }
+
+/*
+Editable column stolen from: https://codesandbox.io/p/sandbox/github/tanstack/table/tree/main/examples/react/editable-data?embed=1&file=%2Fsrc%2Fmain.tsx%3A28%2C1-52%2C2
+
+Idea: We render the table with editable columns or non-editable columns based on the passed prop.
+*/
+
+const defaultColumns: Partial<ColumnDef<any>> = {
+  cell: ({ getValue, row: { index }, column: { id }, table }) => {
+    const initialValue = getValue()
+    // We need to keep and update the state of the cell normally
+    const [value, setValue] = useState(initialValue)
+
+    // When the input is blurred, we'll call our table meta's updateData function
+    const onBlur = () => {
+      table.options.meta?.updateData(index, id, value)
+    }
+
+    // If the initialValue is changed external, sync it up with our state
+    useEffect(() => {
+      setValue(initialValue)
+    }, [initialValue])
+
+    return (
+      <input
+        value={value as string}
+        onChange={e => setValue(e.target.value)}
+        onBlur={onBlur}
+      />
+    )
+  },
+}
+
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  isEditable
 }: DataTableProps<TData, TValue>) {
+
+  const [newData, setData] = useState<TData[]>(data)  
+  const [canEdit, setCanEdit] = useState(isEditable)
+
+  useEffect(() => {
+    setData(data)
+  }, [data])
+
+  useEffect(() => {
+    setCanEdit(isEditable)
+  }, [isEditable])
+
+  console.log(`Prop:  ${isEditable}`)
+  console.log(`Can edit: ${canEdit}`)
+
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     columnVisibilityDefaults
   );
   const table = useReactTable({
-    data,
+    data: newData,
     columns,
+   defaultColumn: defaultColumns, 
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     state: {
       columnVisibility,
+    },
+    meta: {
+      updateData: (rowIndex: number, columnId: number, value: any) => {
+        setData(old =>
+          old.map((row, index) => {
+            if (index === rowIndex) {
+              return {
+                ...old[rowIndex]!,
+                [columnId]: value,
+              }
+            }
+            return row
+          }))
+      }
     },
   });
 

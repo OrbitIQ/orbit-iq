@@ -27,7 +27,7 @@ function DataPage() {
         <h1>Satellite Data</h1>
 
 
-        <SatelliteTable canEdit={canEdit}/>
+        <SatelliteTable isEditable={canEdit}/>
         {/* <h1>{canEdit.toString()}</h1> */}
         <div className="mb-5 flex items-center space-x-2">
           <Switch id="edit-mode" onCheckedChange={() => {
