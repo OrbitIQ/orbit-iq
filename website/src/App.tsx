@@ -8,11 +8,11 @@ function App() {
   return (
     <>
       <Navbar />
-      <Routes>
-        <Route path="/" element={<Navigate replace to="/data" />} /> {/* Redirect from "/" to "/data" */}
-        <Route path="/data" element={<DataPage />} />
-        <Route path="/updates" element={<UpdatesPage />} />
-      </Routes>
+        <Routes>
+          <Route path="/" element={<Navigate replace to="/data" />} /> {/* Redirect from "/" to "/data" */}
+          <Route path="/data" element={<DataPage />} />
+          <Route path="/updates" element={<UpdatesPage />} />
+        </Routes>
     </>
   );
 }

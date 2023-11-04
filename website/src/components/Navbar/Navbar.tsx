@@ -2,8 +2,10 @@ import logo from "./ucslogo.webp";
 import { NavLink } from "react-router-dom";
 
 function Navbar() {
-const linkStyle = ({ isActive }: { isActive: boolean }) =>
-    `px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-200'}`;
+  const linkStyle = ({ isActive }: { isActive: boolean }) =>
+    `px-3 py-2 rounded-md text-sm font-medium ${
+      isActive ? "bg-blue-500 text-white" : "text-gray-600 hover:bg-gray-200"
+    }`;
 
   return (
     <nav className="bg-white">

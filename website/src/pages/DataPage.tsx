@@ -11,7 +11,7 @@ function DataPage() {
       </div>
       <div className="mt-4">
         <Link to="/updates">
-          <Button variant="outline" size="icon" className="text-indigo-600 border-indigo-600 hover:bg-indigo-600 hover:text-white transition ease-in-out duration-150">
+          <Button variant="outline" buttonSize="icon" className="text-indigo-600 border-indigo-600 hover:bg-indigo-600 hover:text-white transition ease-in-out duration-150">
             Edit
           </Button>
         </Link>
