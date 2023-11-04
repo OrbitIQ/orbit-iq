@@ -7,6 +7,7 @@ import {
   getPaginationRowModel,
   VisibilityState,
   useReactTable,
+  Table as table,
 } from "@tanstack/react-table";
 
 import {
@@ -70,34 +71,13 @@ const defaultColumns: Partial<ColumnDef<any>> = {
   },
 }
 
-
-export function DataTable<TData, TValue>({
-  columns,
-  data,
-  isEditable
-}: DataTableProps<TData, TValue>) {
-
-  const [newData, setData] = useState<TData[]>(data)  
-  const [canEdit, setCanEdit] = useState(isEditable)
-
-  useEffect(() => {
-    setData(data)
-  }, [data])
-
-  useEffect(() => {
-    setCanEdit(isEditable)
-  }, [isEditable])
-
-  console.log(`Prop:  ${isEditable}`)
-  console.log(`Can edit: ${canEdit}`)
-
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
-    columnVisibilityDefaults
-  );
-  const table = useReactTable({
-    data: newData,
-    columns,
-   defaultColumn: defaultColumns, 
+//TODO: Add typescript types :)
+// @ts-ignore
+const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData: (value: React.SetStateAction<TData[]>) => void, defaultColumns?) => {
+    return useReactTable({
+    data: data,
+    columns: columns,
+    ...defaultColumns !== undefined && {defaultColumn: defaultColumns},
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
@@ -119,6 +99,70 @@ export function DataTable<TData, TValue>({
       }
     },
   });
+};
+
+
+export function DataTable<TData, TValue>({
+  columns,
+  data,
+  isEditable
+}: DataTableProps<TData, TValue>) {
+
+  const [newData, setData] = useState<TData[]>(data)  
+  const [canEdit, setCanEdit] = useState(isEditable)
+
+  useEffect(() => {
+    setData(data)
+  }, [data])
+
+  useEffect(() => {
+    setCanEdit(isEditable)
+  }, [isEditable])
+
+
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+    columnVisibilityDefaults
+  );
+
+  
+  const table = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData)
+  const editableTable = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, defaultColumns)
+
+  const renderTableHeaders = (canEdit:boolean) => {
+    const headerGroups = canEdit ? editableTable.getHeaderGroups() : table.getHeaderGroups();
+    return headerGroups.map((headerGroup) => (
+      <TableRow key={headerGroup.id}>
+        {headerGroup.headers.map((header) => (
+          <TableHead key={header.id}>
+            {!header.isPlaceholder && flexRender(header.column.columnDef.header, header.getContext())}
+          </TableHead>
+        ))}
+      </TableRow>
+    ));
+  };
+
+  const renderTableBodyRows = (canEdit:boolean, columns: any) => {
+    const rows = canEdit ? editableTable.getRowModel().rows : table.getRowModel().rows;
+    if (rows?.length) {
+      return rows.map((row) => (
+        <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+          {row.getVisibleCells().map((cell) => (
+            <TableCell key={cell.id}>
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </TableCell>
+          ))}
+        </TableRow>
+      ));
+    } else {
+      return (
+        <TableRow>
+          <TableCell colSpan={columns.length} className="h-24 text-center">
+            No results.
+          </TableCell>
+        </TableRow>
+      );
+    }
+  };
 
   return (
     <div>
@@ -150,54 +194,14 @@ export function DataTable<TData, TValue>({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
       <div className="rounded-md border">
         <Table>
           <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
+              {renderTableHeaders(canEdit)}
           </TableHeader>
+
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
+              {renderTableBodyRows(canEdit, columns)}
           </TableBody>
         </Table>
       </div>
@@ -205,11 +209,17 @@ export function DataTable<TData, TValue>({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => table.previousPage()}
+          onClick={() => {
+            table.previousPage()
+            editableTable.previousPage()
+          }}
         >
           Previous
         </Button>
-        <Button variant="outline" size="sm" onClick={() => table.nextPage()}>
+        <Button variant="outline" size="sm" onClick={() => {
+            table.nextPage()
+            editableTable.nextPage() 
+          }}>
           Next
         </Button>
       </div>

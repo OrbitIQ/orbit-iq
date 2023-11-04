@@ -51,7 +51,6 @@ export default function SatelliteTable({isEditable}: {isEditable: boolean}) {
 
   return (
     <div className="container mx-auto py-10">
-      {/* <h1>{isEditable.toString()}</h1> */}
       <DataTable columns={satelliteColumns} data={satellites.satellites} isEditable={isEditable}/>
     </div>
   );
