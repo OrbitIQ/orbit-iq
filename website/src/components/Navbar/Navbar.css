@@ -1,0 +1,41 @@
+/* Navbar */
+.navbar {
+  background-color: #333; /* Background color for the navbar */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+/* Logo */
+.logo {
+  width: 300px; /* Increase the width to make the logo bigger */
+  height: auto; /* Maintain aspect ratio */
+}
+
+/* Navigation Links */
+.nav-link {
+  text-decoration: none;
+  margin: 0 10px; /* Add space between links */
+  color: #fff; /* Link text color */
+  transition: color 0.2s; /* Smooth color transition on hover */
+
+  /* Hover effect */
+  &:hover {
+    color: #00a1e0; /* Change link color on hover */
+  }
+}
+
+/* Button Styles */
+.button {
+  /* Add your button styles here */
+}
+
+/* Adjust the size of the buttons */
+.buttonSize {
+  buttonSize: {
+    default: "h-10 px-4 py-2",
+    sm: "h-9 rounded-md px-3",
+    lg: "h-12 rounded-md px-8",
+  }
+}

@@ -137,12 +137,16 @@ export function DataTable<TData, TValue>({
       <div className="flex items-center justify-end space-x-2 py-4">
         <Button
           variant="outline"
-          size="sm"
+          buttonSize="sm"
           onClick={() => table.previousPage()}
         >
           Previous
         </Button>
-        <Button variant="outline" size="sm" onClick={() => table.nextPage()}>
+        <Button
+          variant="outline"
+          buttonSize="sm"
+          onClick={() => table.nextPage()}
+        >
           Next
         </Button>
       </div>

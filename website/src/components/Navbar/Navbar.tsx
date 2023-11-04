@@ -3,32 +3,23 @@ import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
 
 function Navbar() {
-    return (
-        <>
-            <div
-                style={{
-                    margin: "auto",
-                    width: 1600,
-                    paddingTop: "2.3rem",
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "left",
-                }}
-            >
-                <img src={logo} width={200} height={200} />
-                <Link to="/data">
-                <Button variant="outline" size="icon">
-                    Data
-                </Button>
-                </Link>
-                <Link to="/updates">
-                <Button variant="outline" size="icon">
-                    Update
-                </Button>
-                </Link>
-            </div>
-        </>
-    )
+  return (
+    <>
+      <nav className="navbar">
+        <img src={logo} alt="UCS Logo" className="logo" />
+        <Link to="/data">
+          <Button variant="outline" buttonSize="icon" textSize="lg">
+            Data
+          </Button>
+        </Link>
+        <Link to="/updates">
+          <Button variant="outline" buttonSize="icon" textSize="lg">
+            Update
+          </Button>
+        </Link>
+      </nav>
+    </>
+  );
 }
 
 export default Navbar;

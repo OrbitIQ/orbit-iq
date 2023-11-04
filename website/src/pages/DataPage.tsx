@@ -18,7 +18,7 @@ function DataPage() {
         <h1>Satellite Data</h1>
         <SatelliteTable />
         <Link to="/updates">
-          <Button variant="outline" size="icon">
+          <Button variant="outline" buttonSize="icon">
             Edit
           </Button>
         </Link>
