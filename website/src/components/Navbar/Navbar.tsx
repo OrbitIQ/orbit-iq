@@ -25,6 +25,9 @@ function Navbar() {
             <NavLink to="/updates" className={linkStyle}>
               Proposed Changes
             </NavLink>
+            <NavLink to="/changelog" className={linkStyle}>
+              Changelog
+            </NavLink>
           </div>
         </div>
       </div>
