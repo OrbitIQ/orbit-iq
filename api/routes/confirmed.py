@@ -51,9 +51,9 @@ def get_satellites():
     query = "SELECT * FROM official_satellites"
     if sort_by:
         order = 'ASC' if asc else 'DESC'
-        query += f" ORDER BY {sort_by} {order}"
+        query += f" ORDER BY {sort_by} {order}, official_name DESC"
     else:
-        query += " ORDER BY launch_date DESC"
+        query += " ORDER BY launch_date DESC, official_name DESC"
     if limit:
         query += " LIMIT %s OFFSET %s"
         cursor.execute(query, (limit, offset))
