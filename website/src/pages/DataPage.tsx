@@ -1,7 +1,7 @@
 import SatelliteTable from "../components/SatelliteTable/SatelliteTable";
 import {Switch} from "../components/ui/switch";
 import {Label} from "../components/ui/label";
-import { useEffect, useState, cloneElement} from "react";
+import {useState} from "react";
 
 //To add canEdit prop to the satellite table.
 

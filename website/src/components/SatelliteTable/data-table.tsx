@@ -30,9 +30,10 @@ import { Button } from "@/components/ui/button";
 
 import { useState, useEffect} from "react";
 import { columnVisibilityDefaults } from "@/Constants/constants";
+import Axios from "axios";
 import { Satellite } from "@/types/Satellite";
 
-
+//TODO: Move to a seperate type file
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -41,8 +42,6 @@ interface DataTableProps<TData, TValue> {
 
 /*
 Editable column stolen from: https://codesandbox.io/p/sandbox/github/tanstack/table/tree/main/examples/react/editable-data?embed=1&file=%2Fsrc%2Fmain.tsx%3A28%2C1-52%2C2
-
-Idea: We render the table with editable columns or non-editable columns based on the passed prop.
 */
 
 const defaultColumns: Partial<ColumnDef<any>> = {
@@ -86,13 +85,33 @@ const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationR
     },
     meta: {
       updateData: (rowIndex: number, columnId: number, value: any) => {
+      //TODO: Exponential backoff if the update fails?  For now just do some sort of alert
+      //TODO: The responsibility for the API call shouldn't happen in the data-table component, should be the responsibility for satellite table.
+      //TODO: Fix pagination bug on clicking off of edit
         setData(old =>
           old.map((row, index) => {
             if (index === rowIndex) {
-              return {
+              const rowChange: Satellite = {
                 ...old[rowIndex]!,
                 [columnId]: value,
               }
+              let data = {
+                "data": rowChange, 
+                "update_user": "Steven Kai", 
+                "update_notes": "https://www.youtube.com/shorts/CgKcXbmkNj4?t=20&feature=share"
+              };
+
+              Axios.put(`http://localhost:8080/edit/${rowChange.official_name}`, data)
+               .then(function (response) {
+                console.log(response);
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+
+              
+              
+              return rowChange 
             }
             return row
           }))

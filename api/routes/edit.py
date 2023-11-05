@@ -35,9 +35,12 @@ def update(official_name):
     """
 
     if not request.is_json:
-        return jsonify({'error': 'Request data is not in JSON format'})
+        return jsonify({'error': 'Request data is not in JSON format'}), 400
 
     req_json = request.get_json()
+
+    if not all(key in req_json for key in ['data', 'update_user', 'update_notes']):
+        return jsonify({'error': 'Invalid request'}), 400
 
     data_dict = req_json['data']
     update_user = req_json['update_user']
@@ -48,7 +51,7 @@ def update(official_name):
     cursor = conn.cursor()
 
     # retrieve old data to be logged
-    retrieve_old_data = "SELECT * FROM official_satellites WHERE official_name = %s"
+    retrieve_old_data = "SELECT * FROM official_satellites WHERE official_name = %s" % data_dict['official_name'] 
     cursor.execute(retrieve_old_data, (official_name,))
     old_data = cursor.fetchone()
     # If the satellite is not found, return a 404 error
