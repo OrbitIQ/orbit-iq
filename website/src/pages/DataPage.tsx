@@ -7,38 +7,22 @@ import {useState} from "react";
 
 
 function DataPage() {
-
   const [canEdit, setCanEdit] = useState(false)
 
-
-
   return (
-    <>
-      <div
-        style={{
-          margin: "auto",
-          width: 1600,
-          paddingTop: "2.3rem",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <h1>Satellite Data</h1>
-
-        <SatelliteTable isEditable={canEdit}/>
-
-        <div className="mb-5 flex items-center space-x-2">
-          <Switch id="edit-mode" onCheckedChange={() => {
-              setCanEdit(!canEdit)
-            }
-          }/>
-          <Label htmlFor="edit-mode">Edit</Label>
-        </div>        
-
-
+    <div className="flex flex-col items-center w-full max-w-7xl px-4 py-6 mx-auto sm:px-6 lg:px-8">
+      <h1 className="text-3xl font-semibold text-gray-800 mb-4">Verified Satellite Data</h1>
+      <div className="w-full overflow-x-auto">
+        <SatelliteTable isEditable={canEdit} />
       </div>
-    </>
+      <div className="mt-4">
+        <Switch id="edit-mode" onCheckedChange={() => {
+            setCanEdit(!canEdit)
+          }
+        }/>
+        <Label htmlFor="edit-mode">Edit</Label>
+      </div>
+    </div>
   );
 }
 

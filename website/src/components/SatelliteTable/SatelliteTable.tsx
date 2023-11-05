@@ -40,6 +40,7 @@ export default function SatelliteTable({isEditable}: {isEditable: boolean}) {
         const satelliteData = await Axios.get<SatelliteData>(
           confirmedSatellitesURL
         );
+        console.log(`changelog data: ${JSON.stringify(satelliteData)}`);
         setSatellites(sanitizeSatelliteDataJson(satelliteData.data));
       } catch (error) {
         alert("An error occured fetching satellite data.");
