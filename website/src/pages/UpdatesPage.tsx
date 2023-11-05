@@ -1,7 +1,7 @@
 function UpdatesPage() {
     return (
         <>
-            <h1>Updates</h1>
+            <h1>Proposed Changes</h1>
         </>
     )
 }
