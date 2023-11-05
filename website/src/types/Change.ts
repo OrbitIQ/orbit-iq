@@ -5,7 +5,6 @@ export interface ChangelogData {
 export interface Change {
     cid: string;
     update_user: string;
-    //update_action: 'INSERT' | 'UPDATE' | 'DELETE'; // Assuming these are the actions
     update_action: string;
     update_time: Date;
     update_notes: string;
