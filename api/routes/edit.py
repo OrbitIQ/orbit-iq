@@ -33,13 +33,16 @@ def update(official_name):
     Returns:
         A JSON representation of the edited satellite records
     """
-    data = request.form['data']
-    #serialize data
-    data_dict = json.loads(data)
 
-    update_user = request.form['update_user']
+    if not request.is_json:
+        return jsonify({'error': 'Request data is not in JSON format'})
+
+    req_json = request.get_json()
+
+    data_dict = req_json['data']
+    update_user = req_json['update_user']
     update_time = datetime.datetime.now()
-    update_notes = request.form['update_notes']
+    update_notes = req_json['update_notes']
 
     conn = get_db_connection()
     cursor = conn.cursor()
