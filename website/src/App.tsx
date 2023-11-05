@@ -10,15 +10,17 @@ import { Routes, Route } from "react-router-dom";
 
 function App() {
   return (
-    <>
+    <div className="app-container">
       <Navbar />
-      <Routes>
-        <Route path="/" element={<DataPage />} />
-        <Route path="/data" element={<DataPage />} />
-        <Route path="/updates" element={<UpdatesPage />} />
-        <Route path="/changelog" element={<ChangelogPage />} />
-      </Routes>
-    </>
+      <div className="content-container">
+        <Routes>
+          <Route path="/" element={<DataPage />} />
+          <Route path="/data" element={<DataPage />} />
+          <Route path="/updates" element={<UpdatesPage />} />
+          <Route path="/changelog" element={<ChangelogPage />} />
+        </Routes>
+      </div>
+    </div>
   );
 }
 
