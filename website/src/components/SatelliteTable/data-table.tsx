@@ -27,21 +27,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Button } from "@/components/ui/button";
-
-import { useState, useEffect} from "react";
+import { useState, useEffect, useRef, useCallback} from "react";
 import { columnVisibilityDefaults } from "@/Constants/constants";
 import Axios from "axios";
 import { Satellite } from "@/types/Satellite";
+import { DataTableProps } from "@/types/DataTableProps";
 
-//TODO: Move to a seperate type file
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-  isEditable: boolean;
-}
+//TODO: Have client side pagination avoid the ~2 second api call by actually using the route
+//TODO: Exponential backoff if the update fails?  For now just do some sort of alert
 
 /*
-Editable column stolen from: https://codesandbox.io/p/sandbox/github/tanstack/table/tree/main/examples/react/editable-data?embed=1&file=%2Fsrc%2Fmain.tsx%3A28%2C1-52%2C2
+  Editable column stolen from: https://codesandbox.io/p/sandbox/github/tanstack/table/tree/main/examples/react/editable-data?embed=1&file=%2Fsrc%2Fmain.tsx%3A28%2C1-52%2C2
+  As well as pagination-reset
 */
 
 const defaultColumns: Partial<ColumnDef<any>> = {
@@ -70,24 +67,40 @@ const defaultColumns: Partial<ColumnDef<any>> = {
   },
 }
 
+// Wrap a function with this to skip a pagination reset temporarily
+function useSkipper() {
+  const shouldSkipRef = useRef(true)
+  const shouldSkip = shouldSkipRef.current
+
+  const skip = useCallback(() => {
+    shouldSkipRef.current = false
+  }, [])
+
+  useEffect(() => {
+    shouldSkipRef.current = true
+  })
+
+  return [shouldSkip, skip] as const
+}
+
+
 //TODO: Add typescript types :)
 // @ts-ignore
-const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData: (value: React.SetStateAction<TData[]>) => void, defaultColumns?) => {
+const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData: (value: React.SetStateAction<TData[]>) => void, autoResetPageIndex, skipAutoResetPageIndex, defaultColumns?) => {
     return useReactTable({
     data: data,
     columns: columns,
     ...defaultColumns !== undefined && {defaultColumn: defaultColumns},
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    autoResetPageIndex,
     onColumnVisibilityChange: setColumnVisibility,
     state: {
       columnVisibility,
     },
     meta: {
       updateData: (rowIndex: number, columnId: number, value: any) => {
-      //TODO: Exponential backoff if the update fails?  For now just do some sort of alert
-      //TODO: The responsibility for the API call shouldn't happen in the data-table component, should be the responsibility for satellite table.
-      //TODO: Fix pagination bug on clicking off of edit
+        skipAutoResetPageIndex()
         setData(old =>
           old.map((row, index) => {
             if (index === rowIndex) {
@@ -95,21 +108,18 @@ const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationR
                 ...old[rowIndex]!,
                 [columnId]: value,
               }
-              let data = {
+
+              Axios.put(`http://localhost:8080/edit/${rowChange.official_name}`,{
                 "data": rowChange, 
                 "update_user": "Steven Kai", 
                 "update_notes": "https://www.youtube.com/shorts/CgKcXbmkNj4?t=20&feature=share"
-              };
-
-              Axios.put(`http://localhost:8080/edit/${rowChange.official_name}`, data)
+              })
                .then(function (response) {
                 console.log(response);
               })
               .catch(function (error) {
                 console.log(error);
               });
-
-              
               
               return rowChange 
             }
@@ -129,6 +139,8 @@ export function DataTable<TData, TValue>({
 
   const [newData, setData] = useState<TData[]>(data)  
   const [canEdit, setCanEdit] = useState(isEditable)
+  const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper()
+
 
   useEffect(() => {
     setData(data)
@@ -144,8 +156,8 @@ export function DataTable<TData, TValue>({
   );
 
   
-  const table = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData)
-  const editableTable = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, defaultColumns)
+  const table = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex)
+  const editableTable = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex, defaultColumns)
 
   const renderTableHeaders = (canEdit:boolean) => {
     const headerGroups = canEdit ? editableTable.getHeaderGroups() : table.getHeaderGroups();
