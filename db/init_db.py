@@ -229,10 +229,13 @@ if count == 0:
         
         csv_reader = csv.reader(file)
         headers = next(csv_reader)
+        official_name_index = headers.index('\ufeffCurrent Official Name of Satellite')
         launch_date_index = headers.index('Date of Launch')
         print("Inserting data into the database...")
         
         for row in csv_reader:
+            official_name = row[official_name_index].strip()
+            row[official_name_index] = official_name
             # Replace empty strings with None in the row
             row = [None if val == "" else val for val in row]
             # Convert the source_satellite column to a list of strings
@@ -261,7 +264,7 @@ if count == 0:
         
             cursor.execute("""
             INSERT INTO official_satellites (official_name, reg_country, own_country, owner_name, user_type, purposes, detailed_purpose, orbit_class, orbit_type, geo_longitude, perigee, apogee, eccentricity, inclination, period_min, mass_launch, mass_dry, power_watts, launch_date, exp_lifetime, contractor, contractor_country, launch_site, launch_vehicle, cospar, norad, comment_note, source_orbit, source_satellite) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (official_name) DO NOTHING;
             """, row[:28] + [source_satellite])
     
 print("Data inserted successfully!")

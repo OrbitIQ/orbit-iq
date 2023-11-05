@@ -3,6 +3,7 @@ from app import app
 from utils.helpers import get_db_connection
 from datetime import datetime
 import json
+import logging
 
 # This fixture will be used by the tests to send requests to the application
 
@@ -79,12 +80,12 @@ def test_update_satellite(client):
 
     # Create the 'body' dictionary with 'data', 'update_user', and 'update_notes'
     body = {
-        'data': json.dumps(data_dict),
+        'data': data_dict,
         'update_user': 'test_user',
         'update_notes': 'Test update'
     }
 
-    response = client.put('/edit/Aalto-1', data=body)
+    response = client.put(f'/edit/{official_name}', json=body)
     assert response.status_code == 200
 
 def test_get_all_satellites(client):

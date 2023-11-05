@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from utils.helpers import get_db_connection
 import datetime
 import json
+import logging
 
 # Create a Blueprint for this subpath
 edit_subpath = Blueprint('edit', __name__)
@@ -33,18 +34,26 @@ def update(official_name):
     Returns:
         A JSON representation of the edited satellite records
     """
-    data = request.form['data']
-    #serialize data
-    data_dict = json.loads(data)
 
-    update_user = request.form['update_user']
+    if not request.is_json:
+        return jsonify({'error': 'Request data is not in JSON format'}), 400
+
+    req_json = request.get_json()
+
+    if not all(key in req_json for key in ['data', 'update_user', 'update_notes']):
+        return jsonify({'error': 'Invalid request'}), 400
+
+    data_dict = req_json['data']
+    update_user = req_json['update_user']
     update_time = datetime.datetime.now()
-    update_notes = request.form['update_notes']
+    update_notes = req_json['update_notes']
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     # retrieve old data to be logged
+    print('hi')
+   
     retrieve_old_data = "SELECT * FROM official_satellites WHERE official_name = %s"
     cursor.execute(retrieve_old_data, (official_name,))
     old_data = cursor.fetchone()
