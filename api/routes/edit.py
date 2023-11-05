@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from utils.helpers import get_db_connection
 import datetime
 import json
+import logging
 
 # Create a Blueprint for this subpath
 edit_subpath = Blueprint('edit', __name__)
@@ -51,7 +52,9 @@ def update(official_name):
     cursor = conn.cursor()
 
     # retrieve old data to be logged
-    retrieve_old_data = "SELECT * FROM official_satellites WHERE official_name = %s" % data_dict['official_name'] 
+    print('hi')
+   
+    retrieve_old_data = "SELECT * FROM official_satellites WHERE official_name = %s"
     cursor.execute(retrieve_old_data, (official_name,))
     old_data = cursor.fetchone()
     # If the satellite is not found, return a 404 error
