@@ -17,6 +17,9 @@ function Navbar() {
             Update
           </Button>
         </Link>
+        <Link to="/changelog">
+            <Button variant="outline" buttonSize="icon">Changelog</Button>
+        </Link>
       </nav>
     </>
   );
