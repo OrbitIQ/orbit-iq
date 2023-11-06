@@ -54,7 +54,7 @@ export default function ChangelogTable() {
 
   return (
     <div className="container mx-auto py-10">
-      <DataTable columns={changelogColumns} data={changelog.satellites} />
+      <DataTable columns={changelogColumns} data={changelog.satellites} isEditable={false} />
     </div>
   );
 }
