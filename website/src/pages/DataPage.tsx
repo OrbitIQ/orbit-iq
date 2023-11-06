@@ -1,10 +1,7 @@
 import SatelliteTable from "../components/SatelliteTable/SatelliteTable";
-import {Switch} from "../components/ui/switch";
-import {Label} from "../components/ui/label";
-import {useState} from "react";
-
-//To add canEdit prop to the satellite table.
-
+import { Switch } from "../components/ui/switch";
+import { Label } from "../components/ui/label";
+import { useState } from "react";
 
 function DataPage() {
   const [canEdit, setCanEdit] = useState(false)
@@ -15,12 +12,12 @@ function DataPage() {
       <div className="w-full overflow-x-auto">
         <SatelliteTable isEditable={canEdit} />
       </div>
-      <div className="mt-4">
-        <Switch id="edit-mode" onCheckedChange={() => {
-            setCanEdit(!canEdit)
-          }
-        }/>
-        <Label htmlFor="edit-mode">Edit</Label>
+      <div className="flex items-center mt-4">
+        {/* Wrap Switch and Label in a flex container to align them vertically */}
+        <div className="flex items-center">
+          <Switch id="edit-mode" onCheckedChange={() => setCanEdit(!canEdit)} />
+          <Label htmlFor="edit-mode" className="ml-2">Edit</Label> {/* Add margin-left to Label for spacing */}
+        </div>
       </div>
     </div>
   );
