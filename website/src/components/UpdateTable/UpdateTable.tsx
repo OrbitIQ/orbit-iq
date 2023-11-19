@@ -1,11 +1,11 @@
-import { satelliteColumns } from "./columns";
-import { DataTable } from "./data-table";
+import { DataTable } from "../SatelliteTable/data-table";
 import Axios from "axios";
 import { useEffect, useState } from "react";
-import { SatelliteData } from "../../types/Satellite";
-import { confirmedSatellitesURL } from "@/Constants/constants";
+import { proposedChangeURL } from "@/Constants/constants";
+import { UpdateData } from "@/types/Update";
+import { UpdateColumns } from "./columns";
 
-const sanitizeSatelliteDataJson = (data: SatelliteData): SatelliteData => {
+const sanitizeSatelliteDataJson = (data: UpdateData): UpdateData => {
   data.satellites.forEach((satellite) => {
     satellite.source_satellite = sanitizeSourceSatellite(
       satellite.source_satellite
@@ -28,26 +28,21 @@ const sanitizeSourceSatellite = (
   });
 };
 
-export default function SatelliteTable({
-  isEditable,
-}: {
-  isEditable: boolean;
-}) {
-  const [satellites, setSatellites] = useState<SatelliteData>({
+export default function UpdateTable() {
+  const [update, setUpdate] = useState<UpdateData>({
     satellites: [],
   });
 
   useEffect(() => {
     const getData = async () => {
       try {
-        const satelliteData = await Axios.get<SatelliteData>(
-          confirmedSatellitesURL
-        );
-        console.log(`changelog data: ${JSON.stringify(satelliteData)}`);
-        setSatellites(sanitizeSatelliteDataJson(satelliteData.data));
+        const updateData = await Axios.get<UpdateData>(proposedChangeURL);
+        const updateDataTest = await Axios.get<any>(proposedChangeURL);
+        console.log(`update data: ${JSON.stringify(updateDataTest)}`);
+        setUpdate(sanitizeSatelliteDataJson(updateData.data));
       } catch (error) {
-        alert("An error occured fetching satellite data.");
-        console.error("An error occurred fetching satellite data. ", error);
+        alert("An error occured fetching update data.");
+        console.error("An error occurred fetching update data. ", error);
       }
     };
     getData();
@@ -56,9 +51,9 @@ export default function SatelliteTable({
   return (
     <div className="container mx-auto py-10">
       <DataTable
-        columns={satelliteColumns}
-        data={satellites.satellites}
-        isEditable={isEditable}
+        columns={UpdateColumns}
+        data={update.satellites}
+        isEditable={false}
       />
     </div>
   );
