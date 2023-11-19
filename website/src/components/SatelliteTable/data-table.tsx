@@ -2,12 +2,13 @@
 
 import {
   ColumnDef,
+  ColumnFiltersState,
+  getFilteredRowModel,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   VisibilityState,
   useReactTable,
-  Table as table,
 } from "@tanstack/react-table";
 
 import {
@@ -33,8 +34,9 @@ import Axios from "axios";
 import { Satellite } from "@/types/Satellite";
 import { DataTableProps } from "@/types/DataTableProps";
 
+import { Input } from "@/components/ui/input";
+
 //TODO: Have client side pagination avoid the ~2 second api call by actually using the route
-//TODO: Exponential backoff if the update fails?  For now just do some sort of alert
 
 /*
   Editable column stolen from: https://codesandbox.io/p/sandbox/github/tanstack/table/tree/main/examples/react/editable-data?embed=1&file=%2Fsrc%2Fmain.tsx%3A28%2C1-52%2C2
@@ -49,6 +51,7 @@ const defaultColumns: Partial<ColumnDef<any>> = {
 
     // When the input is blurred, we'll call our table meta's updateData function
     const onBlur = () => {
+      // @ts-ignore
       table.options.meta?.updateData(index, id, value)
     }
 
@@ -86,7 +89,7 @@ function useSkipper() {
 
 //TODO: Add typescript types :)
 // @ts-ignore
-const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData: (value: React.SetStateAction<TData[]>) => void, autoResetPageIndex, skipAutoResetPageIndex, defaultColumns?) => {
+const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData: (value: React.SetStateAction<TData[]>) => void, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, defaultColumns?) => {
     return useReactTable({
     data: data,
     columns: columns,
@@ -95,8 +98,11 @@ const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationR
     getPaginationRowModel: getPaginationRowModel(),
     autoResetPageIndex,
     onColumnVisibilityChange: setColumnVisibility,
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
     state: {
       columnVisibility,
+      columnFilters
     },
     meta: {
       updateData: (rowIndex: number, columnId: number, value: any) => {
@@ -139,6 +145,9 @@ export function DataTable<TData, TValue>({
 
   const [newData, setData] = useState<TData[]>(data)  
   const [canEdit, setCanEdit] = useState(isEditable)
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
+    []
+  )
   const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper()
 
 
@@ -156,8 +165,8 @@ export function DataTable<TData, TValue>({
   );
 
   
-  const table = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex)
-  const editableTable = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex, defaultColumns)
+  const table = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters)
+  const editableTable = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, defaultColumns)
 
   const renderTableHeaders = (canEdit:boolean) => {
     const headerGroups = canEdit ? editableTable.getHeaderGroups() : table.getHeaderGroups();
@@ -197,6 +206,18 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
+
+      <div className="flex items-center py-4">
+        <Input
+          placeholder="Filter official names..."
+          value={(table.getColumn("official_name")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("official_name")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+      </div>
+
       <div className="flex items-center py-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
