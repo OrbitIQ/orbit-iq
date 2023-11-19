@@ -30,7 +30,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef, useCallback} from "react";
 import { columnVisibilityDefaults } from "@/Constants/constants";
-import Axios from "axios";
 import { Satellite } from "@/types/Satellite";
 import { DataTableProps } from "@/types/DataTableProps";
 
@@ -89,7 +88,7 @@ function useSkipper() {
 
 //TODO: Add typescript types :)
 // @ts-ignore
-const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData: (value: React.SetStateAction<TData[]>) => void, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, defaultColumns?) => {
+const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData: (value: React.SetStateAction<TData[]>) => void, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, defaultColumns?, changedData?, setChangedData?: React.Dispatch<React.SetStateAction<TData[]>>) => {
     return useReactTable({
     data: data,
     columns: columns,
@@ -115,17 +114,10 @@ const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationR
                 [columnId]: value,
               }
 
-              Axios.put(`http://localhost:8080/edit/${rowChange.official_name}`,{
-                "data": rowChange, 
-                "update_user": "Steven Kai", 
-                "update_notes": "https://www.youtube.com/shorts/CgKcXbmkNj4?t=20&feature=share"
-              })
-               .then(function (response) {
-                console.log(response);
-              })
-              .catch(function (error) {
-                console.log(error);
-              });
+              // add rowChange to changedData, hacky way to do this but it works
+              if (setChangedData !== undefined){
+                setChangedData((oldData) => [...oldData, rowChange]);
+              }
               
               return rowChange 
             }
@@ -140,7 +132,8 @@ const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationR
 export function DataTable<TData, TValue>({
   columns,
   data,
-  isEditable
+  isEditable,
+  onChangedData,
 }: DataTableProps<TData, TValue>) {
 
   const [newData, setData] = useState<TData[]>(data)  
@@ -150,6 +143,8 @@ export function DataTable<TData, TValue>({
   )
   const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper()
 
+  // we will keep track of a list of changed data
+  const [changedData, setChangedData] = useState<TData[]>([])
 
   useEffect(() => {
     setData(data)
@@ -160,13 +155,19 @@ export function DataTable<TData, TValue>({
   }, [isEditable])
 
 
+  useEffect(() => {
+    // Invoke the callback function with the updated changedData
+    onChangedData(changedData);
+  }, [changedData, onChangedData]);
+
+
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     columnVisibilityDefaults
   );
 
   
   const table = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters)
-  const editableTable = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, defaultColumns)
+  const editableTable = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, defaultColumns, changedData, setChangedData)
 
   const renderTableHeaders = (canEdit:boolean) => {
     const headerGroups = canEdit ? editableTable.getHeaderGroups() : table.getHeaderGroups();
