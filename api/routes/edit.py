@@ -149,46 +149,7 @@ def get_all():
 
     return jsonify({'satellites': satellites_as_dict}), 200
 
-
-@edit_subpath.route('/history/export', methods=['GET'])
-def export_history_to_excel():
-    """
-    Export all records from the official_satellites_changelog table to an Excel file.
-
-    Returns:
-        An Excel file containing the changelog data.
-    """
-    # Connect to the database
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    # Fetch data from the changelog table
-    cursor.execute("SELECT * FROM official_satellites_changelog")
-    records = cursor.fetchall()
-
-    # Create a new Excel workbook and select the active worksheet
-    wb = Workbook()
-    ws = wb.active
-
-    # Assuming the first row of records contains the column headers
-    if records:
-        ws.append(records[0]._fields)  # Column headers
-        for record in records:
-            ws.append(record)  # Each row of data
-
-    # Save the workbook to a BytesIO object
-    excel_file = BytesIO()
-    wb.save(excel_file)
-    excel_file.seek(0)
-
-    # Close the database connection
-    cursor.close()
-    conn.close()
-
-    # Return the Excel file as a downloadable response
-    return send_file(excel_file, as_attachment=True, attachment_filename='changelog.xlsx', mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-
-
+#TODO: choose an approriate one from export to csv/excel
 @edit_subpath.route('/history/export/csv', methods=['GET'])
 def export_history_to_csv():
     """
@@ -197,15 +158,13 @@ def export_history_to_csv():
     Returns:
         A CSV file containing the changelog data.
     """
-    # Connect to the database
     conn = get_db_connection()
     cursor = conn.cursor()
-
-    # Fetch data from the changelog table
+  # The SQL query to retrieve all satellites
     cursor.execute("SELECT * FROM official_satellites_changelog")
     records = cursor.fetchall()
 
-    # Define a function to generate CSV data
+    # Generate CSV data
     def generate():
         data = StringIO()
         writer = csv.writer(data)
@@ -226,7 +185,6 @@ def export_history_to_csv():
             data.seek(0)
             data.truncate(0)
 
-    # Close the database connection
     cursor.close()
     conn.close()
 

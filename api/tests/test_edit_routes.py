@@ -2,8 +2,11 @@ import pytest
 from app import app
 from utils.helpers import get_db_connection
 from datetime import datetime
-import json
-import logging
+import csv
+from io import StringIO
+from sqlalchemy import text
+from utils.helpers import SessionLocal
+
 
 # This fixture will be used by the tests to send requests to the application
 
@@ -93,3 +96,31 @@ def test_get_all_satellites(client):
     response = client.get('/edit/history')
     assert response.status_code == 200
     assert isinstance(response.json['satellites'], list)
+
+
+def test_export_history_to_csv(client):
+    # Test exporting changelog to CSV
+    response = client.get('/edit/history/export/csv')
+    assert response.status_code == 200
+    assert response.content_type == 'text/csv'
+
+    csv_data = response.data.decode('utf-8').splitlines()
+    reader = csv.reader(StringIO('\n'.join(csv_data)))
+    rows = [row for row in reader]
+    header, *rows = rows
+
+    # Fetch data
+    session = SessionLocal()
+    try:
+        result = session.execute(text("SELECT * FROM official_satellites_changelog"))
+        db_rows = result.fetchall()
+        db_header = result.keys()
+
+        # Compare the headers and rows
+        assert header == db_header
+        for csv_row, db_row in zip(rows, db_rows):
+            db_row_str = [str(item) if item is not None else '' for item in db_row]
+            assert csv_row == db_row_str
+
+    finally:
+        session.close()
