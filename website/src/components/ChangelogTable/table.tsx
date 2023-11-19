@@ -8,7 +8,7 @@ import { changelogColumns } from "./columns";
 const sanitizeSatelliteDataJson = (data: ChangelogData): ChangelogData => {
   data.satellites.forEach((satellite) => {
     satellite.source_satellite = sanitizeSourceSatellite(
-        satellite.source_satellite
+      satellite.source_satellite
     );
 
     //This needs to be fixed, guessing any of these columns can be null at any given point.
@@ -36,12 +36,8 @@ export default function ChangelogTable() {
   useEffect(() => {
     const getData = async () => {
       try {
-        const changelogData = await Axios.get<ChangelogData>(
-          editHistoryURL
-        );
-        const changelogDataTest = await Axios.get<any>(
-            editHistoryURL
-        );
+        const changelogData = await Axios.get<ChangelogData>(editHistoryURL);
+        const changelogDataTest = await Axios.get<any>(editHistoryURL);
         console.log(`changelog data: ${JSON.stringify(changelogDataTest)}`);
         setChangelog(sanitizeSatelliteDataJson(changelogData.data));
       } catch (error) {
@@ -54,7 +50,11 @@ export default function ChangelogTable() {
 
   return (
     <div className="container mx-auto py-10">
-      <DataTable columns={changelogColumns} data={changelog.satellites} isEditable={false} />
+      <DataTable
+        columns={changelogColumns}
+        data={changelog.satellites}
+        isEditable={false}
+      />
     </div>
   );
 }
