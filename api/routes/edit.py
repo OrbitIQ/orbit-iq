@@ -155,8 +155,14 @@ def export_history_to_csv():
     """
     Export all records from the official_satellites_changelog table to a CSV file.
 
+    Parameters:
+        - None
+
     Returns:
         A CSV file containing the changelog data.
+
+    Example Usage:
+        GET /edit/history/csv
     """
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -195,4 +201,61 @@ def export_history_to_csv():
     }
     return Response(generate(), headers=headers)
 
+@edit_subpath.route('/history/export/xlsx', methods=['GET'])
+def export_history_to_excel():
+    """
+    Export all records from the official_satellites_changelog table to an Excel file.
+
+    Parameters:
+        - None
+
+    Returns:
+        An Excel file containing the changelog data.
     
+    Example Usage:
+        GET /edit/history/xlsx
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # The SQL query to retrieve all satellites
+    cursor.execute("SELECT * FROM official_satellites_changelog")
+    records = cursor.fetchall()
+
+    # A new Excel workbook and the active worksheet
+    wb = Workbook()
+    ws = wb.active
+
+   # Using cursor.description to get column headers
+    if cursor.description:
+        column_headers = [desc[0] for desc in cursor.description]
+        ws.append(column_headers)  # Append the column headers to the worksheet
+
+    # Append each record as a new row in the worksheet
+    for record in records:
+        processed_record = []
+        for item in record:
+            if isinstance(item, list):
+                # Convert lists to JSON strings
+                processed_record.append(json.dumps(item))
+            elif isinstance(item, datetime.datetime):
+                # Format datetime objects to 'YYYY-MM-DD'
+                processed_record.append(item.strftime('%Y/%m/%d'))
+            else:
+                processed_record.append(str(item) if item is not None else '')
+        ws.append(processed_record)
+
+    # Save the workbook 
+    excel_file = BytesIO()
+    wb.save(excel_file)
+    excel_file.seek(0)
+
+    cursor.close()
+    conn.close()
+
+    return send_file(
+                excel_file, 
+                as_attachment=True, 
+                download_name='changelog.xlsx', 
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
