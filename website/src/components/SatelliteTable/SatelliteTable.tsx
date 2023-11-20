@@ -1,58 +1,42 @@
 import { satelliteColumns } from "./columns";
 import { DataTable } from "./data-table";
-import Axios from "axios";
-import { useEffect, useState } from "react";
-import { SatelliteData } from "../../types/Satellite";
-import { confirmedSatellitesURL } from "@/Constants/constants";
+import {useQuery} from "@tanstack/react-query";
+import fetchSatelliteData from "./fetchSatelliteData";
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
 
-const sanitizeSatelliteDataJson = (data: SatelliteData): SatelliteData => {
-  data.satellites.forEach((satellite) => {
-    satellite.source_satellite = sanitizeSourceSatellite(
-      satellite.source_satellite
-    );
-
-    //This needs to be fixed, guessing any of these columns can be null at any given point.
-    if (satellite.mass_dry == null) satellite.mass_dry = "N/A";
-    if (satellite.power_watts == null) satellite.power_watts = "N/A";
-    if (satellite.source_orbit == null) satellite.power_watts = "N/A";
-  });
-
-  return data;
-};
-
-const sanitizeSourceSatellite = (
-  source_satellite: Array<null | string>
-): Array<null | string> => {
-  return source_satellite.filter((str) => {
-    return str !== null;
-  });
-};
 
 
 export default function SatelliteTable({ isEditable, handleChangedData }: { isEditable: boolean; handleChangedData: any }) {
-  const [satellites, setSatellites] = useState<SatelliteData>({
-    satellites: [],
-  });
+  const query = useQuery({ queryKey: ['satellite-data'], queryFn: fetchSatelliteData})
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const satelliteData = await Axios.get<SatelliteData>(
-          confirmedSatellitesURL
-        );
-        console.log(`changelog data: ${JSON.stringify(satelliteData)}`);
-        setSatellites(sanitizeSatelliteDataJson(satelliteData.data));
-      } catch (error) {
-        alert("An error occured fetching satellite data.");
-        console.error("An error occurred fetching satellite data. ", error);
-      }
-    };
-    getData();
-  }, []);
-
+  if(query.isLoading){
+    return (
+      <div className="container mx-auto py-10">
+       <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center', // Horizontally center the content
+          alignItems: 'center',     // Vertically center the content
+          height: '100vh',          // Make the container take the full height of the viewport
+        }}
+      >
+          <CircularProgress />
+      </Box>
+      </div>
+    );
+  }
+  if(query.error){
+    alert("Failed to fetch query results")
+    return(
+      <>
+      </>
+    );
+  }
   return (
-    <div className="container mx-auto py-10">
-      <DataTable columns={satelliteColumns} data={satellites.satellites} isEditable={isEditable} onChangedData={handleChangedData}/>
-    </div>
+      <div className="container mx-auto py-10">
+        <DataTable columns={satelliteColumns} data={query.data?.satellites || []} isEditable={isEditable} onChangedData={handleChangedData}/>
+      </div>
   );
+
 }
