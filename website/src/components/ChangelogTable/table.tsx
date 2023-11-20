@@ -28,6 +28,10 @@ const sanitizeSourceSatellite = (
   });
 };
 
+// currently not used, but DataTable requires it
+const onChangedData = () => {
+}
+
 export default function ChangelogTable() {
   const [changelog, setChangelog] = useState<ChangelogData>({
     satellites: [],
@@ -54,7 +58,7 @@ export default function ChangelogTable() {
 
   return (
     <div className="container mx-auto py-10">
-      <DataTable columns={changelogColumns} data={changelog.satellites} isEditable={false} />
+      <DataTable columns={changelogColumns} data={changelog.satellites} isEditable={false} onChangedData={onChangedData} />
     </div>
   );
 }

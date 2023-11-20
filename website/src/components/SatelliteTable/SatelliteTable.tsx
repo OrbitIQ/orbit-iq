@@ -29,7 +29,7 @@ const sanitizeSourceSatellite = (
 };
 
 
-export default function SatelliteTable({isEditable}: {isEditable: boolean}) {
+export default function SatelliteTable({ isEditable, handleChangedData }: { isEditable: boolean; handleChangedData: any }) {
   const [satellites, setSatellites] = useState<SatelliteData>({
     satellites: [],
   });
@@ -52,7 +52,7 @@ export default function SatelliteTable({isEditable}: {isEditable: boolean}) {
 
   return (
     <div className="container mx-auto py-10">
-      <DataTable columns={satelliteColumns} data={satellites.satellites} isEditable={isEditable}/>
+      <DataTable columns={satelliteColumns} data={satellites.satellites} isEditable={isEditable} onChangedData={handleChangedData}/>
     </div>
   );
 }
