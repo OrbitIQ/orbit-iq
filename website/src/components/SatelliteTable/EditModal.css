@@ -1,80 +1,81 @@
 /* Modal Container */
 .Modal {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
-  overflow-y: auto; /* Enable vertical scrolling */
-}
-
-/* Modal Content */
-.ModalContent {
-  background-color: #fff; /* White background */
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Box shadow for a subtle lift effect */
-  max-width: 600px; /* Increased maximum width */
-  width: 100%;
-  max-height: 80vh; /* Maximum height to allow scrolling */
-  overflow-y: auto; /* Enable vertical scrolling */
-  margin: 20px; /* Add some margin */
-}
-
-/* Close button */
-.CloseButton {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  cursor: pointer;
-  font-size: 18px;
-}
-
-/* Input and Label */
-.InputContainer {
-  margin-bottom: 15px;
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-input {
-  width: calc(100% - 16px); /* Adjusted width to account for padding */
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
-  margin-top: 3px;
-}
-
-/* Save and Cancel Buttons */
-.ButtonContainer {
-  display: flex;
-  justify-content: flex-end; /* Adjusted to align buttons to the right */
-  margin-top: 15px; /* Add some top margin */
-}
-
-button {
-  padding: 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button.SaveButton {
-  background-color: #4caf50; /* Green */
-  color: white;
-  margin-right: 10px; /* Add some right margin */
-}
-
-button.CancelButton {
-  background-color: #f44336; /* Red */
-  color: white;
-}
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+    overflow-y: auto; /* Enable vertical scrolling */
+  }
+  
+  /* Modal Content */
+  .ModalContent {
+    background-color: #fff; /* White background */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Box shadow for a subtle lift effect */
+    max-width: 600px; /* Increased maximum width */
+    width: 100%;
+    max-height: 80vh; /* Maximum height to allow scrolling */
+    overflow-y: auto; /* Enable vertical scrolling */
+    margin: 20px; /* Add some margin */
+  }
+  
+  /* Close button */
+  .CloseButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 18px;
+  }
+  
+  /* Input and Label */
+  .InputContainer {
+    margin-bottom: 15px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  input {
+    width: calc(100% - 16px); /* Adjusted width to account for padding */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-top: 3px;
+  }
+  
+  /* Save and Cancel Buttons */
+  .ButtonContainer {
+    display: flex;
+    justify-content: flex-end; /* Adjusted to align buttons to the right */
+    margin-top: 15px; /* Add some top margin */
+  }
+  
+  button {
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  button.SaveButton {
+    background-color: #4caf50; /* Green */
+    color: white;
+    margin-right: 10px; /* Add some right margin */
+  }
+  
+  button.CancelButton {
+    background-color: #f44336; /* Red */
+    color: white;
+  }
+  
