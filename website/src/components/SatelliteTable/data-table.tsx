@@ -207,7 +207,6 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter official names..."
@@ -217,9 +216,6 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm"
         />
-      </div>
-
-      <div className="flex items-center py-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
