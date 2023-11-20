@@ -28,6 +28,8 @@ const sanitizeSourceSatellite = (
   });
 };
 
+const onChangedData = () => {};
+
 export default function UpdateTable() {
   const [update, setUpdate] = useState<UpdateData>({
     satellites: [],
@@ -54,6 +56,7 @@ export default function UpdateTable() {
         columns={UpdateColumns}
         data={update.satellites}
         isEditable={false}
+        onChangedData={onChangedData}
       />
     </div>
   );
