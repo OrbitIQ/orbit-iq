@@ -4,6 +4,7 @@ import psycopg2
 import logging
 
 from sources.gcat import gcat
+from sources.aerospace import aerospace
 from utils import get_db_conn
 
 def setup_sources():
@@ -16,9 +17,11 @@ def setup_sources():
             # Now add the sources, lets make sure our IDs are fixed here
 
             # 1 - GCAT - General Catalog of Artificial Space Objects
+            # 2 - Aerospace_reentry - Aerospace Reentry Data
             cur.execute("""
                 INSERT INTO sources (id, name, url, description) VALUES
-                (1, 'GCAT', 'https://planet4589.org/space/gcat/', 'General Catalog of Artificial Space Objects (GCAT)')
+                (1, 'GCAT', 'https://planet4589.org/space/gcat/', 'General Catalog of Artificial Space Objects (GCAT)'),
+                (2, 'Aerospace_reentry', 'https://aerospace.org/reentries', 'Aerospace Reentry Data')
                 ON CONFLICT DO NOTHING;
             """)
         
@@ -65,13 +68,19 @@ def main():
     logging.info("Starting crawler")
     setup_sources() # create sources table and add sources
 
-    before_count = count_crawler_dump()
+    start_count = count_crawler_dump()
 
     gcat()
 
+    after_gcat_count = count_crawler_dump()
+
+    aerospace()
+
     after_count = count_crawler_dump()
 
-    print("Added {} new records to crawler_dump".format(after_count - before_count))
+    print(f"Added {after_count - start_count} new records to crawler_dump")
+    print(f"\tGCAT: {after_gcat_count - start_count}")
+    print(f"\tAerospace Reentry: {after_count - after_gcat_count}")
 
 if __name__ == "__main__":
     main()

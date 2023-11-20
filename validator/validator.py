@@ -3,11 +3,13 @@ from psycopg2 import extras
 from proposed_change import ProposedChange, insert_proposed_change
 from utils.helpers import get_db_connection
 from mappings.gcat import from_gcat
+from mappings.aerospace import from_aerospace
 from typing import Optional
 import time
 
 source_id_to_mapper = {
-    1: from_gcat
+    1: from_gcat,
+    2: from_aerospace
 }
 
 # Needs to pull from crawler_dump table
@@ -43,7 +45,8 @@ if __name__ == "__main__":
 
     for record in records:
         proposed_change = map_to_proposed_change(record)
-         # TODO: When we get multiple sources we will need to try to combine the proposed changes together into one object then put it in insert_proposed_change
+
+        # TODO: When we get multiple sources we will need to try to combine the proposed changes together into one object then put it in insert_proposed_change
         if proposed_change is not None:
             insert_proposed_change(proposed_change, [record['id']])
 
