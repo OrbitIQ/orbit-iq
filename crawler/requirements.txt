@@ -1,2 +1,4 @@
 pandas==2.0.3
 psycopg2==2.9.9
+beautifulsoup4==4.12.2
+requests==2.31.0

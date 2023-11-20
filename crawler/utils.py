@@ -36,6 +36,6 @@ class EnhancedJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, pd.Timestamp):
             return obj.isoformat() if pd.notna(obj) else None
-        elif pd.isna(obj) or obj is pd.NaT:
+        elif pd.isna(obj) or obj is pd.NaT or pd.isnull(obj):
             return None
         return super(EnhancedJSONEncoder, self).default(obj)

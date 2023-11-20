@@ -3,6 +3,12 @@ from utils.helpers import get_db_connection
 import datetime
 import json
 import logging
+from flask import send_file
+from openpyxl import Workbook
+from io import BytesIO
+from flask import Response
+import csv
+from io import StringIO
 
 # Create a Blueprint for this subpath
 edit_subpath = Blueprint('edit', __name__)
@@ -142,3 +148,114 @@ def get_all():
     satellites_as_dict = [dict(zip(columns, row)) for row in satellites]
 
     return jsonify({'satellites': satellites_as_dict}), 200
+
+#TODO: choose an approriate one from export to csv/excel
+@edit_subpath.route('/history/export/csv', methods=['GET'])
+def export_history_to_csv():
+    """
+    Export all records from the official_satellites_changelog table to a CSV file.
+
+    Parameters:
+        - None
+
+    Returns:
+        A CSV file containing the changelog data.
+
+    Example Usage:
+        GET /edit/history/csv
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+  # The SQL query to retrieve all satellites
+    cursor.execute("SELECT * FROM official_satellites_changelog")
+    records = cursor.fetchall()
+
+    # Generate CSV data
+    def generate():
+        data = StringIO()
+        writer = csv.writer(data)
+
+        # Writing column headers
+        if records:
+            writer.writerow([desc[0] for desc in cursor.description])  # Column headers
+            data.seek(0)
+            yield data.read()
+            data.seek(0)
+            data.truncate(0)
+
+        # Writing each row of data
+        for record in records:
+            writer.writerow(record)
+            data.seek(0)
+            yield data.read()
+            data.seek(0)
+            data.truncate(0)
+
+    cursor.close()
+    conn.close()
+
+    # Return the CSV file as a downloadable response
+    headers = {
+        'Content-Disposition': 'attachment; filename=changelog.csv',
+        'Content-Type': 'text/csv'
+    }
+    return Response(generate(), headers=headers)
+
+@edit_subpath.route('/history/export/xlsx', methods=['GET'])
+def export_history_to_excel():
+    """
+    Export all records from the official_satellites_changelog table to an Excel file.
+
+    Parameters:
+        - None
+
+    Returns:
+        An Excel file containing the changelog data.
+    
+    Example Usage:
+        GET /edit/history/xlsx
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # The SQL query to retrieve all satellites
+    cursor.execute("SELECT * FROM official_satellites_changelog")
+    records = cursor.fetchall()
+
+    # A new Excel workbook and the active worksheet
+    wb = Workbook()
+    ws = wb.active
+
+   # Using cursor.description to get column headers
+    if cursor.description:
+        column_headers = [desc[0] for desc in cursor.description]
+       # print("Column Headers:", column_headers)  
+        ws.append(column_headers)  # Append the column headers to the worksheet
+
+    # Append each record as a new row in the worksheet
+    for record in records:
+        #print("Raw Record:", record) 
+        processed_record = []
+        for item in record:
+            if isinstance(item, list):
+                # Convert lists to JSON strings
+                processed_record.append(json.dumps(item))
+            else:
+                processed_record.append(str(item) if item is not None else '')
+        # print("Processed Record:", processed_record)
+        ws.append(processed_record)
+
+    # Save the workbook 
+    excel_file = BytesIO()
+    wb.save(excel_file)
+    excel_file.seek(0)
+
+    cursor.close()
+    conn.close()
+
+    return send_file(
+                excel_file, 
+                as_attachment=True, 
+                download_name='changelog.xlsx', 
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )

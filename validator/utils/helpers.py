@@ -31,3 +31,38 @@ def get_proposed_changes_columns():
             cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'proposed_changes'")
             columns = [row[0] for row in cursor.fetchall()]
     return columns
+
+def validate_norad(norad):
+    """
+    Validate a NORAD ID.
+    - NORAD ID should be a non-empty value.
+    - NORAD ID should be a number (if it's a string, it should contain only digits).
+    - NORAD ID should have exactly 5 digits.
+    """
+    # if string input convert to int if possible
+    if isinstance(norad, str):
+        try:
+            norad = int(norad)
+        except ValueError:
+            return False
+        
+    
+    if not norad:
+        return False
+    
+    if not isinstance(norad, int):
+        return False
+    
+    if 1 <= norad <= 999999999:
+        return True
+    
+    return False
+
+def get_key(data, key, default=None):
+    """
+    Get a key from a dictionary, returning a default value if the key is not present.
+    """
+    r = data.get(key, default)
+    if r is None:
+        return default
+    return r
