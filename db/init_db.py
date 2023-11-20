@@ -170,6 +170,7 @@ CREATE TABLE IF NOT EXISTS proposed_changes (
     source_orbit text,
     source_satellite text[],
     confidence_score float,
+    alternative_names text[],
     flagged boolean DEFAULT false /* if the user/validator flags the change as suspicious */
 );
 """)

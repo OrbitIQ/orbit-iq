@@ -39,6 +39,7 @@ class ProposedChange:
     is_approved: Optional[str] = field(default='pending')
     proposed_notes: Optional[str] = field(default=None)
     flagged: Optional[bool] = field(default=None)
+    alternative_names: Optional[List[str]] = field(default_factory=list)
 
 def insert_proposed_change(proposed_change: ProposedChange, used_row_ids: List[int]):
     conn = get_db_connection()
@@ -51,7 +52,7 @@ def insert_proposed_change(proposed_change: ProposedChange, used_row_ids: List[i
             inclination, period_min, mass_launch, mass_dry, power_watts, launch_date,
             exp_lifetime, contractor, contractor_country, launch_site, launch_vehicle,
             cospar, norad, comment_note, source_orbit, source_satellite, confidence_score,
-            is_approved, proposed_notes, flagged, proposed_user
+            is_approved, proposed_notes, flagged, proposed_user, alternative_names
         )
         VALUES (
             %(official_name)s, %(reg_country)s, %(own_country)s, %(owner_name)s, %(user_type)s, %(purposes)s,
@@ -59,7 +60,7 @@ def insert_proposed_change(proposed_change: ProposedChange, used_row_ids: List[i
             %(inclination)s, %(period_min)s, %(mass_launch)s, %(mass_dry)s, %(power_watts)s, %(launch_date)s,
             %(exp_lifetime)s, %(contractor)s, %(contractor_country)s, %(launch_site)s, %(launch_vehicle)s,
             %(cospar)s, %(norad)s, %(comment_note)s, %(source_orbit)s, %(source_satellite)s,
-            %(confidence_score)s, %(is_approved)s, %(proposed_notes)s, %(flagged)s, %(proposed_user)s
+            %(confidence_score)s, %(is_approved)s, %(proposed_notes)s, %(flagged)s, %(proposed_user)s, %(alternative_names)s
         )
         RETURNING id
     """

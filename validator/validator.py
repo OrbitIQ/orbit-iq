@@ -43,7 +43,8 @@ if __name__ == "__main__":
 
     for record in records:
         proposed_change = map_to_proposed_change(record)
-         # TODO: When we get multiple sources we will need to try to combine the proposed changes together into one object then put it in insert_proposed_change
+
+        # TODO: When we get multiple sources we will need to try to combine the proposed changes together into one object then put it in insert_proposed_change
         if proposed_change is not None:
             insert_proposed_change(proposed_change, [record['id']])
 
