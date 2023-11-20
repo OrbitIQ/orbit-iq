@@ -174,8 +174,8 @@ def test_export_history_to_excel(client):
         for excel_row, db_row in zip(excel_data_rows, db_rows):
             for i, (excel_item, db_item) in enumerate(zip(excel_row, db_row)):
                 # Deserialization and numeric conversion
-                print(f"Row {i}, Excel item: {excel_item}")
-                print(f"db: Row {i}, Excel item: {db_item}")
+                # print(f"Excel Row {i}, Excel item: {excel_item}")
+                # print(f"DB Row {i}, Excel item: {db_item}")
                 if excel_item is not None:
                     try:
                         excel_item = json.loads(excel_item.replace("'", '"'))

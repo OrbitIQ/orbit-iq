@@ -229,20 +229,20 @@ def export_history_to_excel():
    # Using cursor.description to get column headers
     if cursor.description:
         column_headers = [desc[0] for desc in cursor.description]
+       # print("Column Headers:", column_headers)  
         ws.append(column_headers)  # Append the column headers to the worksheet
 
     # Append each record as a new row in the worksheet
     for record in records:
+        #print("Raw Record:", record) 
         processed_record = []
         for item in record:
             if isinstance(item, list):
                 # Convert lists to JSON strings
                 processed_record.append(json.dumps(item))
-            elif isinstance(item, datetime.datetime):
-                # Format datetime objects to 'YYYY-MM-DD'
-                processed_record.append(item.strftime('%Y/%m/%d'))
             else:
                 processed_record.append(str(item) if item is not None else '')
+        # print("Processed Record:", processed_record)
         ws.append(processed_record)
 
     # Save the workbook 
