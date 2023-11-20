@@ -171,6 +171,7 @@ CREATE TABLE IF NOT EXISTS proposed_changes (
     source_satellite text[],
     confidence_score float,
     alternative_names text[],
+    action VARCHAR(10) DEFAULT 'update' /* can be 'update' or 'delete' at the moment */,
     flagged boolean DEFAULT false /* if the user/validator flags the change as suspicious */
 );
 """)

@@ -3,11 +3,13 @@ from psycopg2 import extras
 from proposed_change import ProposedChange, insert_proposed_change
 from utils.helpers import get_db_connection
 from mappings.gcat import from_gcat
+from mappings.aerospace import from_aerospace
 from typing import Optional
 import time
 
 source_id_to_mapper = {
-    1: from_gcat
+    1: from_gcat,
+    2: from_aerospace
 }
 
 # Needs to pull from crawler_dump table
