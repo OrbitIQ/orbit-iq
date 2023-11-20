@@ -10,7 +10,7 @@ function DataPage() {
   const [canEdit, setCanEdit] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [updateData, setUpdateData] = useState({});
-  
+
   const handleEditClick = () => {
     // Open the modal
     setIsEditModalOpen(true);
@@ -41,6 +41,7 @@ function DataPage() {
     alert("Data saved.");
     // Close the modal
     setIsEditModalOpen(false);
+    setCanEdit(false);
   };
 
   const handleChangedData = (changedData: any) => {
@@ -57,7 +58,7 @@ function DataPage() {
       <div className="flex items-center mt-4">
         {/* Wrap Switch and Label in a flex container to align them vertically */}
         <div className="flex items-center">
-          <Switch id="edit-mode" onCheckedChange={() => setCanEdit(!canEdit)} />
+          <Switch id="edit-mode" checked={canEdit} onCheckedChange={() => setCanEdit(!canEdit)} />
           <Label htmlFor="edit-mode" className="ml-2">Edit</Label> {/* Add margin-left to Label for spacing */}
       </div>
       </div>
