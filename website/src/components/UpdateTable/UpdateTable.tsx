@@ -6,14 +6,16 @@ import { UpdateData } from "@/types/Update";
 import { UpdateColumns } from "./columns";
 
 const sanitizeSatelliteDataJson = (data: UpdateData): UpdateData => {
-  data.satellites.forEach((satellite) => {
-    satellite.source_satellite = sanitizeSourceSatellite(
-      satellite.source_satellite
+  console.log(data.proposed_changes);
+  data.proposed_changes.forEach((proposed_changes) => {
+    proposed_changes.source_satellite = sanitizeSourceSatellite(
+      proposed_changes.source_satellite
     );
-
-    if (satellite.mass_dry == null) satellite.mass_dry = "N/A";
-    if (satellite.power_watts == null) satellite.power_watts = "N/A";
-    if (satellite.source_orbit == null) satellite.power_watts = "N/A";
+    if (proposed_changes.mass_dry == null) proposed_changes.mass_dry = "N/A";
+    if (proposed_changes.power_watts == null)
+      proposed_changes.power_watts = "N/A";
+    if (proposed_changes.source_orbit == null)
+      proposed_changes.power_watts = "N/A";
   });
   return data;
 };
@@ -30,7 +32,7 @@ const onChangedData = () => {};
 
 export default function UpdateTable() {
   const [update, setUpdate] = useState<UpdateData>({
-    satellites: [],
+    proposed_changes: [],
   });
 
   useEffect(() => {
@@ -39,6 +41,8 @@ export default function UpdateTable() {
         const updateData = await Axios.get<UpdateData>(proposedChangeURL);
         const updateDataTest = await Axios.get<any>(proposedChangeURL);
         console.log(`update data: ${JSON.stringify(updateDataTest)}`);
+        console.log(`update data: ${JSON.stringify(updateData)}`);
+        sanitizeSatelliteDataJson(updateData.data);
         setUpdate(sanitizeSatelliteDataJson(updateData.data));
       } catch (error) {
         alert("An error occured fetching update data.");
@@ -52,7 +56,7 @@ export default function UpdateTable() {
     <div className="container mx-auto py-10">
       <DataTable
         columns={UpdateColumns}
-        data={update.satellites}
+        data={update.proposed_changes}
         isEditable={false}
         onChangedData={onChangedData}
       />

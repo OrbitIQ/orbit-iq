@@ -1,5 +1,5 @@
 export interface UpdateData {
-    satellites: Update[];
+    proposed_changes: Update[];
 }
 
 export interface Update {
