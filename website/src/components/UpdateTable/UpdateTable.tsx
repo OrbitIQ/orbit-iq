@@ -58,7 +58,7 @@ export default function UpdateTable() {
   const handleApprove:HandleChangeFunction = async (rowId: number) => {
     try {
       const response = await Axios.put(
-        `http://localhost:8080//proposed/approve/changes/${rowId}`
+        `${proposedChangeURL}/approve/${rowId}`
       );
       if (response.status === 200) {
         console.log("Approved:", response.data.id);
@@ -73,7 +73,7 @@ export default function UpdateTable() {
   const handleDeny:HandleChangeFunction = async (rowId: number) => {
     try {
       const response = await Axios.put(
-        `http://localhost:8080//proposed/deny/changes/${rowId}`
+        `${proposedChangeURL}/deny/${rowId}`
       );
       if (response.status === 200) {
         console.log("Denied:", response.data.id);
