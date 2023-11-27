@@ -58,11 +58,19 @@ export default function UpdateTable() {
   const handleApprove:HandleChangeFunction = async (rowId: number) => {
     try {
       const response = await Axios.put(
-        `http://localhost:8080/proposed/changes/approve/${rowId}`
+        `${proposedChangeURL}/approve/${rowId}`
       );
       if (response.status === 200) {
         console.log("Approved:", response.data.id);
-        // TODO: do more interaction
+        setUpdate(prevState => ({
+          ...prevState,
+          proposed_changes: prevState.proposed_changes.map(item => {
+            if (item.id === rowId) {
+              return { ...item, is_approved: "approved" };
+            }
+            return item;
+          })
+        }));
       }
     } catch (error) {
       console.error("Error approving:", error);
@@ -73,11 +81,19 @@ export default function UpdateTable() {
   const handleDeny:HandleChangeFunction = async (rowId: number) => {
     try {
       const response = await Axios.put(
-        `http://localhost:8080/proposed/changes/deny/${rowId}`
+        `${proposedChangeURL}/deny/${rowId}`
       );
       if (response.status === 200) {
         console.log("Denied:", response.data.id);
-        // TODO: do more interaction
+        setUpdate(prevState => ({
+          ...prevState,
+          proposed_changes: prevState.proposed_changes.map(item => {
+            if (item.id === rowId) {
+              return { ...item, is_approved: "denied" };
+            }
+            return item;
+          })
+        }));
       }
     } catch (error) {
       console.error("Error denying:", error);
