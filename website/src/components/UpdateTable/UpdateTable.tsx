@@ -3,10 +3,9 @@ import Axios from "axios";
 import { useEffect, useState } from "react";
 import { proposedChangeURL } from "@/Constants/constants";
 import { UpdateData } from "@/types/Update";
-import { UpdateColumns } from "./columns";
+import  UpdateColumns from "./columns";
 
 const sanitizeSatelliteDataJson = (data: UpdateData): UpdateData => {
-  console.log(data.proposed_changes);
   data.proposed_changes.forEach((proposed_changes) => {
     proposed_changes.source_satellite = sanitizeSourceSatellite(
       proposed_changes.source_satellite
@@ -52,10 +51,38 @@ export default function UpdateTable() {
     getData();
   }, []);
 
+  const handleApprove = async (rowId) => {
+    try {
+      const response = await Axios.put(`/proposed/approve/changes/${rowId}`);
+      if (response.status === 200) {
+        console.log('Approved:', response.data.id);
+        // TODO: do more interaction
+      }
+    } catch (error) {
+      console.error('Error approving:', error);
+      // TODO: do more interaction
+    }
+  };
+  
+  const handleDeny = async (rowId) => {
+    try {
+      const response = await Axios.put(`/proposed/deny/changes/${rowId}`);
+      if (response.status === 200) {
+        console.log('Denied:', response.data.id);
+        // TODO: do more interaction
+      }
+    } catch (error) {
+      console.error('Error denying:', error);
+      // TODO: do more interaction
+    }
+  };
+
+  
+
   return (
     <div className="container mx-auto py-10">
       <DataTable
-        columns={UpdateColumns}
+        columns={UpdateColumns({ handleApprove, handleDeny })}
         data={update.proposed_changes}
         isEditable={false}
         onChangedData={onChangedData}
