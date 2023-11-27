@@ -3,7 +3,7 @@ import Axios from "axios";
 import { useEffect, useState } from "react";
 import { proposedChangeURL } from "@/Constants/constants";
 import { UpdateData } from "@/types/Update";
-import  UpdateColumns from "./columns";
+import UpdateColumns from "./columns";
 
 const sanitizeSatelliteDataJson = (data: UpdateData): UpdateData => {
   data.proposed_changes.forEach((proposed_changes) => {
@@ -57,38 +57,33 @@ export default function UpdateTable() {
 
   const handleApprove:HandleChangeFunction = async (rowId: number) => {
     try {
-      const response = await Axios.put(`${proposedChangeURL}/${rowId}`);
+      const response = await Axios.put(
+        `http://localhost:8080//proposed/approve/changes/${rowId}`
+      );
       if (response.status === 200) {
-        console.log('Approved:', response.data.id);
-        refreshData();
+        console.log("Approved:", response.data.id);
+        // TODO: do more interaction
       }
     } catch (error) {
-      console.error('Error approving:', error);
-    }
-  };
-  
-  const handleDeny:HandleChangeFunction = async (rowId: number) => {
-    try {
-      const response = await Axios.put(`${proposedChangeURL}/${rowId}`);
-      console.log(`update data: ${rowId}`);
-      if (response.status === 200) {
-        console.log('Denied:', response.data.id);
-        refreshData();
-      }
-    } catch (error) {
-      console.error('Error denying:', error)
+      console.error("Error approving:", error);
+      // TODO: do more interaction
     }
   };
 
-  const refreshData = async () => {
+  const handleDeny = async (rowId) => {
     try {
-      const updateData = await Axios.get<UpdateData>(proposedChangeURL);
-      setUpdate(sanitizeSatelliteDataJson(updateData.data));
+      const response = await Axios.put(
+        `http://localhost:8080//proposed/deny/changes/${rowId}`
+      );
+      if (response.status === 200) {
+        console.log("Denied:", response.data.id);
+        // TODO: do more interaction
+      }
     } catch (error) {
-      console.error("An error occurred fetching update data. ", error);
-      alert("An error occurred refreshing the data.");
+      console.error("Error denying:", error);
+      // TODO: do more interaction
     }
-  }; 
+  };
 
   return (
     <div className="container mx-auto py-10">

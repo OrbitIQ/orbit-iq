@@ -15,7 +15,7 @@ const UpdateColumns = ({ handleApprove, handleDeny }: UpdateColumnsProps): Colum
       if (column.id === 'approve' || column.id === 'deny') {
         return {
           ...column,
-          accessorFn: row => row as Update, // Dummy accessor function
+          accessorFn: row => row as Update, // this is just for type compacitity
           cell: ({ row }: { row: Update }) => (
             <Button 
               variant={column.id === 'approve' ? 'success' : 'destructive'}
@@ -28,7 +28,7 @@ const UpdateColumns = ({ handleApprove, handleDeny }: UpdateColumnsProps): Colum
       }
       return {
           ...column,
-          accessorFn: row => row[column.accessorKey as keyof Update], // Assuming column.accessorKey exists and is valid
+          accessorFn: row => row[column.accessorKey], 
       };
     });
   };
