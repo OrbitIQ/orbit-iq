@@ -1,3 +1,6 @@
+import { Button, buttonVariants } from 'website/src/components/ui/button';
+
+
 /**React Table Columns**/
 
 //https://www.material-react-table.com/docs/guides/column-hiding
@@ -395,6 +398,14 @@ export const updateColumns = [
     accessorKey: "user_type",
     header: "User Type",
   },
+  {
+    id: 'approve',
+    header: 'Approve',
+  },
+  {
+    id: 'deny',
+    header: 'Deny',
+  }
 ];
 
 //Default visible columns 😈 
