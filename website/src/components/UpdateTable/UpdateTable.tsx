@@ -3,7 +3,7 @@ import Axios from "axios";
 import { useEffect, useState } from "react";
 import { proposedChangeURL } from "@/Constants/constants";
 import { UpdateData } from "@/types/Update";
-import  UpdateColumns from "./columns";
+import UpdateColumns from "./columns";
 
 const sanitizeSatelliteDataJson = (data: UpdateData): UpdateData => {
   data.proposed_changes.forEach((proposed_changes) => {
@@ -53,31 +53,33 @@ export default function UpdateTable() {
 
   const handleApprove = async (rowId) => {
     try {
-      const response = await Axios.put(`/proposed/approve/changes/${rowId}`);
+      const response = await Axios.put(
+        `http://localhost:8080//proposed/approve/changes/${rowId}`
+      );
       if (response.status === 200) {
-        console.log('Approved:', response.data.id);
+        console.log("Approved:", response.data.id);
         // TODO: do more interaction
       }
     } catch (error) {
-      console.error('Error approving:', error);
-      // TODO: do more interaction
-    }
-  };
-  
-  const handleDeny = async (rowId) => {
-    try {
-      const response = await Axios.put(`/proposed/deny/changes/${rowId}`);
-      if (response.status === 200) {
-        console.log('Denied:', response.data.id);
-        // TODO: do more interaction
-      }
-    } catch (error) {
-      console.error('Error denying:', error);
+      console.error("Error approving:", error);
       // TODO: do more interaction
     }
   };
 
-  
+  const handleDeny = async (rowId) => {
+    try {
+      const response = await Axios.put(
+        `http://localhost:8080//proposed/deny/changes/${rowId}`
+      );
+      if (response.status === 200) {
+        console.log("Denied:", response.data.id);
+        // TODO: do more interaction
+      }
+    } catch (error) {
+      console.error("Error denying:", error);
+      // TODO: do more interaction
+    }
+  };
 
   return (
     <div className="container mx-auto py-10">
