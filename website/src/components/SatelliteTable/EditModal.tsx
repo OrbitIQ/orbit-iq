@@ -85,9 +85,9 @@ const modalStyle: ReactModal.Styles = {
     },
 };
 
-const contentStyle: React.CSSProperties = {
+//const contentStyle: React.CSSProperties = {
   // Add any additional styles for the content container here
-};
+//};
 
 const inputContainerStyle: React.CSSProperties = {
   marginBottom: '15px',

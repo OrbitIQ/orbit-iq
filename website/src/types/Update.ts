@@ -36,4 +36,5 @@ export interface Update {
     comment_note: string;
     source_orbit: string;
     source_satellite: Array<null | string>;
+    id: number;
 }

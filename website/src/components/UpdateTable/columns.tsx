@@ -3,21 +3,34 @@ import { updateColumns } from "@/Constants/constants";
 import { Update } from "@/types/Update";
 import { Button } from "@/components/ui/button";
 
-const UpdateColumns = ({ handleApprove, handleDeny }) => updateColumns.map(column => {
-    if (column.id === 'approve' || column.id === 'deny') {
-      return {
-        ...column,
-        cell: ({ row }: { row: Update }) => (
-          <Button 
-            variant={column.id === 'approve' ? 'success' : 'destructive'}
-            onClick={() => column.id === 'approve' ? handleApprove(row.id) : handleDeny(row.id)}
+type HandleChangeFunction = (rowId: number) => Promise<void>;
+
+type UpdateColumnsProps = {
+  handleApprove: HandleChangeFunction;
+  handleDeny: HandleChangeFunction;
+};
+
+const UpdateColumns = ({ handleApprove, handleDeny }: UpdateColumnsProps): ColumnDef<Update>[] => {
+    return updateColumns.map(column => {
+      if (column.id === 'approve' || column.id === 'deny') {
+        return {
+          ...column,
+          accessorFn: row => row as Update, // Dummy accessor function
+          cell: ({ row }: { row: Update }) => (
+            <Button 
+              variant={column.id === 'approve' ? 'success' : 'destructive'}
+              onClick={() => column.id === 'approve' ? handleApprove(row.id) : handleDeny(row.id)}
             >
-            {column.id.charAt(0).toUpperCase() + column.id.slice(1)}
-          </Button>
-        )
+              {column.id.charAt(0).toUpperCase() + column.id.slice(1)}
+            </Button>
+          )
+        };
+      }
+      return {
+          ...column,
+          accessorFn: row => row[column.accessorKey as keyof Update], // Assuming column.accessorKey exists and is valid
       };
-    }
-    return column;
-  });
+    });
+  };
 
 export default UpdateColumns;

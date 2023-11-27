@@ -29,6 +29,9 @@ const sanitizeSourceSatellite = (
 
 const onChangedData = () => {};
 
+// Define the type for handleApprove and handleDeny functions
+type HandleChangeFunction = (rowId: number) => Promise<void>;
+
 export default function UpdateTable() {
   const [update, setUpdate] = useState<UpdateData>({
     proposed_changes: [],
@@ -38,11 +41,12 @@ export default function UpdateTable() {
     const getData = async () => {
       try {
         const updateData = await Axios.get<UpdateData>(proposedChangeURL);
-        const updateDataTest = await Axios.get<any>(proposedChangeURL);
-        console.log(`update data: ${JSON.stringify(updateDataTest)}`);
+        //const updateDataTest = await Axios.get<any>(proposedChangeURL);
+        //console.log(`update data test: ${JSON.stringify(updateDataTest)}`);
         console.log(`update data: ${JSON.stringify(updateData)}`);
         sanitizeSatelliteDataJson(updateData.data);
         setUpdate(sanitizeSatelliteDataJson(updateData.data));
+        //console.log('Approved id:', JSON.stringify(updateData.data.id));
       } catch (error) {
         alert("An error occured fetching update data.");
         console.error("An error occurred fetching update data. ", error);
@@ -51,33 +55,40 @@ export default function UpdateTable() {
     getData();
   }, []);
 
-  const handleApprove = async (rowId) => {
+  const handleApprove:HandleChangeFunction = async (rowId: number) => {
     try {
-      const response = await Axios.put(`/proposed/approve/changes/${rowId}`);
+      const response = await Axios.put(`${proposedChangeURL}/${rowId}`);
       if (response.status === 200) {
         console.log('Approved:', response.data.id);
-        // TODO: do more interaction
+        refreshData();
       }
     } catch (error) {
       console.error('Error approving:', error);
-      // TODO: do more interaction
     }
   };
   
-  const handleDeny = async (rowId) => {
+  const handleDeny:HandleChangeFunction = async (rowId: number) => {
     try {
-      const response = await Axios.put(`/proposed/deny/changes/${rowId}`);
+      const response = await Axios.put(`${proposedChangeURL}/${rowId}`);
+      console.log(`update data: ${rowId}`);
       if (response.status === 200) {
         console.log('Denied:', response.data.id);
-        // TODO: do more interaction
+        refreshData();
       }
     } catch (error) {
-      console.error('Error denying:', error);
-      // TODO: do more interaction
+      console.error('Error denying:', error)
     }
   };
 
-  
+  const refreshData = async () => {
+    try {
+      const updateData = await Axios.get<UpdateData>(proposedChangeURL);
+      setUpdate(sanitizeSatelliteDataJson(updateData.data));
+    } catch (error) {
+      console.error("An error occurred fetching update data. ", error);
+      alert("An error occurred refreshing the data.");
+    }
+  }; 
 
   return (
     <div className="container mx-auto py-10">
