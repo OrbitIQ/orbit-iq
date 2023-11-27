@@ -3,6 +3,7 @@ export interface UpdateData {
 }
 
 export interface Update {
+    [key: string]: any;
     proposed_user: string;
     created_at: Date;
     proposed_notes: string;

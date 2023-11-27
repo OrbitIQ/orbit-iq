@@ -70,7 +70,7 @@ export default function UpdateTable() {
     }
   };
 
-  const handleDeny = async (rowId) => {
+  const handleDeny:HandleChangeFunction = async (rowId: number) => {
     try {
       const response = await Axios.put(
         `http://localhost:8080//proposed/deny/changes/${rowId}`
