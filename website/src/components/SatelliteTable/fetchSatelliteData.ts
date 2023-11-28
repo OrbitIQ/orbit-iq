@@ -26,9 +26,10 @@ const sanitizeSourceSatellite = (
   });
 };
 
-export default async function fetchSatelliteData(): Promise<SatelliteData>{
+export default async function fetchSatelliteData(page: number, pageSize: number): Promise<SatelliteData>{
+
     const satelliteData = await Axios.get<SatelliteData>(
-        confirmedSatellitesURL
+        `${confirmedSatellitesURL}?limit=${pageSize}&page=${page}`
     );
 
     const rel = sanitizeSatelliteDataJson(satelliteData.data).satellites;

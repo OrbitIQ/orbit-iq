@@ -11,7 +11,11 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-
+import {useQuery} from "@tanstack/react-query";
+import fetchSatelliteData from "./fetchSatelliteData";
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
+import ErrorIcon from '@mui/icons-material/Error';
 
 import {
   Table,
@@ -30,7 +34,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Button } from "@/components/ui/button";
-import { useState, useEffect, useRef, useCallback} from "react";
+import { useState, useEffect, useRef, useCallback, useReducer} from "react";
 import { columnVisibilityDefaults } from "@/Constants/constants";
 import { Satellite } from "@/types/Satellite";
 import { DataTableProps } from "@/types/DataTableProps";
@@ -90,21 +94,32 @@ function useSkipper() {
 
 //TODO: Add typescript types :)
 // @ts-ignore
-const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData: (value: React.SetStateAction<TData[]>) => void, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, defaultColumns?, changedData?, setChangedData?: React.Dispatch<React.SetStateAction<TData[]>>) => {
+const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData: (value: React.SetStateAction<TData[]>) => void, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, pageIndex, pageSize, defaultColumns?, changedData?, setChangedData?: React.Dispatch<React.SetStateAction<TData[]>>) => {
     return useReactTable({
     data: data,
     columns: columns,
     ...defaultColumns !== undefined && {defaultColumn: defaultColumns},
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    // getPaginationRowModel: getPaginationRowModel(),
     autoResetPageIndex,
     onColumnVisibilityChange: setColumnVisibility,
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+
+    initialState: {
+  // @ts-ignore
+      PaginationTableState: {
+        pageIndex: pageIndex,
+        pageSize: pageSize
+
+      }
+
+    },
     state: {
       columnVisibility,
-      columnFilters
+      columnFilters,
     },
+    manualPagination: true,
     meta: {
       updateData: (rowIndex: number, columnId: number, value: any) => {
         skipAutoResetPageIndex()
@@ -130,27 +145,66 @@ const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationR
   });
 };
 
-
 export function DataTable<TData, TValue>({
   columns,
-  data,
   isEditable,
   onChangedData,
 }: DataTableProps<TData, TValue>) {
 
-  const [newData, setData] = useState<TData[]>(data)  
+  //For implementation of server-side pagination.
+  const initialState = {
+    queryPageIndex: 1,
+    queryPageSize: 10,
+    totalCount: null,
+  };
+
+  const PAGE_CHANGED = 'PAGE_CHANGED';
+
+  // @ts-ignore
+  const reducer = (state, { type, payload }) => {
+    switch (type) {
+      case PAGE_CHANGED:
+        return {
+          ...state,
+          queryPageIndex: payload + 1,
+        };
+      default:
+        throw new Error(`Unhandled action type: ${type}`);
+      }
+  };
+
+
+  const [{ queryPageIndex, queryPageSize}, dispatch] =
+      useReducer(reducer, initialState);  
+
+  const { isLoading, error, data, isSuccess } = useQuery({
+      queryKey: ['satellite-data', queryPageIndex, queryPageSize],
+      queryFn: () => fetchSatelliteData(queryPageIndex, queryPageSize),
+      staleTime: Infinity,
+    // @ts-ignore
+      keepPreviousData: false
+    }
+  );
+
+  const [newData, setData] = useState<TData[]>(isSuccess ? data.satellites as TData[] : [] )  
   const [canEdit, setCanEdit] = useState(isEditable)
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
     []
   )
   const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper()
 
-  // we will keep track of a list of changed data
-  const [changedData, setChangedData] = useState<TData[]>([])
+
 
   useEffect(() => {
-    setData(data)
-  }, [data])
+    // Update newData when the API call is successful
+    if (isSuccess) {
+      setData(data.satellites as TData[]);
+    }
+  }, [isSuccess, data]);
+
+
+  // we will keep track of a list of changed data
+  const [changedData, setChangedData] = useState<TData[]>([])
 
   useEffect(() => {
     setCanEdit(isEditable)
@@ -168,8 +222,18 @@ export function DataTable<TData, TValue>({
   );
 
   
-  const table = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters)
-  const editableTable = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, defaultColumns, changedData, setChangedData)
+  const table = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, queryPageIndex, queryPageSize)
+  const editableTable = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, queryPageIndex, queryPageSize, defaultColumns, changedData, setChangedData)
+
+  // Force react-query to re-run the query when
+  //TODO: THIS USE-EFFECT CALL IS FUCKED.
+  useEffect(() => {
+    dispatch({type: PAGE_CHANGED, payload: table.getState().pagination.pageIndex})
+      }, [table.getState().pagination.pageIndex]
+    )
+
+
+
 
   const renderTableHeaders = (canEdit:boolean) => {
     const headerGroups = canEdit ? editableTable.getHeaderGroups() : table.getHeaderGroups();
@@ -207,6 +271,30 @@ export function DataTable<TData, TValue>({
     }
   };
 
+  
+  if (isLoading){
+    return (
+      <div className="container mx-auto py-10">
+       <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center', // Horizontally center the content
+          alignItems: 'center',     // Vertically center the content
+          height: '100vh',          // Make the container take the full height of the viewport
+        }}
+      >
+          <CircularProgress />
+      </Box>
+      </div>
+    );
+  }
+  if(error){
+    return(
+      <div>
+        <ErrorIcon/>        
+      </div>
+    )
+  }
   return (
     <div>
       <div className="flex items-center py-4">
@@ -245,6 +333,7 @@ export function DataTable<TData, TValue>({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -256,6 +345,8 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
+
+
       <div className="flex items-center justify-end space-x-2 py-4">
         <Button
           variant="outline"
