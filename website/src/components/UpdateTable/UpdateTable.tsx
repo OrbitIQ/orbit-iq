@@ -52,12 +52,12 @@ export default function UpdateTable() {
 
   return (
     <div className="container mx-auto py-10">
-      <DataTable
+      {/* <DataTable
         columns={UpdateColumns}
         data={update.satellites}
         isEditable={false}
         onChangedData={onChangedData}
-      />
+      /> */}
     </div>
   );
 }

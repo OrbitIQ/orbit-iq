@@ -54,12 +54,12 @@ export default function ChangelogTable() {
 
   return (
     <div className="container mx-auto py-10">
-      <DataTable
+      {/* <DataTable
         columns={changelogColumns}
         data={changelog.satellites}
         isEditable={false}
         onChangedData={onChangedData}
-      />
+      /> */}
     </div>
   );
 }

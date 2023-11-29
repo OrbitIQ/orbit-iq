@@ -15,7 +15,7 @@ import {useQuery} from "@tanstack/react-query";
 import fetchSatelliteData from "./fetchSatelliteData";
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
-import ErrorIcon from '@mui/icons-material/Error';
+// import ErrorIcon from '@mui/icons-material/Error';
 
 import {
   Table,
@@ -94,7 +94,7 @@ function useSkipper() {
 
 //TODO: Add typescript types :)
 // @ts-ignore
-const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData: (value: React.SetStateAction<TData[]>) => void, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, pageIndex, pageSize, defaultColumns?, changedData?, setChangedData?: React.Dispatch<React.SetStateAction<TData[]>>) => {
+const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData: (value: React.SetStateAction<TData[]>) => void, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, paginationSettings, setPagination, defaultColumns?, changedData?, setChangedData?: React.Dispatch<React.SetStateAction<TData[]>>) => {
     return useReactTable({
     data: data,
     columns: columns,
@@ -106,20 +106,14 @@ const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationR
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
 
-    initialState: {
-  // @ts-ignore
-      PaginationTableState: {
-        pageIndex: pageIndex,
-        pageSize: pageSize
-
-      }
-
-    },
     state: {
       columnVisibility,
       columnFilters,
+      // @ts-ignore
+      paginationSettings,
     },
     manualPagination: true,
+    onPaginationChange: setPagination,
     meta: {
       updateData: (rowIndex: number, columnId: number, value: any) => {
         skipAutoResetPageIndex()
@@ -147,39 +141,31 @@ const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationR
 
 export function DataTable<TData, TValue>({
   columns,
+  //@ts-ignore
+  pagination,
+  //@ts-ignore
+  setPagination,
   isEditable,
   onChangedData,
 }: DataTableProps<TData, TValue>) {
 
   //For implementation of server-side pagination.
-  const initialState = {
-    queryPageIndex: 1,
-    queryPageSize: 10,
-    totalCount: null,
-  };
 
-  const PAGE_CHANGED = 'PAGE_CHANGED';
+  // const [pagination, setPagination] = useState({
+  //   pageIndex: 0,
+  //   pageSize: 10, //customize the default page size
+  // });
 
-  // @ts-ignore
-  const reducer = (state, { type, payload }) => {
-    switch (type) {
-      case PAGE_CHANGED:
-        return {
-          ...state,
-          queryPageIndex: payload + 1,
-        };
-      default:
-        throw new Error(`Unhandled action type: ${type}`);
-      }
-  };
+  useEffect(() => {
+    // Update newData when the API call is successful
+    console.log(`PAGANATION CHANGED: ${pagination.pageIndex}`)
+  }, [pagination]);
 
 
-  const [{ queryPageIndex, queryPageSize}, dispatch] =
-      useReducer(reducer, initialState);  
 
   const { isLoading, error, data, isSuccess } = useQuery({
-      queryKey: ['satellite-data', queryPageIndex, queryPageSize],
-      queryFn: () => fetchSatelliteData(queryPageIndex, queryPageSize),
+      queryKey: ['satellite-data', pagination.pageIndex + 1, pagination.pageSize],
+      queryFn: () => fetchSatelliteData(pagination.pageIndex + 1, pagination.pageSize),
       staleTime: Infinity,
     // @ts-ignore
       keepPreviousData: false
@@ -222,18 +208,8 @@ export function DataTable<TData, TValue>({
   );
 
   
-  const table = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, queryPageIndex, queryPageSize)
-  const editableTable = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, queryPageIndex, queryPageSize, defaultColumns, changedData, setChangedData)
-
-  // Force react-query to re-run the query when
-  //TODO: THIS USE-EFFECT CALL IS FUCKED.
-  useEffect(() => {
-    dispatch({type: PAGE_CHANGED, payload: table.getState().pagination.pageIndex})
-      }, [table.getState().pagination.pageIndex]
-    )
-
-
-
+  const table = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, pagination, setPagination)
+  const editableTable = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, pagination, setPagination, defaultColumns, changedData,  setChangedData)
 
   const renderTableHeaders = (canEdit:boolean) => {
     const headerGroups = canEdit ? editableTable.getHeaderGroups() : table.getHeaderGroups();
@@ -291,7 +267,7 @@ export function DataTable<TData, TValue>({
   if(error){
     return(
       <div>
-        <ErrorIcon/>        
+        <h1>An error occured</h1>
       </div>
     )
   }
