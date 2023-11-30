@@ -45,7 +45,8 @@ def from_gcat(record):
     vals = get_key(data, 'AltNames', '').split(',')
     if vals is not None:
         for val in vals:
-            alt_names.append(val.strip())
+            if val.strip() != '':
+                alt_names.append(val.strip())
 
     pl_name = get_key(data, 'PLName', '').strip()
     if pl_name != '' and pl_name not in alt_names and pl_name != name:
