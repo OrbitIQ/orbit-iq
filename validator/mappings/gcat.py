@@ -1,7 +1,7 @@
 import logging
 from proposed_change import ProposedChange
 from utils.helpers import get_proposed_changes_columns, validate_norad, get_key
-
+from datetime import datetime
 
 def from_gcat(record):
     data = record[3]
@@ -39,6 +39,28 @@ def from_gcat(record):
     # TODO: We need and should find out what the State column really is and what it applies to
     # TODO: Maybe we should join State/Owner/Manufacturer against https://planet4589.org/space/gcat/web/orgs/index.html
     #       to get the full name of the country/owner/manufacturer
+
+    # alt names
+    alt_names = []
+    vals = get_key(data, 'AltNames', '').split(',')
+    if vals is not None:
+        for val in vals:
+            alt_names.append(val.strip())
+
+    pl_name = get_key(data, 'PLName', '').strip()
+    if pl_name != '' and pl_name not in alt_names and pl_name != name:
+        alt_names.append(pl_name)
+
+    status = get_key(data, 'Status', '').strip()
+    if status != "O":
+        # Status O designates in orbit, so if it's not O then it's not in orbit so we don't want it
+        return None
+        
+    # source should be in format: JMSatcat/3_23 where 3_23 is month and year
+    # need to generate it
+    source = datetime.now().strftime("JMSatcat/%m_%y")
+
+
     proposed_data = {
         'official_name': name,
         'reg_country': get_key(data, 'State', '').strip(),
@@ -63,13 +85,13 @@ def from_gcat(record):
         'contractor_country': get_key(data, 'State', '').strip(),
         # 'launch_site': '',  # Not provided in the table
         # 'launch_vehicle': '',  # Not provided in the table
-        # 'cospar': '',  # Not provided in the table
+        'cospar': get_key(data, 'Piece', '').strip(),
         'norad': norad,
         # 'comment_note': '',  # Not provided in the table
         'source_orbit': get_key(data, 'Primary', '').strip(),
-        'source_satellite': ["GCAT"],
+        'source_satellite': [source], # TODO: not sure this is same as source, we should sort of make sure the columns of official_satellite are 1:1 with UCS's satellite table
         'confidence_score': 1.0,  # Default value
-        'alternative_names': get_key(data, 'AltNames', '').split(',') if get_key(data, 'AltNames') else []
+        'alternative_names': alt_names
     }
 
 
