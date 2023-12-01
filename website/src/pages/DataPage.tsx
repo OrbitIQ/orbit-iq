@@ -1,16 +1,21 @@
 import SatelliteTable from "../components/SatelliteTable/SatelliteTable";
+import {useContext} from "react";
 import { Switch } from "../components/ui/switch";
 import { Label } from "../components/ui/label";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import EditModal from "@/components/SatelliteTable/EditModal";
 import Axios from "axios";
+import { queryClientContext } from "@/context";
 
 function DataPage() {
 
+  const cacheKey = "satellite-data"
   const [canEdit, setCanEdit] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [updateData, setUpdateData] = useState({});
+
+  const queryContext = useContext(queryClientContext);
 
   const handleEditClick = () => {
     // Open the modal
@@ -25,13 +30,17 @@ function DataPage() {
   const handleEditModalSave = (update_user: string, update_notes: string, updateData: any) => {
     console.log('Saving edited data:', update_user, update_notes, updateData);
     // Save the edited data by calling Axios API endpoint
-    updateData.forEach((rowChange: any) => {
-      Axios.put(`http://localhost:8080/edit/${rowChange.official_name}`, {
-        "data": rowChange,
+    //TODO: Update this to a mutator.
+    updateData.forEach((dataChange: any) => {
+      Axios.put(`http://localhost:8080/edit/${dataChange.rowChange.official_name}`, {
+        "data": dataChange.rowChange,
         "update_user": update_user,
         "update_notes": update_notes,
       })
         .then(function (response) {
+          //Invalidate prior query so we re-fetch.
+          console.log(`Attempting to invalidate: ${[cacheKey, dataChange.pagination.pageIndex, dataChange.pagination.pageSize].toString()}`)
+          queryContext?.queryClient.invalidateQueries({queryKey: [cacheKey, dataChange.pagination.pageIndex, dataChange.pagination.pageSize]});
           console.log(response);
         })
         .catch(function (error) {
@@ -55,7 +64,7 @@ function DataPage() {
         Verified Satellite Data
       </h1>
       <div className="w-full overflow-x-auto">
-        <SatelliteTable isEditable={canEdit} handleChangedData={handleChangedData}/>
+        <SatelliteTable isEditable={canEdit} handleChangedData={handleChangedData} cacheKey = {cacheKey}/>
       </div>
       <div className="flex items-center mt-4">
         {/* Wrap Switch and Label in a flex container to align them vertically */}
