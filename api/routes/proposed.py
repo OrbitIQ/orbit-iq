@@ -402,6 +402,20 @@ def save_all_approved_or_denied_changes():
     for row in approved_changes:
         row_dict = dict(zip(colnames, row))
 
+        # if row action is delete, we have to drop the row in the official_satellites table
+        if row_dict['action'] == 'delete':
+            cur.execute(f"""
+                DELETE FROM official_satellites WHERE official_name = %s;
+                """, (row_dict['official_name'],)
+            )
+            # we also want to note this in the change log
+            cur.execute(f"""
+                INSERT INTO official_satellites_changelog (update_user, update_action, update_time, update_notes, official_name)
+                VALUES (%s, %s, %s, %s, %s);
+                """, ('admin', 'deleted', datetime.datetime.now(), 'deleted from proposed table as the satellite is deorbiting', row_dict['official_name'])
+            )
+            continue
+
         # Convert launch_date to valid date format
         try:
             if isinstance(row_dict['launch_date'], datetime.date):
