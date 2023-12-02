@@ -1,24 +1,18 @@
 import React, { createContext, useState, useContext, useCallback } from 'react';
 import { Satellite } from "@/types/Satellite"; 
 import { Update }from "@/types/Update";
-import axios from 'axios';
-import { proposedChangeURL } from "@/Constants/constants";
 
 interface SatelliteDataContextType {
   satellites: Satellite[];
-  updates:Update[];
   setSatellites: (satellites: Satellite[]) => void;
-  setUpdates: (updates: Update[]) => void;
   addApprovedSatellite: (approvedSatellite: Satellite) => void; 
-  fetchSatellites: (id?: number) => void; 
-  shouldRefetch: boolean;
-  setShouldRefetch: (value: boolean) => void;
 }
 
 const SatelliteDataContext = createContext<SatelliteDataContextType | undefined>(undefined);
 
 export const useSatelliteData = () => {
   const context = useContext(SatelliteDataContext);
+
   if (!context) {
     throw new Error('useSatelliteData must be used within a SatelliteDataProvider');
   }
@@ -61,25 +55,13 @@ export function convertUpdateToSatellite(update: Update): Satellite {
     source_orbit: update.source_orbit,
     source_satellite: update.source_satellite,
     user_type: update.user_type,
-    // Add any other properties that need to be mapped
   };
 }
 
 
 export const SatelliteDataProvider: React.FC<SatelliteDataProviderProps> = ({ children }) => {
   const [satellites, setSatellites] = useState<Satellite[]>([]);
-  // const [shouldRefetch, setShouldRefetch] = useState(false);
-  // const [updates, setUpdates] = useState<Update[]>([]);
 
-  // const setSatellitesDebug = (newSatellites) => {
-  //   console.log("setSatellites called with:", newSatellites);
-  //   if (!Array.isArray(newSatellites)) {
-  //     console.error("Expected an array, received:", typeof newSatellites, newSatellites);
-  //   }
-  //   setSatellites(newSatellites);
-  // };
-
-  
   const addApprovedSatellite = useCallback((approvedSatellite: Satellite) => {
     console.log("Adding approved satellite:", approvedSatellite);
     console.log("Current satellites before adding:", satellites);
