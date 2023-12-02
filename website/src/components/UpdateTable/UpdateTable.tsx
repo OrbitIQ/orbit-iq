@@ -37,6 +37,7 @@ export default function UpdateTable() {
   const [update, setUpdate] = useState<UpdateData>({
     proposed_changes: [],
   });
+  const { addApprovedSatellite } = useSatelliteData(); // Call the hook at the top level
 
   useEffect(() => {
     const getData = async () => {
@@ -44,7 +45,7 @@ export default function UpdateTable() {
         const updateData = await Axios.get<UpdateData>(proposedChangeURL);
         //const updateDataTest = await Axios.get<any>(proposedChangeURL);
         //console.log(`update data test: ${JSON.stringify(updateDataTest)}`);
-        console.log(`update data: ${JSON.stringify(updateData)}`);
+        //console.log(`update data: ${JSON.stringify(updateData)}`);
         sanitizeSatelliteDataJson(updateData.data);
         setUpdate(sanitizeSatelliteDataJson(updateData.data));
         //console.log('Approved id:', JSON.stringify(updateData.data.id));
@@ -75,9 +76,10 @@ export default function UpdateTable() {
           console.log("Approved:", response.data.id);
          // Extract the approved satellite data
           const approvedUpdate = update.proposed_changes.find(item => item.id === rowId); 
-          const { addApprovedSatellite } = useSatelliteData();
+          console.log("Approved Update:", approvedUpdate);  
           if (approvedUpdate) {
             const approvedSatellite = convertUpdateToSatellite(approvedUpdate);
+            console.log("Converted to Satellite:", approvedSatellite);
             addApprovedSatellite(approvedSatellite);
            }
           // Remove the row from the displayed data   

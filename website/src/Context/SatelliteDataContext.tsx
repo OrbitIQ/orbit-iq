@@ -42,7 +42,7 @@ export function convertUpdateToSatellite(update: Update): Satellite {
     exp_lifetime: update.exp_lifetime,
     geo_longitude: update.geo_longitude,
     inclination: update.inclination,
-    launch_date: update.launch_date.toISOString(),
+    launch_date: (update.launch_date instanceof Date) ? update.launch_date.toISOString() : update.launch_date,
     launch_site: update.launch_site,
     launch_vehicle: update.launch_vehicle,
     mass_dry: update.mass_dry,
@@ -68,34 +68,29 @@ export function convertUpdateToSatellite(update: Update): Satellite {
 
 export const SatelliteDataProvider: React.FC<SatelliteDataProviderProps> = ({ children }) => {
   const [satellites, setSatellites] = useState<Satellite[]>([]);
-  const [shouldRefetch, setShouldRefetch] = useState(false);
-  const [updates, setUpdates] = useState<Update[]>([]);
+  // const [shouldRefetch, setShouldRefetch] = useState(false);
+  // const [updates, setUpdates] = useState<Update[]>([]);
 
-  const fetchSatellites = useCallback(async (id?: number) => {
-    try {
-      const url = id ? `${proposedChangeURL}/changes/${id}` : `${proposedChangeURL}/changes`;
-      const response = await axios.get(url);
-      setSatellites(response.data);
-    } catch (error) {
-      console.error('Error fetching satellites:', error);
-    }
-  }, []);
+  // const setSatellitesDebug = (newSatellites) => {
+  //   console.log("setSatellites called with:", newSatellites);
+  //   if (!Array.isArray(newSatellites)) {
+  //     console.error("Expected an array, received:", typeof newSatellites, newSatellites);
+  //   }
+  //   setSatellites(newSatellites);
+  // };
 
-  // Function to add an approved satellite to the satellites array
+  
   const addApprovedSatellite = useCallback((approvedSatellite: Satellite) => {
+    console.log("Adding approved satellite:", approvedSatellite);
+    console.log("Current satellites before adding:", satellites);
     setSatellites(prevSatellites => [...prevSatellites, approvedSatellite]);
   }, []);
 
   return (
     <SatelliteDataContext.Provider value={{ 
       satellites, 
-      setSatellites, 
-      updates, 
-      setUpdates, 
-      addApprovedSatellite, 
-      fetchSatellites, 
-      shouldRefetch, 
-      setShouldRefetch 
+      setSatellites,
+      addApprovedSatellite 
     }}>
       {children}
     </SatelliteDataContext.Provider>

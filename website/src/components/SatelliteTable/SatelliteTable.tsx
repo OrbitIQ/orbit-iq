@@ -5,17 +5,38 @@ import fetchSatelliteData from "./fetchSatelliteData";
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import { useSatelliteData } from '@/Context/SatelliteDataContext';
-import { useEffect} from "react"
+import { useEffect, useRef} from "react"
+
 
 export default function SatelliteTable({ isEditable, handleChangedData }: { isEditable: boolean; handleChangedData: any }) {
-  const { satellites,fetchSatellites } = useSatelliteData();
-  useEffect(() => {;
-    fetchSatellites();
-  }, [fetchSatellites]);
+  const { satellites } = useSatelliteData();
+  const prevSatellitesRef = useRef(satellites);
 
   const query = useQuery({
-
     queryKey: ['satellite-data',satellites ], queryFn: fetchSatelliteData})
+
+    const combinedData = () => {
+      const fetchedData = query.data?.satellites || [];
+      return [...satellites, ...fetchedData];
+    }
+
+  useEffect(() => {
+    console.log("Type of satellites:", typeof satellites, "Value:", satellites);
+
+    // Proceed only if satellites is an array
+    if (Array.isArray(satellites)) {
+      const newSatellites = satellites.filter(satellite => !prevSatellitesRef.current.includes(satellite));
+    
+      if (newSatellites.length > 0) {
+        console.log("New Satellites in SatelliteTable:", newSatellites);
+      }else{
+        console.log("debug for newSatellites", newSatellites);
+      }
+
+      prevSatellitesRef.current = satellites;
+    }
+  }, [satellites]);
+
   
   if(query.isLoading){
     return (
@@ -42,7 +63,7 @@ export default function SatelliteTable({ isEditable, handleChangedData }: { isEd
   }
   return (
       <div className="container mx-auto py-10">
-        <DataTable columns={satelliteColumns} data={query.data?.satellites || []} isEditable={isEditable} onChangedData={handleChangedData}/>
+        <DataTable columns={satelliteColumns} data={combinedData()} isEditable={isEditable} onChangedData={handleChangedData}/>
       </div>
   );
 
