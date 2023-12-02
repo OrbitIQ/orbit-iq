@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { proposedChangeURL } from "@/Constants/constants";
 import { UpdateData } from "@/types/Update";
 import UpdateColumns from "./columns";
+import { useSatelliteData } from '@/Context/SatelliteDataContext';
 
 const sanitizeSatelliteDataJson = (data: UpdateData): UpdateData => {
   data.proposed_changes.forEach((proposed_changes) => {
@@ -72,7 +73,13 @@ export default function UpdateTable() {
         const response = await Axios.put(`${proposedChangeURL}/approve/${rowId}`);
         if (response.status === 200) {
           console.log("Approved:", response.data.id);
-          // Remove the row from the displayed data
+         // Extract the approved satellite data
+          const approvedSatellite = update.proposed_changes.find(item => item.id === rowId); 
+          const { addApprovedSatellite } = useSatelliteData();
+          if (approvedSatellite) {
+            addApprovedSatellite(approvedSatellite);
+           }
+          // Remove the row from the displayed data   
           setUpdate(prevState => ({
             ...prevState,
             proposed_changes: prevState.proposed_changes.filter(item => item.id !== rowId)
@@ -96,9 +103,7 @@ export default function UpdateTable() {
     } catch (error) {
       console.error("Error approving:", error);
     }
-  };
-  
-  
+  };  
 
   const handleDeny: HandleChangeFunction = async (rowId: number) => {
     try {

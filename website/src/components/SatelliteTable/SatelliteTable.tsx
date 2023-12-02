@@ -4,12 +4,18 @@ import {useQuery} from "@tanstack/react-query";
 import fetchSatelliteData from "./fetchSatelliteData";
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
-
-
-
+import { useSatelliteData } from '@/Context/SatelliteDataContext';
+import { ususeEffect,useRef, useCallback} from "react"
 export default function SatelliteTable({ isEditable, handleChangedData }: { isEditable: boolean; handleChangedData: any }) {
-  const query = useQuery({ queryKey: ['satellite-data'], queryFn: fetchSatelliteData})
+  const { satellites,fetchSatellites } = useSatelliteData();
+  useEffect(() => {;
+    fetchSatellites();
+  }, [fetchSatellites]);
 
+  const query = useQuery({
+
+    queryKey: ['satellite-data',satellites ], queryFn: fetchSatelliteData})
+  
   if(query.isLoading){
     return (
       <div className="container mx-auto py-10">
