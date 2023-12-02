@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { proposedChangeURL } from "@/Constants/constants";
 import { UpdateData } from "@/types/Update";
 import UpdateColumns from "./columns";
-import { useSatelliteData } from '@/Context/SatelliteDataContext';
+import { useSatelliteData,convertUpdateToSatellite } from '@/Context/SatelliteDataContext';
 
 const sanitizeSatelliteDataJson = (data: UpdateData): UpdateData => {
   data.proposed_changes.forEach((proposed_changes) => {
@@ -74,9 +74,10 @@ export default function UpdateTable() {
         if (response.status === 200) {
           console.log("Approved:", response.data.id);
          // Extract the approved satellite data
-          const approvedSatellite = update.proposed_changes.find(item => item.id === rowId); 
+          const approvedUpdate = update.proposed_changes.find(item => item.id === rowId); 
           const { addApprovedSatellite } = useSatelliteData();
-          if (approvedSatellite) {
+          if (approvedUpdate) {
+            const approvedSatellite = convertUpdateToSatellite(approvedUpdate);
             addApprovedSatellite(approvedSatellite);
            }
           // Remove the row from the displayed data   

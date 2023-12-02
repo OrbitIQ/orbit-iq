@@ -5,7 +5,8 @@ import fetchSatelliteData from "./fetchSatelliteData";
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import { useSatelliteData } from '@/Context/SatelliteDataContext';
-import { ususeEffect,useRef, useCallback} from "react"
+import { useEffect} from "react"
+
 export default function SatelliteTable({ isEditable, handleChangedData }: { isEditable: boolean; handleChangedData: any }) {
   const { satellites,fetchSatellites } = useSatelliteData();
   useEffect(() => {;
