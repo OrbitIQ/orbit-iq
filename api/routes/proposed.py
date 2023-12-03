@@ -402,45 +402,64 @@ def save_all_approved_or_denied_changes():
     for row in approved_changes:
         row_dict = dict(zip(colnames, row))
 
-        # Convert launch_date to valid date format
-        try:
-            if isinstance(row_dict['launch_date'], datetime.date):
-                launch_date = row_dict['launch_date']
-            else:
-                launch_date = datetime.datetime.strptime(row_dict['launch_date'], '%Y-%m-%d').date()
-        except ValueError:
-            return jsonify({'error': f'Invalid date format for launch_date. Got {row_dict["launch_date"]} ({type(row_dict["launch_date"])})'}), 400
+        # if row action is delete, we have to drop the row in the official_satellites table
+        if row_dict['action'] == 'delete':
+            cur.execute(f"""
+                DELETE FROM official_satellites WHERE official_name = %s;
+                """, (row_dict['official_name'],)
+            )
+            # we also want to note this in the change log
+            cur.execute(f"""
+                INSERT INTO official_satellites_changelog (update_user, update_action, update_time, update_notes, official_name)
+                VALUES (%s, %s, %s, %s, %s);
+                """, ('admin', 'deleted', datetime.datetime.now(), 'deleted from proposed table as the satellite is deorbiting', row_dict['official_name'])
+            )
+            continue
+        elif row_dict['action'] == 'update':
 
-        # Prepare values for official_satellites table
-        official_satellite_values = {key: row_dict[key] for key in row_dict if key in official_satellite_columns}
-        official_satellite_values['launch_date'] = launch_date
+            # Convert launch_date to valid date format
+            try:
+                if isinstance(row_dict['launch_date'], datetime.date):
+                    launch_date = row_dict['launch_date']
+                else:
+                    launch_date = datetime.datetime.strptime(row_dict['launch_date'], '%Y-%m-%d').date()
+            except ValueError:
+                return jsonify({'error': f'Invalid date format for launch_date. Got {row_dict["launch_date"]} ({type(row_dict["launch_date"])})'}), 400
 
-        # Insert into official_satellites table or update on conflict
-        cur.execute(f"""
-            INSERT INTO official_satellites ({', '.join(official_satellite_values.keys())}) 
-            VALUES ({', '.join(['%s'] * len(official_satellite_values))})
-            ON CONFLICT (official_name)
-            DO UPDATE SET
-                {', '.join([f'{key} = excluded.{key}' for key in official_satellite_values.keys()])};
-            """, list(official_satellite_values.values())
-        )
+            # Prepare values for official_satellites table
+            official_satellite_values = {key: row_dict[key] for key in row_dict if key in official_satellite_columns}
+            official_satellite_values['launch_date'] = launch_date
+
+            # Insert into official_satellites table or update on conflict
+            cur.execute(f"""
+                INSERT INTO official_satellites ({', '.join(official_satellite_values.keys())}) 
+                VALUES ({', '.join(['%s'] * len(official_satellite_values))})
+                ON CONFLICT (official_name)
+                DO UPDATE SET
+                    {', '.join([f'{key} = excluded.{key}' for key in official_satellite_values.keys()])};
+                """, list(official_satellite_values.values())
+            )
 
 
-        # Prepare values for change log
-        changelog_values = {
-            'update_user': 'admin',
-            'update_action': 'persisted',
-            'update_time': datetime.datetime.now(),
-            'update_notes': 'changes persisted from proposed table',
-            **official_satellite_values
-        }
+            # Prepare values for change log
+            changelog_values = {
+                'update_user': 'admin',
+                'update_action': 'persisted',
+                'update_time': datetime.datetime.now(),
+                'update_notes': 'changes persisted from proposed table',
+                **official_satellite_values
+            }
 
-        # Insert into change log
-        cur.execute(f"""
-            INSERT INTO official_satellites_changelog ({', '.join(changelog_values.keys())}) 
-            VALUES ({', '.join(['%s'] * len(changelog_values))});
-            """, list(changelog_values.values())
-        )
+            # Insert into change log
+            cur.execute(f"""
+                INSERT INTO official_satellites_changelog ({', '.join(changelog_values.keys())}) 
+                VALUES ({', '.join(['%s'] * len(changelog_values))});
+                """, list(changelog_values.values())
+            )
+        else:
+            cur.close()
+            conn.close()
+            return jsonify({'error': f'Invalid action type. Got {row_dict["action"]} expected update or delete'}), 400
 
     # Commit changes to database
     conn.commit()
