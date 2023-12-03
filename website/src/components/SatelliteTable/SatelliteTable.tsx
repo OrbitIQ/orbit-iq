@@ -15,7 +15,7 @@ export default function SatelliteTable({ isEditable, handleChangedData }: { isEd
 
     const combinedData = () => {
       const fetchedData = query.data?.satellites || [];
-      return [...satellites, ...fetchedData];
+      return [...fetchedData];
     }
 
   if(query.isLoading){

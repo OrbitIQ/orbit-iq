@@ -264,16 +264,8 @@ export const changelogColumnDefinitions = [
 //Column Definitions
 export const updateColumns = [
   {
-    accessorKey: "proposed_user",
-    header: "Proposed User",
-  },
-  {
-    accessorKey: "created_at",
-    header: "Created At",
-  },
-  {
-    accessorKey: "proposed_notes",
-    header: "Proposed Notes",
+    accessorKey: "official_name",
+    header: "Official Name",
   },
   {
     accessorKey: "is_approved",
@@ -343,10 +335,7 @@ export const updateColumns = [
     accessorKey: "norad",
     header: "Norad",
   },
-  {
-    accessorKey: "official_name",
-    header: "Official Name",
-  },
+
   {
     accessorKey: "orbit_class",
     header: "Orbit Class",
@@ -397,13 +386,17 @@ export const updateColumns = [
     header: "User Type",
   },
   {
+    accessorKey: "proposed_user",
+    header: "Proposed User",
+  },
+  {
     id: 'approve',
     header: 'Approve',
   },
   {
     id: 'deny',
     header: 'Deny',
-  }
+  },
 ];
 
 //Default visible columns 😈 

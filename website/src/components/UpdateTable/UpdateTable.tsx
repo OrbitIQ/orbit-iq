@@ -43,12 +43,8 @@ export default function UpdateTable() {
     const getData = async () => {
       try {
         const updateData = await Axios.get<UpdateData>(proposedChangeURL);
-        //const updateDataTest = await Axios.get<any>(proposedChangeURL);
-        //console.log(`update data test: ${JSON.stringify(updateDataTest)}`);
-        //console.log(`update data: ${JSON.stringify(updateData)}`);
         sanitizeSatelliteDataJson(updateData.data);
         setUpdate(sanitizeSatelliteDataJson(updateData.data));
-        //console.log('Approved id:', JSON.stringify(updateData.data.id));
       } catch (error) {
         alert("An error occured fetching update data.");
         console.error("An error occurred fetching update data. ", error);
@@ -82,14 +78,20 @@ export default function UpdateTable() {
             console.log("Converted to Satellite:", approvedSatellite);
             addApprovedSatellite(approvedSatellite);
            }
+          const formData = new FormData();
+          formData.append('approved_user', 'admin');
+          const persistResponse = await Axios.post(`${proposedChangeURL}/persist`,
+          formData);
+          console.log("Response received", persistResponse);
+          if (persistResponse.status === 200) {
+            console.log("Persisted changes:", persistResponse.data.message);
+            alert("Approval and persisting of changes confirmed.");
+          }
           // Remove the row from the displayed data   
           setUpdate(prevState => ({
             ...prevState,
             proposed_changes: prevState.proposed_changes.filter(item => item.id !== rowId)
           }));
-  
-          // Alert the user about successful approval
-          alert("Approval confirmed! The row has been moved to the verified data page.");
         }
       } else {
         // If not confirmed, revert the is_approved status
@@ -105,6 +107,7 @@ export default function UpdateTable() {
       }
     } catch (error) {
       console.error("Error approving:", error);
+      alert("An error occurred while approving or persisting changes.");
     }
   };  
 
@@ -114,6 +117,7 @@ export default function UpdateTable() {
         const response = await Axios.put(`${proposedChangeURL}/deny/${rowId}`);
         if (response.status === 200) {
           console.log("Denied:", response.data.id);
+          
           setUpdate(prevState => ({
             ...prevState,
             proposed_changes: prevState.proposed_changes.map(item => {
