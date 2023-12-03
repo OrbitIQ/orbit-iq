@@ -1,41 +1,12 @@
 import { satelliteColumns } from "./columns";
-import { DataTable } from "./data-table";
-import {useQuery} from "@tanstack/react-query";
-import fetchSatelliteData from "./fetchSatelliteData";
-import CircularProgress from '@mui/material/CircularProgress';
-import Box from '@mui/material/Box';
+import { DataTable } from "../Table/data-table";
+import fetchSatelliteData from "../../requestLogic/fetchSatelliteData";
 
-
-
-export default function SatelliteTable({ isEditable, handleChangedData }: { isEditable: boolean; handleChangedData: any }) {
-  const query = useQuery({ queryKey: ['satellite-data'], queryFn: fetchSatelliteData})
-
-  if(query.isLoading){
-    return (
-      <div className="container mx-auto py-10">
-       <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center', // Horizontally center the content
-          alignItems: 'center',     // Vertically center the content
-          height: '100vh',          // Make the container take the full height of the viewport
-        }}
-      >
-          <CircularProgress />
-      </Box>
-      </div>
-    );
-  }
-  if(query.error){
-    alert("Failed to fetch query results")
-    return(
-      <>
-      </>
-    );
-  }
+export default function SatelliteTable({ isEditable, handleChangedData, cacheKey }: { isEditable: boolean; handleChangedData: any; cacheKey: any; }) {
   return (
       <div className="container mx-auto py-10">
-        <DataTable columns={satelliteColumns} data={query.data?.satellites || []} isEditable={isEditable} onChangedData={handleChangedData}/>
+        {/* @ts-ignore */}
+        <DataTable columns={satelliteColumns} isEditable={isEditable} fetchFunction={fetchSatelliteData} onChangedData={handleChangedData} cacheKey={cacheKey}/>
       </div>
   );
 

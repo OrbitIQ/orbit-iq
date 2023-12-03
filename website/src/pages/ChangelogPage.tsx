@@ -1,4 +1,4 @@
-import ChangelogTable from "../components/ChangelogTable/table";
+import ChangelogTable from "../components/ChangelogTable/changelog-table";
 
 function ChangelogPage() {
   return (
