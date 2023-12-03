@@ -43,8 +43,11 @@ export default function UpdateTable() {
     const getData = async () => {
       try {
         const updateData = await Axios.get<UpdateData>(proposedChangeURL);
-        sanitizeSatelliteDataJson(updateData.data);
-        setUpdate(sanitizeSatelliteDataJson(updateData.data));
+        const sanitizedData = sanitizeSatelliteDataJson(updateData.data);
+        const filteredData = sanitizedData.proposed_changes.filter(item =>
+          item.is_approved === "denied" || item.is_approved === "pending"
+        );
+        setUpdate({ proposed_changes: filteredData });
       } catch (error) {
         alert("An error occured fetching update data.");
         console.error("An error occurred fetching update data. ", error);
@@ -72,7 +75,6 @@ export default function UpdateTable() {
           console.log("Approved:", response.data.id);
          // Extract the approved satellite data
           const approvedUpdate = update.proposed_changes.find(item => item.id === rowId); 
-          console.log("Approved Update:", approvedUpdate);  
           if (approvedUpdate) {
             const approvedSatellite = convertUpdateToSatellite(approvedUpdate);
             console.log("Converted to Satellite:", approvedSatellite);
