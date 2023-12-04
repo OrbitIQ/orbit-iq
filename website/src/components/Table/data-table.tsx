@@ -3,15 +3,15 @@
 import {
   ColumnDef,
   ColumnFiltersState,
-  getFilteredRowModel,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   VisibilityState,
-  useReactTable,
 } from "@tanstack/react-table";
 
-
+import {useQuery} from "@tanstack/react-query";
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
 
 import {
   Table,
@@ -30,19 +30,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Button } from "@/components/ui/button";
-import { useState, useEffect, useRef, useCallback} from "react";
+import { useState, useEffect, useRef, useCallback, } from "react";
 import { columnVisibilityDefaults } from "@/Constants/constants";
-import { Satellite } from "@/types/Satellite";
 import { DataTableProps } from "@/types/DataTableProps";
-
+import reactTableCreatorFactory from "../SatelliteTable/reactTableCreatorFactory";
 import { Input } from "@/components/ui/input";
-
-//TODO: Have client side pagination avoid the ~2 second api call by actually using the route
-
-/*
-  Editable column stolen from: https://codesandbox.io/p/sandbox/github/tanstack/table/tree/main/examples/react/editable-data?embed=1&file=%2Fsrc%2Fmain.tsx%3A28%2C1-52%2C2
-  As well as pagination-reset
-*/
 
 const defaultColumns: Partial<ColumnDef<any>> = {
   cell: ({ getValue, row: { index }, column: { id }, table }) => {
@@ -88,69 +80,50 @@ function useSkipper() {
 }
 
 
-//TODO: Add typescript types :)
-// @ts-ignore
-const reactTableCreatorFactory = (data, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData: (value: React.SetStateAction<TData[]>) => void, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, defaultColumns?, changedData?, setChangedData?: React.Dispatch<React.SetStateAction<TData[]>>) => {
-    return useReactTable({
-    data: data,
-    columns: columns,
-    ...defaultColumns !== undefined && {defaultColumn: defaultColumns},
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    autoResetPageIndex,
-    onColumnVisibilityChange: setColumnVisibility,
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    state: {
-      columnVisibility,
-      columnFilters
-    },
-    meta: {
-      updateData: (rowIndex: number, columnId: number, value: any) => {
-        skipAutoResetPageIndex()
-        setData(old =>
-          old.map((row, index) => {
-            if (index === rowIndex) {
-              const rowChange: Satellite = {
-                ...old[rowIndex]!,
-                [columnId]: value,
-              }
-
-              // add rowChange to changedData, hacky way to do this but it works
-              if (setChangedData !== undefined){
-                setChangedData((oldData) => [...oldData, rowChange]);
-              }
-              
-              return rowChange 
-            }
-            return row
-          }))
-      }
-    },
-  });
-};
-
-
 export function DataTable<TData, TValue>({
   columns,
-  data,
   isEditable,
+  // @ts-ignore
+  fetchFunction,
+  // @ts-ignore
+  cacheKey,
   onChangedData,
 }: DataTableProps<TData, TValue>) {
 
-  const [newData, setData] = useState<TData[]>(data)  
+  const [pagination, setPagination] = useState({
+    pageIndex: 1,
+    pageSize: 10, //customize the default page size
+  });
+
+
+  const { isLoading, error, data, isSuccess } = useQuery({
+      queryKey: [cacheKey, pagination.pageIndex, pagination.pageSize],
+      queryFn: () => fetchFunction(pagination.pageIndex, pagination.pageSize),
+      staleTime: Infinity,
+    // @ts-ignore
+      keepPreviousData: false
+    }
+  );
+
+  const [newData, setData] = useState<TData[]>(isSuccess ? data.satellites as TData[] : [] )  
   const [canEdit, setCanEdit] = useState(isEditable)
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
     []
   )
   const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper()
 
-  // we will keep track of a list of changed data
-  const [changedData, setChangedData] = useState<TData[]>([])
+
 
   useEffect(() => {
-    setData(data)
-  }, [data])
+    // Update newData when the API call is successful
+    if (isSuccess) {
+      setData(data.satellites as TData[]);
+    }
+  }, [isSuccess, data]);
+
+
+  // we will keep track of a list of changed data
+  const [changedData, setChangedData] = useState<TData[]>([])
 
   useEffect(() => {
     setCanEdit(isEditable)
@@ -167,9 +140,24 @@ export function DataTable<TData, TValue>({
     columnVisibilityDefaults
   );
 
-  
-  const table = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters)
-  const editableTable = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, defaultColumns, changedData, setChangedData)
+    const handlePreviousPage = () => {
+    if (pagination.pageIndex > 0) {
+      setPagination({
+        ...pagination,
+        pageIndex: pagination.pageIndex - 1,
+      });
+    }
+  };
+
+  const handleNextPage = () => {
+    setPagination({
+      ...pagination,
+      pageIndex: pagination.pageIndex + 1,
+    });
+  };
+
+  const table = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, pagination)
+  const editableTable = reactTableCreatorFactory(newData, columns, getCoreRowModel, getPaginationRowModel, setColumnVisibility, columnVisibility, setData, autoResetPageIndex, skipAutoResetPageIndex, setColumnFilters, columnFilters, pagination, defaultColumns, changedData,  setChangedData)
 
   const renderTableHeaders = (canEdit:boolean) => {
     const headerGroups = canEdit ? editableTable.getHeaderGroups() : table.getHeaderGroups();
@@ -207,6 +195,30 @@ export function DataTable<TData, TValue>({
     }
   };
 
+  
+  if (isLoading){
+    return (
+      <div className="container mx-auto py-10">
+       <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center', // Horizontally center the content
+          alignItems: 'center',     // Vertically center the content
+          height: '100vh',          // Make the container take the full height of the viewport
+        }}
+      >
+          <CircularProgress />
+      </Box>
+      </div>
+    );
+  }
+  if(error){
+    return(
+      <div>
+        <h1>An error occured</h1>
+      </div>
+    )
+  }
   return (
     <div>
       <div className="flex items-center py-4">
@@ -245,6 +257,7 @@ export function DataTable<TData, TValue>({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -256,18 +269,20 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
+
+
       <div className="flex items-center justify-end space-x-2 py-4">
         <Button
           variant="outline"
           buttonSize="sm"
-          onClick={() => table.previousPage()}
+          onClick={handlePreviousPage}
         >
           Previous
         </Button>
         <Button
           variant="outline"
           buttonSize="sm"
-          onClick={() => table.nextPage()}
+          onClick={handleNextPage}
         >
           Next
         </Button>

@@ -1,10 +1,11 @@
-import { DataTable } from "../SatelliteTable/data-table";
+import { DataTable } from "../Table/data-table";
 import Axios from "axios";
 import { useEffect, useState } from "react";
 import { proposedChangeURL } from "@/Constants/constants";
 import { UpdateData } from "@/types/Update";
-import UpdateColumns from "./columns";
+import { UpdateColumns } from "./columns";
 import { useSatelliteData,convertUpdateToSatellite } from '@/Context/SatelliteDataContext';
+import fetchUpdateData from "@/requestLogic/fetchUpdateData";
 
 const sanitizeSatelliteDataJson = (data: UpdateData): UpdateData => {
   data.proposed_changes.forEach((proposed_changes) => {
@@ -27,6 +28,7 @@ const sanitizeSourceSatellite = (
     return str !== null;
   });
 };
+
 
 const onChangedData = () => {};
 
@@ -176,6 +178,9 @@ export default function UpdateTable() {
       <DataTable
         columns={UpdateColumns({ handleApprove, handleDeny, handleToggleStatus })}
         data={update.proposed_changes}
+        // @ts-ignore
+        fetchFunction = {fetchUpdateData}
+        cacheKey={"update-log"}
         isEditable={false}
         onChangedData={onChangedData}
       />

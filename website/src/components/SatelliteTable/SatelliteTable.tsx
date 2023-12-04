@@ -1,7 +1,7 @@
 import { satelliteColumns } from "./columns";
-import { DataTable } from "./data-table";
+import { DataTable } from "../Table/data-table";
 import {useQuery} from "@tanstack/react-query";
-import fetchSatelliteData from "./fetchSatelliteData";
+import fetchSatelliteData from "../../requestLogic/fetchSatelliteData";
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import { useSatelliteData } from '@/Context/SatelliteDataContext';
@@ -44,6 +44,12 @@ export default function SatelliteTable({ isEditable, handleChangedData }: { isEd
   return (
       <div className="container mx-auto py-10">
         <DataTable columns={satelliteColumns} data={combinedData()} isEditable={isEditable} onChangedData={handleChangedData}/>
+
+export default function SatelliteTable({ isEditable, handleChangedData, cacheKey }: { isEditable: boolean; handleChangedData: any; cacheKey: any; }) {
+  return (
+      <div className="container mx-auto py-10">
+        {/* @ts-ignore */}
+        <DataTable columns={satelliteColumns} isEditable={isEditable} fetchFunction={fetchSatelliteData} onChangedData={handleChangedData} cacheKey={cacheKey}/>
       </div>
   );
 
