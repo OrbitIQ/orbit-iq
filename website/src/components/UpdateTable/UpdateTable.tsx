@@ -3,7 +3,7 @@ import Axios from "axios";
 import { useEffect, useState } from "react";
 import { proposedChangeURL } from "@/Constants/constants";
 import { UpdateData } from "@/types/Update";
-import { UpdateColumns } from "./columns";
+import UpdateColumns from "./columns";
 import { useSatelliteData,convertUpdateToSatellite } from '@/Context/SatelliteDataContext';
 import fetchUpdateData from "@/requestLogic/fetchUpdateData";
 
@@ -177,7 +177,6 @@ export default function UpdateTable() {
     <div className="container mx-auto py-10">
       <DataTable
         columns={UpdateColumns({ handleApprove, handleDeny, handleToggleStatus })}
-        data={update.proposed_changes}
         // @ts-ignore
         fetchFunction = {fetchUpdateData}
         cacheKey={"update-log"}

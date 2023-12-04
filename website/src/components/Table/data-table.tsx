@@ -141,7 +141,7 @@ export function DataTable<TData, TValue>({
   );
 
     const handlePreviousPage = () => {
-    if (pagination.pageIndex > 0) {
+    if (pagination.pageIndex > 1) {
       setPagination({
         ...pagination,
         pageIndex: pagination.pageIndex - 1,
