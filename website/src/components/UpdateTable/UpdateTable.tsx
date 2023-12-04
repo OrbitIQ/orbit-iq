@@ -137,11 +137,44 @@ export default function UpdateTable() {
     }
   };
   
+  const handleToggleStatus: HandleChangeFunction = async (rowId: number) => {
+    try {
+    const rowData = update.proposed_changes.find(item => item.id === rowId);
+    if (!rowData) {
+      console.error("Row data not found for ID:", rowId);
+      return;
+    }
+      //console.log("Row data:", rowData);
+      const newStatus = rowData.is_approved === "denied" ? "pending" : "denied";
+      const updateData = {
+        ...rowData, 
+        is_approved: newStatus 
+      };
+      const formData = new URLSearchParams();
+      formData.append('data', JSON.stringify(updateData));
+      formData.append('proposed_user', 'admin'); 
+      formData.append('created_at', new Date().toISOString());
+      formData.append('proposed_notes', 'revert changes');
+  
+      const response = await Axios.put(`${proposedChangeURL}/${rowId}`, formData); 
+      if (response.status === 200) {
+        setUpdate(prevState => ({
+          ...prevState,
+          proposed_changes: prevState.proposed_changes.map(item =>
+            item.id === rowData.id ? { ...item, is_approved: newStatus } : item
+          )
+        }));
+      }
+    } catch (error) {
+      console.error("Error changing status:", error);
+      alert("An error occurred while changing the status.");
+    }
+  };
 
   return (
     <div className="container mx-auto py-10">
       <DataTable
-        columns={UpdateColumns({ handleApprove, handleDeny })}
+        columns={UpdateColumns({ handleApprove, handleDeny, handleToggleStatus })}
         data={update.proposed_changes}
         isEditable={false}
         onChangedData={onChangedData}
