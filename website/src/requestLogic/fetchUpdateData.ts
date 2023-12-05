@@ -9,6 +9,9 @@ export default async function fetchUpdateData(page: number, pageSize: number): P
     );
 
     const rel = updateData.data;
+    // rel.proposed_changes.forEach((change) => {
+    //     console.log(change.owner_name);
+    // })
 
     return rel;
 

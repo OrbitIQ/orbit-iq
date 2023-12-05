@@ -88,6 +88,8 @@ export function DataTable<TData, TValue>({
   // @ts-ignore
   cacheKey,
   onChangedData,
+  // @ts-ignore
+  onExportExcel
 }: DataTableProps<TData, TValue>) {
 
   const [pagination, setPagination] = useState({
@@ -219,74 +221,152 @@ export function DataTable<TData, TValue>({
       </div>
     )
   }
-  return (
-    <div>
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter official names..."
-          value={(table.getColumn("official_name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("official_name")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Filter Columns
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="max-h-64 overflow-y-auto">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+  if(onExportExcel === undefined){
+    return (
+      <div>
+        <div className="flex items-center py-4">
+          <Input
+            placeholder="Filter official names..."
+            value={(table.getColumn("official_name")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("official_name")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-auto">
+                Filter Columns
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="max-h-64 overflow-y-auto">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+                {renderTableHeaders(canEdit)}
+            </TableHeader>
+
+            <TableBody>
+              {renderTableBodyRows(canEdit, columns)}
+            </TableBody>
+          </Table>
+        </div>
+
+
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <Button
+            variant="outline"
+            buttonSize="sm"
+            onClick={handlePreviousPage}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            buttonSize="sm"
+            onClick={handleNextPage}
+          >
+            Next
+          </Button>
+        </div>
       </div>
+    );
+  }  
+  else{
+    return (
+      <div>
+        <div className="flex items-center py-4">
+          <Input
+            placeholder="Filter official names..."
+            value={(table.getColumn("official_name")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("official_name")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
+          />
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-              {renderTableHeaders(canEdit)}
-          </TableHeader>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-auto">
+                Filter Columns
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="max-h-64 overflow-y-auto">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button onClick={onExportExcel} variant="outline" className="ml-4">Export to Excel</Button>
+        </div>
 
-          <TableBody>
-            {renderTableBodyRows(canEdit, columns)}
-          </TableBody>
-        </Table>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+                {renderTableHeaders(canEdit)}
+            </TableHeader>
+
+            <TableBody>
+              {renderTableBodyRows(canEdit, columns)}
+            </TableBody>
+          </Table>
+        </div>
+
+
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <Button
+            variant="outline"
+            buttonSize="sm"
+            onClick={handlePreviousPage}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            buttonSize="sm"
+            onClick={handleNextPage}
+          >
+            Next
+          </Button>
+        </div>
       </div>
+    );
 
+  }
 
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          buttonSize="sm"
-          onClick={handlePreviousPage}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          buttonSize="sm"
-          onClick={handleNextPage}
-        >
-          Next
-        </Button>
-      </div>
-    </div>
-  );
 }

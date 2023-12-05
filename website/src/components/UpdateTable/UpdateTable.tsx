@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { proposedChangeURL } from "@/Constants/constants";
 import { UpdateData } from "@/types/Update";
 import UpdateColumns from "./columns";
-import { useSatelliteData,convertUpdateToSatellite } from '@/Context/SatelliteDataContext';
+import { useSatelliteData,convertUpdateToSatellite} from '@/Context/SatelliteDataContext';
 import fetchUpdateData from "@/requestLogic/fetchUpdateData";
 
 const sanitizeSatelliteDataJson = (data: UpdateData): UpdateData => {
@@ -51,7 +51,7 @@ export default function UpdateTable() {
         );
         setUpdate({ proposed_changes: filteredData });
       } catch (error) {
-        alert("An error occured fetching update data.");
+        // alert("An error occured fetching update data.");
         console.error("An error occurred fetching update data. ", error);
       }
     };
@@ -175,14 +175,15 @@ export default function UpdateTable() {
 
   return (
     <div className="container mx-auto py-10">
-      <DataTable
+        <DataTable
         columns={UpdateColumns({ handleApprove, handleDeny, handleToggleStatus })}
         // @ts-ignore
         fetchFunction = {fetchUpdateData}
         cacheKey={"update-log"}
         isEditable={false}
         onChangedData={onChangedData}
-      />
+        />
+
     </div>
   );
 }
