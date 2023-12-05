@@ -29,7 +29,9 @@ def from_aerospace(record):
     conn.close()
 
     if not name:
-        logging.getLogger(__name__).warning(f"Skipping record {record}: NORAD ID '{norad}' not in database")
+        # logging.getLogger(__name__).warning(f"Skipping record {record}: NORAD ID '{norad}' not in database")
+        # this is fine bc we expect some NORAD IDs to not be in the database since the database is not complete
+        # and only covers satellites that are currently in orbit
         return None
 
 
