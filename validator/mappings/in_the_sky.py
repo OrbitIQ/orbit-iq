@@ -20,6 +20,11 @@ def from_in_the_sky(record):
     deleted_statuses = ['decayed', 'destroyed', 'failed', 'retired', 'lost', 'non-operational']
     operating_statuses = ['operational', 'partially operational']
 
+    official_name = data['official_name'].strip().lower()
+    if "debris" in official_name.split(" "):
+        # assume debris is not a satellite
+        return None
+
     if str(data['norad']) != str(data['NORAD ID']):
         # uh oh
         logging.getLogger(__name__).warning(f"Skipping record {record}: NORAD ID '{data['norad']}' does not match NORAD ID '{data['NORAD ID']}'")
