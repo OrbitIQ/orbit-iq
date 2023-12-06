@@ -9,7 +9,7 @@ from io import BytesIO
 from flask import Response
 import csv
 from io import StringIO
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 
 # Create a Blueprint for this subpath
 edit_subpath = Blueprint('edit', __name__)
@@ -59,11 +59,16 @@ def update(official_name):
     cursor = conn.cursor()
 
     # Lets get the user's name from the JWT token
+    verify_jwt_in_request()
+
     update_user_username = get_jwt_identity()
     # get full name from db
     cursor.execute("SELECT name FROM users WHERE username = %s", (update_user_username,))
-    update_user_fullname = cursor.fetchone()[0]
-    update_user = update_user_fullname + " (" + update_user_username + ")"
+    update_user_fullnames = cursor.fetchone()
+    if update_user_fullnames:
+        update_user = update_user_fullnames[0] + " (" + update_user_username + ")"
+    else:
+        update_user = f"Unknown ({update_user_username})" # mostly for testing, as this should never happen 
    
     retrieve_old_data = "SELECT * FROM official_satellites WHERE official_name = %s"
     cursor.execute(retrieve_old_data, (official_name,))

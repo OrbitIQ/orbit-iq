@@ -6,10 +6,18 @@ import json
 
 from unittest.mock import patch
 
+# This fixture will be used by the tests to send requests to the application
 @pytest.fixture(autouse=True)
-def mock_jwt_required():
-    with patch('flask_jwt_extended.jwt_required', lambda fn: fn):
-        yield
+def neuter_jwt(monkeypatch):
+  def no_verify(*args, **kwargs):
+    pass
+
+  from flask_jwt_extended import view_decorators
+  from flask_jwt_extended import utils 
+
+  monkeypatch.setattr(view_decorators, 'verify_jwt_in_request', no_verify)
+  monkeypatch.setattr(view_decorators, 'jwt_required', no_verify)
+  monkeypatch.setattr(utils, 'get_jwt_identity', lambda: 'test_user')
 
 @pytest.fixture
 def client():
