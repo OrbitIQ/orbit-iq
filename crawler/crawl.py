@@ -5,6 +5,7 @@ import logging
 
 from sources.gcat import gcat
 from sources.aerospace import aerospace
+from sources.in_the_sky import in_the_sky
 from utils import get_db_conn
 
 def setup_sources():
@@ -18,10 +19,12 @@ def setup_sources():
 
             # 1 - GCAT - General Catalog of Artificial Space Objects
             # 2 - Aerospace_reentry - Aerospace Reentry Data
+            # 3 - In The Sky - in-the-sky.org
             cur.execute("""
                 INSERT INTO sources (id, name, url, description) VALUES
                 (1, 'GCAT', 'https://planet4589.org/space/gcat/', 'General Catalog of Artificial Space Objects (GCAT)'),
-                (2, 'Aerospace_reentry', 'https://aerospace.org/reentries', 'Aerospace Reentry Data')
+                (2, 'Aerospace_reentry', 'https://aerospace.org/reentries', 'Aerospace Reentry Data'),
+                (3, 'in-the-sky.org', 'https://in-the-sky.org/spacecraft.php', 'in-the-sky.org')
                 ON CONFLICT DO NOTHING;
             """)
         
@@ -76,11 +79,17 @@ def main():
 
     aerospace()
 
+    after_aerospace_count = count_crawler_dump()
+
+    print("We are now going to crawl in-the-sky.org, this will take a while")
+    in_the_sky() # this one is slow so we do it last
+
     after_count = count_crawler_dump()
 
     print(f"Added {after_count - start_count} new records to crawler_dump")
     print(f"\tGCAT: {after_gcat_count - start_count}")
-    print(f"\tAerospace Reentry: {after_count - after_gcat_count}")
+    print(f"\tAerospace Reentry: {after_aerospace_count - after_gcat_count}")
+    print(f"\tin-the-sky.org: {after_count - after_aerospace_count}")
 
 if __name__ == "__main__":
     main()

@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import psycopg2
 import time
+from datetime import datetime
 
 # Connect to the PostgreSQL database
 DB_HOST = os.environ.get('DB_HOST')
@@ -34,6 +35,8 @@ def get_db_conn():
 
 class EnhancedJSONEncoder(json.JSONEncoder):
     def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
         if isinstance(obj, pd.Timestamp):
             return obj.isoformat() if pd.notna(obj) else None
         elif pd.isna(obj) or obj is pd.NaT or pd.isnull(obj):

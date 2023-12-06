@@ -32,7 +32,7 @@ class ProposedChange:
     norad: int = 0
     comment_note: str = ''
     source_orbit: str = ''
-    proposed_user: str = field(default='validator')
+    proposed_user: str = field(default='web crawler')
     source_satellite: List[str] = field(default_factory=list) # TODO: This might supposed to be the source satellite that launched the satellite like bus? idk we gotta check
     confidence_score: float = 0
     change_id: Optional[int] = field(default=None)
@@ -43,6 +43,8 @@ class ProposedChange:
     action: Optional[str] = field(default='update') # can be 'update' or 'delete' at the moment
 
 def insert_proposed_change(proposed_change: ProposedChange, used_row_ids: List[int]):
+    # TODO: We probably only want to update the satellite if there are changes
+    # from what's currently in the database
     conn = get_db_connection()
     cursor = conn.cursor()
 
