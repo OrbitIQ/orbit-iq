@@ -5,12 +5,14 @@ from utils.helpers import get_db_connection
 from psycopg2 import sql
 import psycopg2
 import datetime
+from flask_jwt_extended import jwt_required
 
 proposed_changes_subpath = Blueprint('proposed_changes', __name__)
 
 # TODO: might be good for future workflow like hitting edit on the frontend's production table actually creates a proposed change
 # Create a new proposed change
 @proposed_changes_subpath.route('/changes', methods=['POST'])
+@jwt_required()
 def create_proposed_change():
     """
     Request Data:
@@ -102,6 +104,7 @@ def create_proposed_change():
 
 # select * from proposed changes
 @proposed_changes_subpath.route('/changes', methods=["GET"])
+@jwt_required()
 def get_proposed():
     """
     Retrieve proposed changes from the proposed_changes table with optional pagination.
@@ -160,6 +163,7 @@ def get_proposed():
 
 # Get a specific proposed change by id
 @proposed_changes_subpath.route('/changes/<id>', methods=['GET'])
+@jwt_required()
 def get_proposed_change(id):
     """
     Request Data:
@@ -193,6 +197,7 @@ def get_proposed_change(id):
 
 # Update a specific proposed change by ID
 @proposed_changes_subpath.route('/changes/<id>', methods=['PUT'])
+@jwt_required()
 def update_proposed_change(id):
     """
     Request Data:
@@ -287,6 +292,7 @@ def update_proposed_change(id):
 
 #approve API
 @proposed_changes_subpath.route('/changes/approve/<id>', methods=['PUT'])
+@jwt_required()
 def approve_proposed_change(id):
     """
     Request Data:
@@ -322,6 +328,7 @@ def approve_proposed_change(id):
 
 #deny API
 @proposed_changes_subpath.route('/changes/deny/<id>', methods=['PUT'])
+@jwt_required()
 def deny_proposed_change(id):
     """
     Request Data:
@@ -359,6 +366,7 @@ def deny_proposed_change(id):
 # all the proposed changes which has been denied will not be modified, and update the official_satellites table, 
 # if the proposed change is neither approve nor denied, leave it in the proposed_changes table.
 @proposed_changes_subpath.route('/changes/persist', methods=['POST'])
+@jwt_required()
 def save_all_approved_or_denied_changes():
     """
     Request Data:

@@ -9,11 +9,13 @@ from io import BytesIO
 from flask import Response
 import csv
 from io import StringIO
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 # Create a Blueprint for this subpath
 edit_subpath = Blueprint('edit', __name__)
 
 @edit_subpath.route('/<official_name>', methods=['PUT'])
+@jwt_required()
 def update(official_name):
     """
     Update a record in the official_satellites table.
@@ -46,19 +48,22 @@ def update(official_name):
 
     req_json = request.get_json()
 
-    if not all(key in req_json for key in ['data', 'update_user', 'update_notes']):
+    if not all(key in req_json for key in ['data', 'update_notes']):
         return jsonify({'error': 'Invalid request'}), 400
 
     data_dict = req_json['data']
-    update_user = req_json['update_user']
     update_time = datetime.datetime.now()
     update_notes = req_json['update_notes']
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # retrieve old data to be logged
-    print('hi')
+    # Lets get the user's name from the JWT token
+    update_user_username = get_jwt_identity()
+    # get full name from db
+    cursor.execute("SELECT name FROM users WHERE username = %s", (update_user_username,))
+    update_user_fullname = cursor.fetchone()[0]
+    update_user = update_user_fullname + " (" + update_user_username + ")"
    
     retrieve_old_data = "SELECT * FROM official_satellites WHERE official_name = %s"
     cursor.execute(retrieve_old_data, (official_name,))
@@ -119,6 +124,7 @@ def update(official_name):
 
 
 @edit_subpath.route('/history', methods=['GET'])
+@jwt_required()
 def get_all():
     """
     Retrieve all records from the official_satellites_changelog table.
@@ -151,6 +157,7 @@ def get_all():
 
 #TODO: choose an approriate one from export to csv/excel
 @edit_subpath.route('/history/export/csv', methods=['GET'])
+@jwt_required()
 def export_history_to_csv():
     """
     Export all records from the official_satellites_changelog table to a CSV file.
@@ -202,6 +209,7 @@ def export_history_to_csv():
     return Response(generate(), headers=headers)
 
 @edit_subpath.route('/history/export/xlsx', methods=['GET'])
+@jwt_required()
 def export_history_to_excel():
     """
     Export all records from the official_satellites_changelog table to an Excel file.

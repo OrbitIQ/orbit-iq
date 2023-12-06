@@ -429,6 +429,4 @@ export const paginationSize: number = 10;
 export const pageSize: number = 4
 
 //Endpoint URLs
-export const confirmedSatellitesURL: string = `http://localhost:8080/confirmed/satellites`;
-export const editHistoryURL: string = `http://localhost:8080/edit/history`;
-export const proposedChangeURL: string = `http://localhost:8080/proposed/changes`;
+export const apiURL: string = `http://localhost:8080`; // TODO: Switch conditional on production vs. development

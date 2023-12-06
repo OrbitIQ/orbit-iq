@@ -5,8 +5,8 @@ import { Label } from "../components/ui/label";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import EditModal from "@/components/SatelliteTable/EditModal";
-import Axios from "axios";
 import { queryClientContext } from "@/context";
+import api from "@/services/AxiosInterceptor";
 
 function DataPage() {
 
@@ -27,14 +27,12 @@ function DataPage() {
     setIsEditModalOpen(false);
   };
 
-  const handleEditModalSave = (update_user: string, update_notes: string, updateData: any) => {
-    console.log('Saving edited data:', update_user, update_notes, updateData);
+  const handleEditModalSave = (update_notes: string, updateData: any) => {
     // Save the edited data by calling Axios API endpoint
     //TODO: Update this to a mutator.
     updateData.forEach((dataChange: any) => {
-      Axios.put(`http://localhost:8080/edit/${dataChange.rowChange.official_name}`, {
+      api.put(`/edit/${dataChange.rowChange.official_name}`, {
         "data": dataChange.rowChange,
-        "update_user": update_user,
         "update_notes": update_notes,
       })
         .then(function (response) {
@@ -55,7 +53,7 @@ function DataPage() {
   };
 
   const handleExcelExport = () => {
-    Axios.get('http://localhost:8080/confirmed/satellites/export', {
+    api.get('/confirmed/satellites/export', {
       responseType: 'blob', // important
     }).then((response) => {
       // create file link in browser's memory
@@ -78,6 +76,7 @@ function DataPage() {
     // Update the state or perform any action with the received data
     setUpdateData(changedData);
   };
+  
   return (
     <div className="flex flex-col items-center w-full max-w-7xl px-4 py-6 mx-auto sm:px-6 lg:px-8">
       <h1 className="text-3xl font-semibold text-gray-800 mb-4">
