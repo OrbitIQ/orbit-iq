@@ -6,8 +6,13 @@ from utils.helpers import SessionLocal
 from sqlalchemy import text
 import csv
 import sys
+from unittest.mock import patch
 
 # This fixture will be used by the tests to send requests to the application
+@pytest.fixture(autouse=True)
+def mock_jwt_required():
+    with patch('flask_jwt_extended.jwt_required', lambda fn: fn):
+        yield
 
 @pytest.fixture
 def client():

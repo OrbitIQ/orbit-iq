@@ -4,6 +4,13 @@ from utils.helpers import get_db_connection
 from datetime import datetime
 import json
 
+from unittest.mock import patch
+
+@pytest.fixture(autouse=True)
+def mock_jwt_required():
+    with patch('flask_jwt_extended.jwt_required', lambda fn: fn):
+        yield
+
 @pytest.fixture
 def client():
     with app.test_client() as client:
