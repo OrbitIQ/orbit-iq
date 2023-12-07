@@ -89,7 +89,10 @@ export function DataTable<TData, TValue>({
   cacheKey,
   onChangedData,
   // @ts-ignore
-  onExportExcel
+  onExportExcel,
+  //Hacky, solution TODO: FIX
+  // @ts-ignore
+  isProposedChanges
 }: DataTableProps<TData, TValue>) {
 
   const [pagination, setPagination] = useState({
@@ -107,7 +110,10 @@ export function DataTable<TData, TValue>({
     }
   );
 
-  const [newData, setData] = useState<TData[]>(isSuccess ? data.satellites as TData[] : [] )  
+  const [newData, setData] = useState<TData[]>(
+    isSuccess ? (isProposedChanges ? data.proposed_changes : data.satellites) as TData[] : []
+  );
+  
   const [canEdit, setCanEdit] = useState(isEditable)
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
     []
@@ -119,7 +125,7 @@ export function DataTable<TData, TValue>({
   useEffect(() => {
     // Update newData when the API call is successful
     if (isSuccess) {
-      setData(data.satellites as TData[]);
+      setData(isProposedChanges ? data.proposed_changes : data.satellites as TData[]);
     }
   }, [isSuccess, data]);
 
