@@ -5,7 +5,7 @@ from utils.helpers import get_db_connection
 from psycopg2 import sql
 import psycopg2
 import datetime
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 
 proposed_changes_subpath = Blueprint('proposed_changes', __name__)
 
@@ -395,6 +395,7 @@ def save_all_approved_or_denied_changes():
 
     
     # Get the user who is updating the changes
+    verify_jwt_in_request()
     username = get_jwt_identity()
     cur.execute("SELECT name FROM users WHERE username = %s;", (username,))
     update_user = cur.fetchone()[0] + f" ({username})"
