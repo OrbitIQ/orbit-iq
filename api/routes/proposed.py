@@ -56,7 +56,7 @@ def create_proposed_change():
         sql.Literal(proposed_user),
         sql.Literal(created_at),
         sql.Literal(proposed_notes),
-        sql.Literal("pending"),
+        sql.Literal("pending"), # TODO: btw we might want to change this to any proposed changes, @davidteather will do this
         sql.Literal(data_dict['official_name']),
         sql.Literal(data_dict['reg_country']),
         sql.Literal(data_dict['own_country']),

@@ -23,7 +23,7 @@
     "@tanstack/react-query-devtools": "^5.8.4",
     "@tanstack/react-table": "^8.10.7",
     "@types/react-modal": "^3.16.3",
-    "axios": "^1.5.1",
+    "axios": "^1.6.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "lucide-react": "^0.288.0",

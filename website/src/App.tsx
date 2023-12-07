@@ -13,18 +13,18 @@ function App() {
 
   return (
     <>
-      <queryClientContext.Provider value = {{queryClient}}>
-        <QueryClientProvider client={queryClient}>
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<Navigate replace to="/data" />} /> {/* Redirect from "/" to "/data" */}
-            <Route path="/data" element={<DataPage />} />
-            <Route path="/updates" element={<UpdatesPage />} />
-            <Route path="/changelog" element={<ChangelogPage />} />
-          </Routes>
-          <ReactQueryDevtools/>
-        </QueryClientProvider>
-      </queryClientContext.Provider>
+        <queryClientContext.Provider value = {{queryClient}}>
+          <QueryClientProvider client={queryClient}>
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<Navigate replace to="/data" />} /> {/* Redirect from "/" to "/data" */}
+              <Route path="/data" element={<DataPage />} />
+              <Route path="/updates" element={<UpdatesPage />} />
+              <Route path="/changelog" element={<ChangelogPage />} />
+            </Routes>
+            <ReactQueryDevtools/>
+          </QueryClientProvider>
+        </queryClientContext.Provider>
     </>
   );
 }

@@ -54,25 +54,6 @@ function DataPage() {
     setCanEdit(false);
   };
 
-  const handleExcelExport = () => {
-    Axios.get('http://localhost:8080/confirmed/satellites/export', {
-      responseType: 'blob', // important
-    }).then((response) => {
-      // create file link in browser's memory
-      const href = URL.createObjectURL(response.data);
-  
-      // create "a" HTML element with href to file & click
-      const link = document.createElement('a');
-      link.href = href;
-      link.setAttribute('download', 'data.csv'); //or any other extension
-      document.body.appendChild(link);
-      link.click();
-  
-      // clean up "a" element & remove ObjectURL
-      document.body.removeChild(link);
-      URL.revokeObjectURL(href);
-    });
-  }
 
   const handleChangedData = (changedData: any) => {
     // Update the state or perform any action with the received data
@@ -83,7 +64,6 @@ function DataPage() {
       <h1 className="text-3xl font-semibold text-gray-800 mb-4">
         Verified Satellite Data
       </h1>
-      <Button onClick={handleExcelExport}>Export to Excel</Button>
       <div className="w-full overflow-x-auto">
         <SatelliteTable isEditable={canEdit} handleChangedData={handleChangedData} cacheKey = {cacheKey}/>
       </div>
