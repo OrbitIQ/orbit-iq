@@ -3,21 +3,32 @@ from app import app
 from utils.helpers import get_db_connection
 from datetime import datetime
 import json
+from flask_jwt_extended import create_access_token
 
 from unittest.mock import patch
 
 # This fixture will be used by the tests to send requests to the application
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="function")
 def neuter_jwt(monkeypatch):
-  def no_verify(*args, **kwargs):
-    pass
+    # This is definitely excessive but I'm afraid to touch it right now. I spent an hour
+    # getting this working.
+    def no_verify(*args, **kwargs):
+        pass
 
-  from flask_jwt_extended import view_decorators
-  from flask_jwt_extended import utils 
+    from flask_jwt_extended import view_decorators
+    from flask_jwt_extended import utils 
+    
+    monkeypatch.setattr(view_decorators, 'verify_jwt_in_request', no_verify)
+    monkeypatch.setattr(view_decorators, 'jwt_required', no_verify)
+    monkeypatch.setattr(utils, 'get_jwt_identity', lambda: 'test_user')
+    
+    # from flask_jwt_extended import verify_jwt_in_request, jwt_required, get_jwt_identity
+    monkeypatch.setattr('flask_jwt_extended.verify_jwt_in_request', no_verify)
+    monkeypatch.setattr('flask_jwt_extended.jwt_required', no_verify)
+    monkeypatch.setattr('flask_jwt_extended.get_jwt_identity', lambda: 'test_user')
 
-  monkeypatch.setattr(view_decorators, 'verify_jwt_in_request', no_verify)
-  monkeypatch.setattr(view_decorators, 'jwt_required', no_verify)
-  monkeypatch.setattr(utils, 'get_jwt_identity', lambda: 'test_user')
+    monkeypatch.setattr("flask_jwt_extended.verify_jwt_in_request", no_verify)
+
 
 @pytest.fixture
 def client():
@@ -441,9 +452,14 @@ def test_save_all_approved_or_denied_changes(client):
     pending_data = pending_response.get_json()
     pending_id = pending_data['id']
 
+    with app.app_context():
+        access_token = create_access_token(identity='test_user')
+    headers = {
+        'Authorization': f'Bearer {access_token}'
+    }
+
     # Call the API to persist approved and denied changes
-    response = client.post('/proposed/changes/persist', data={'approved_user': 'Test User'})
-    print(response.data)
+    response = client.post('/proposed/changes/persist', headers=headers)
 
     # Check that the API returns a 200 status code
     assert response.status_code == 200
@@ -453,24 +469,24 @@ def test_save_all_approved_or_denied_changes(client):
     assert 'persisted' in response_data['message'].lower()
 
     # verify approved data is persisted properly
-    approved_response = client.get(f'/proposed/changes/{approved_id}')
+    approved_response = client.get(f'/proposed/changes/{approved_id}', headers=headers)
     assert approved_response.status_code == 200
     # check that the approved_data in proposed_table is marked as "persisted"
     approved_satellite_dict = approved_response.get_json()
     assert approved_satellite_dict['is_approved'] == 'persisted'
 
     # Check that the pending change still exists in the proposed_changes table
-    pending_response = client.get(f'/proposed/changes/{pending_id}')
+    pending_response = client.get(f'/proposed/changes/{pending_id}', headers=headers)
     assert pending_response.status_code == 200
 
     official_name = json.loads(approved_data["data"])["official_name"]
     # Check that the official_satellites table has been updated with approved changes
     # You can use the get API for the official_satellite to validate the update
-    official_satellite_response = client.get(f'/confirmed/satellites/{official_name}')
+    official_satellite_response = client.get(f'/confirmed/satellites/{official_name}', headers=headers)
     assert official_satellite_response.status_code == 200
 
     # check that the official_satellites_changelog has been updated with approved changes
-    official_satellite_changelog_response = client.get('/edit/history')
+    official_satellite_changelog_response = client.get('/edit/history', headers=headers)
     assert official_satellite_changelog_response.status_code == 200
     # check that the approved satellite name is in the response
     assert official_name in official_satellite_changelog_response.get_data(as_text=True)
