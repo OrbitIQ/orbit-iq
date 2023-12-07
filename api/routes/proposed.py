@@ -398,7 +398,11 @@ def save_all_approved_or_denied_changes():
     verify_jwt_in_request()
     username = get_jwt_identity()
     cur.execute("SELECT name FROM users WHERE username = %s;", (username,))
-    update_user = cur.fetchone()[0] + f" ({username})"
+    u = cur.fetchone()
+    if u is not None:
+        update_user = u[0] + f" ({username})"
+    else:
+        update_user = f"Unknown ({username}))" # this should only happen in testing
 
 
     # Execute SQL query to update is_approved status
