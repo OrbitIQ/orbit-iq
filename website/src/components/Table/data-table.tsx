@@ -92,13 +92,13 @@ export function DataTable<TData, TValue>({
   onExportExcel,
   //Hacky, solution TODO: FIX
   // @ts-ignore
-  isProposedChanges
+  isProposedChanges,
+  // @ts-ignore
+  pagination,
+  // @ts-ignore
+  setPagination
 }: DataTableProps<TData, TValue>) {
 
-  const [pagination, setPagination] = useState({
-    pageIndex: 1,
-    pageSize: 10, //customize the default page size
-  });
 
 
   const { isLoading, error, data, isSuccess } = useQuery({

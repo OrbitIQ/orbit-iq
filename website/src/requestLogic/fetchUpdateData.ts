@@ -10,6 +10,7 @@ export default async function fetchUpdateData(page: number, pageSize: number): P
 
     const rel = updateData.data;
 
+
     return {proposed_changes: rel.proposed_changes.filter(item => item.is_approved === "denied" || item.is_approved === "pending")};
 
 }

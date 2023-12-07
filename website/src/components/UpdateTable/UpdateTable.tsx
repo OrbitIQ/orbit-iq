@@ -4,118 +4,46 @@ import { useEffect, useState } from "react";
 import { proposedChangeURL } from "@/Constants/constants";
 import { UpdateData } from "@/types/Update";
 import UpdateColumns from "./columns";
-import { useSatelliteData,convertUpdateToSatellite } from '@/Context/SatelliteDataContext';
 import fetchUpdateData from "@/requestLogic/fetchUpdateData";
 import { queryClientContext } from "@/context";
 import {useContext} from "react";
 
-
-
-
-const sanitizeSatelliteDataJson = (data: UpdateData): UpdateData => {
-  data.proposed_changes.forEach((proposed_changes) => {
-    proposed_changes.source_satellite = sanitizeSourceSatellite(
-      proposed_changes.source_satellite
-    );
-    if (proposed_changes.mass_dry == null) proposed_changes.mass_dry = "N/A";
-    if (proposed_changes.power_watts == null)
-      proposed_changes.power_watts = "N/A";
-    if (proposed_changes.source_orbit == null)
-      proposed_changes.power_watts = "N/A";
-  });
-  return data;
-};
-
-const sanitizeSourceSatellite = (
-  source_satellite: Array<null | string>
-): Array<null | string> => {
-  return source_satellite.filter((str) => {
-    return str !== null;
-  });
-};
-
-
 const onChangedData = () => {};
+
 
 // Define the type for handleApprove and handleDeny functions
 type HandleChangeFunction = (rowId: number) => Promise<void>;
 
 export default function UpdateTable() {
-  const [update, setUpdate] = useState<UpdateData>({
-    proposed_changes: [],
+
+  const [pagination, setPagination] = useState({
+    pageIndex: 1,
+    pageSize: 10, //customize the default page size
   });
-  const { addApprovedSatellite } = useSatelliteData(); // Call the hook at the top level
 
   const queryContext = useContext(queryClientContext);
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const updateData = await Axios.get<UpdateData>(proposedChangeURL);
-        const sanitizedData = sanitizeSatelliteDataJson(updateData.data);
-        const filteredData = sanitizedData.proposed_changes.filter(item =>
-          item.is_approved === "denied" || item.is_approved === "pending"
-        );
-        setUpdate({ proposed_changes: filteredData });
-      } catch (error) {
-        alert("An error occured fetching update data.");
-        console.error("An error occurred fetching update data. ", error);
-      }
-    };
-    getData();
-  }, [])
-
   const handleApprove: HandleChangeFunction = async (rowId: number) => {
     try {
-      // Update the row to mark as 'approved' before asking for confirmation
-      setUpdate(prevState => ({
-        ...prevState,
-        proposed_changes: prevState.proposed_changes.map(item => {
-          if (item.id === rowId) {
-            return { ...item, is_approved: "approved" };
-          }
-          return item;
-        })
-      }));
-
       if (window.confirm("Are you sure you want to approve this record?")) {
         const response = await Axios.put(`${proposedChangeURL}/approve/${rowId}`);
         if (response.status === 200) {
-          console.log("Approved:", response.data.id);
-         // Extract the approved satellite data
-          const approvedUpdate = update.proposed_changes.find(item => item.id === rowId); 
-          if (approvedUpdate) {
-            const approvedSatellite = convertUpdateToSatellite(approvedUpdate);
-            console.log("Converted to Satellite:", approvedSatellite);
-            addApprovedSatellite(approvedSatellite);
-           }
+
           const formData = new FormData();
           formData.append('approved_user', 'admin');
           const persistResponse = await Axios.post(`${proposedChangeURL}/persist`,
           formData);
           console.log("Response received", persistResponse);
+
           if (persistResponse.status === 200) {
             console.log("Persisted changes:", persistResponse.data.message);
             alert("Approval and persisting of changes confirmed.");
           }
-          // Remove the row from the displayed data   
-          setUpdate(prevState => ({
-            ...prevState,
-            proposed_changes: prevState.proposed_changes.filter(item => item.id !== rowId)
-          }));
+
+          //Invalidate query, cause a re-fetch of the proposed-changes page. 
+          queryContext?.queryClient.invalidateQueries({queryKey: ["update-log", pagination.pageIndex, pagination.pageSize]});
         }
-      } else {
-        // If not confirmed, revert the is_approved status
-        setUpdate(prevState => ({
-          ...prevState,
-          proposed_changes: prevState.proposed_changes.map(item => {
-            if (item.id === rowId) {
-              return { ...item, is_approved: "pending" }; 
-            }
-            return item;
-          })
-        }));
-      }
+      }     
     } catch (error) {
       console.error("Error approving:", error);
       alert("An error occurred while approving or persisting changes.");
@@ -128,17 +56,9 @@ export default function UpdateTable() {
         const response = await Axios.put(`${proposedChangeURL}/deny/${rowId}`);
         if (response.status === 200) {
           console.log("Denied:", response.data.id);
-          
-          setUpdate(prevState => ({
-            ...prevState,
-            proposed_changes: prevState.proposed_changes.map(item => {
-              if (item.id === rowId) {
-                // Update the is_approved status and disable actions
-                return { ...item, is_approved: "denied", actionsDisabled: true };
-              }
-              return item;
-            })
-          }));
+
+          //Invalidate query, cause a re-fetch of the page. 
+          queryContext?.queryClient.invalidateQueries({queryKey: ["update-log", pagination.pageIndex, pagination.pageSize]});
         }
       }
     } catch (error) {
@@ -148,7 +68,12 @@ export default function UpdateTable() {
   
   const handleToggleStatus: HandleChangeFunction = async (rowId: number) => {
     try {
-    const rowData = update.proposed_changes.find(item => item.id === rowId);
+    
+    //@ts-ignore
+    const rowData = queryContext?.queryClient.getQueryData(["update-log", pagination.pageIndex, pagination.pageSize]).proposed_changes.find(item => item.id === rowId);
+    
+    console.log(rowData);
+
     if (!rowData) {
       console.error("Row data not found for ID:", rowId);
       return;
@@ -167,12 +92,8 @@ export default function UpdateTable() {
   
       const response = await Axios.put(`${proposedChangeURL}/${rowId}`, formData); 
       if (response.status === 200) {
-        setUpdate(prevState => ({
-          ...prevState,
-          proposed_changes: prevState.proposed_changes.map(item =>
-            item.id === rowData.id ? { ...item, is_approved: newStatus } : item
-          )
-        }));
+        //Invalidate query, cause a re-fetch of the page. 
+        queryContext?.queryClient.invalidateQueries({queryKey: ["update-log", pagination.pageIndex, pagination.pageSize]});
       }
     } catch (error) {
       console.error("Error changing status:", error);
@@ -190,6 +111,8 @@ export default function UpdateTable() {
         isEditable={false}
         onChangedData={onChangedData}
         isProposedChanges={true}
+        pagination={pagination}
+        setPagination={setPagination}
       />
     </div>
   );
