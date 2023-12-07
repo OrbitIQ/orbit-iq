@@ -9,9 +9,32 @@ from utils.helpers import SessionLocal
 import openpyxl
 import io
 import json
-
+from unittest.mock import patch
+from flask_jwt_extended import create_access_token
 
 # This fixture will be used by the tests to send requests to the application
+@pytest.fixture(autouse=True, scope="function")
+def neuter_jwt(monkeypatch):
+    # This is definitely excessive but I'm afraid to touch it right now. I spent an hour
+    # getting this working.
+    def no_verify(*args, **kwargs):
+        pass
+
+    from flask_jwt_extended import view_decorators
+    from flask_jwt_extended import utils 
+    
+    monkeypatch.setattr(view_decorators, 'verify_jwt_in_request', no_verify)
+    monkeypatch.setattr(view_decorators, 'jwt_required', no_verify)
+    monkeypatch.setattr(utils, 'get_jwt_identity', lambda: 'test_user')
+    
+    # from flask_jwt_extended import verify_jwt_in_request, jwt_required, get_jwt_identity
+    monkeypatch.setattr('flask_jwt_extended.verify_jwt_in_request', no_verify)
+    monkeypatch.setattr('flask_jwt_extended.jwt_required', no_verify)
+    monkeypatch.setattr('flask_jwt_extended.get_jwt_identity', lambda: 'test_user')
+
+    monkeypatch.setattr("flask_jwt_extended.verify_jwt_in_request", no_verify)
+
+
 
 @pytest.fixture
 def client():
@@ -91,7 +114,13 @@ def test_update_satellite(client):
         'update_notes': 'Test update'
     }
 
-    response = client.put(f'/edit/{official_name}', json=body)
+    with app.app_context():
+        access_token = create_access_token(identity='test_user')
+    headers = {
+        'Authorization': f'Bearer {access_token}'
+    }
+
+    response = client.put(f'/edit/{official_name}', json=body, headers=headers)
     assert response.status_code == 200
 
 def test_get_all_satellites(client):

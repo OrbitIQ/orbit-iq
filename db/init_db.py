@@ -215,6 +215,16 @@ CREATE INDEX IF NOT EXISTS idx_crawler_dump_id
 ON crawler_dump_proposed_changes (crawler_dump_id);
 """)
 
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    is_admin BOOLEAN NOT NULL DEFAULT false,
+    password_hash VARCHAR(255) NOT NULL
+);
+""")
+
 # backfilling script:
 # Should probably first check that the table is empty before inserting, or was just created above.
 cursor.execute("SELECT COUNT(*) FROM official_satellites")

@@ -1,11 +1,11 @@
 import { satelliteColumns } from "./columns";
 import { DataTable } from "../Table/data-table";
 import fetchSatelliteData from "../../requestLogic/fetchSatelliteData";
-import Axios from "axios";
+import api from "@/services/AxiosInterceptor";
 import {useState} from "react";
 
 const handleExcelExport = () => {
-    Axios.get('http://localhost:8080/confirmed/satellites/export', {
+    api.get('/confirmed/satellites/export', {
       responseType: 'blob', // important
     }).then((response: any) => {
       // create file link in browser's memory

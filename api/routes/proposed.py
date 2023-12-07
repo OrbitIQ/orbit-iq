@@ -5,12 +5,14 @@ from utils.helpers import get_db_connection
 from psycopg2 import sql
 import psycopg2
 import datetime
+from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 
 proposed_changes_subpath = Blueprint('proposed_changes', __name__)
 
 # TODO: might be good for future workflow like hitting edit on the frontend's production table actually creates a proposed change
 # Create a new proposed change
 @proposed_changes_subpath.route('/changes', methods=['POST'])
+@jwt_required()
 def create_proposed_change():
     """
     Request Data:
@@ -102,6 +104,7 @@ def create_proposed_change():
 
 # select * from proposed changes
 @proposed_changes_subpath.route('/changes', methods=["GET"])
+@jwt_required()
 def get_proposed():
     """
     Retrieve proposed changes from the proposed_changes table with optional pagination.
@@ -160,6 +163,7 @@ def get_proposed():
 
 # Get a specific proposed change by id
 @proposed_changes_subpath.route('/changes/<id>', methods=['GET'])
+@jwt_required()
 def get_proposed_change(id):
     """
     Request Data:
@@ -193,6 +197,7 @@ def get_proposed_change(id):
 
 # Update a specific proposed change by ID
 @proposed_changes_subpath.route('/changes/<id>', methods=['PUT'])
+@jwt_required()
 def update_proposed_change(id):
     """
     Request Data:
@@ -287,6 +292,7 @@ def update_proposed_change(id):
 
 #approve API
 @proposed_changes_subpath.route('/changes/approve/<id>', methods=['PUT'])
+@jwt_required()
 def approve_proposed_change(id):
     """
     Request Data:
@@ -322,6 +328,7 @@ def approve_proposed_change(id):
 
 #deny API
 @proposed_changes_subpath.route('/changes/deny/<id>', methods=['PUT'])
+@jwt_required()
 def deny_proposed_change(id):
     """
     Request Data:
@@ -359,10 +366,9 @@ def deny_proposed_change(id):
 # all the proposed changes which has been denied will not be modified, and update the official_satellites table, 
 # if the proposed change is neither approve nor denied, leave it in the proposed_changes table.
 @proposed_changes_subpath.route('/changes/persist', methods=['POST'])
+@jwt_required()
 def save_all_approved_or_denied_changes():
     """
-    Request Data:
-        - approved_user (str): The user who approved the changes.
     Example Usage:
         POST /proposed/changes/persist
     Returns:
@@ -387,10 +393,22 @@ def save_all_approved_or_denied_changes():
     if not approved_changes:
         return jsonify({'error': 'No approved changes found.'}), 404
 
+    
+    # Get the user who is updating the changes
+    verify_jwt_in_request()
+    username = get_jwt_identity()
+    cur.execute("SELECT name FROM users WHERE username = %s;", (username,))
+    u = cur.fetchone()
+    if u is not None:
+        update_user = u[0] + f" ({username})"
+    else:
+        update_user = f"Unknown ({username}))" # this should only happen in testing
+
+
     # Execute SQL query to update is_approved status
     query = sql.SQL("UPDATE proposed_changes SET is_approved = {}, approved_user = {} WHERE is_approved = {};").format(
         sql.Literal("persisted"),
-        sql.Literal(request.form['approved_user']),
+        sql.Literal(update_user),
         sql.Literal("approved")
     )
     cur.execute(query)
@@ -440,10 +458,9 @@ def save_all_approved_or_denied_changes():
                 """, list(official_satellite_values.values())
             )
 
-
             # Prepare values for change log
             changelog_values = {
-                'update_user': 'admin',
+                'update_user': update_user,
                 'update_action': 'persisted',
                 'update_time': datetime.datetime.now(),
                 'update_notes': 'changes persisted from proposed table',
