@@ -110,13 +110,17 @@ def delete():
     if not username:
         return jsonify({"msg": "Username required"}), 400
 
+    making_request = get_jwt_identity()
+    if username == making_request:
+        return jsonify({"msg": "You cannot delete your own account"}), 400
+
     # check if username already exists in table users
     conn = get_db_connection()
     cursor = conn.cursor()
 
     # check if user making this request is an admin (priviledged to make other accts)
     query = "SELECT is_admin FROM users WHERE username = %s"
-    cursor.execute(query, (get_jwt_identity(),))
+    cursor.execute(query, (making_request,))
     res = cursor.fetchone()
     if not res or not res[0]:
         cursor.close()
