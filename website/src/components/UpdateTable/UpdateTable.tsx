@@ -14,6 +14,7 @@ const onChangedData = () => {};
 // Define the type for handleApprove and handleDeny functions
 type HandleChangeFunction = (rowId: number) => Promise<void>;
 
+
 export default function UpdateTable() {
 
   const [pagination, setPagination] = useState({
@@ -22,6 +23,17 @@ export default function UpdateTable() {
   });
 
   const queryContext = useContext(queryClientContext);
+
+  const invalidateSatelliteDataEntries = () => {
+      queryContext?.queryClient.getQueryCache().getAll().forEach(cache =>
+        {
+          if(cache.queryKey[0] === 'satellite-data'){
+            console.log(`Invalidating key: ${cache.queryKey}`)
+            queryContext?.queryClient.invalidateQueries({queryKey: cache.queryKey})
+          }
+        }                         
+      );
+  }
 
   const handleApprove: HandleChangeFunction = async (rowId: number) => {
     try {
@@ -36,9 +48,10 @@ export default function UpdateTable() {
           console.log("Response received", persistResponse);
 
           if (persistResponse.status === 200) {
-            console.log("Persisted changes:", persistResponse.data.message);
-            alert("Approval and persisting of changes confirmed.");
-          }
+              //Invalidate verified data cache so that the new change will reliably show up.
+              invalidateSatelliteDataEntries();
+              alert("Approval and persisting of changes confirmed.");
+            }
 
           //Invalidate query, cause a re-fetch of the proposed-changes page. 
           queryContext?.queryClient.invalidateQueries({queryKey: ["update-log", pagination.pageIndex, pagination.pageSize]});
@@ -94,6 +107,7 @@ export default function UpdateTable() {
       if (response.status === 200) {
         //Invalidate query, cause a re-fetch of the page. 
         queryContext?.queryClient.invalidateQueries({queryKey: ["update-log", pagination.pageIndex, pagination.pageSize]});
+        invalidateSatelliteDataEntries();
       }
     } catch (error) {
       console.error("Error changing status:", error);
