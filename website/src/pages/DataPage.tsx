@@ -1,5 +1,5 @@
 import SatelliteTable from "../components/SatelliteTable/SatelliteTable";
-import {useContext} from "react";
+import {useContext, useEffect} from "react";
 import { Switch } from "../components/ui/switch";
 import { Label } from "../components/ui/label";
 import { useState } from "react";
@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import EditModal from "@/components/SatelliteTable/EditModal";
 import { queryClientContext } from "@/context";
 import api from "@/services/AxiosInterceptor";
+import AuthService from "@/services/AuthService";
 
 function DataPage() {
-
   const cacheKey = "satellite-data"
   const [canEdit, setCanEdit] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);

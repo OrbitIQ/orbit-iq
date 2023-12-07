@@ -11,7 +11,7 @@ def is_password_secure(password):
     """
     Check if the password is reasonably secure and return reasons if it's not.
     A secure password should have:
-    - At least 12 characters
+    - At least 8 characters
     - At least one uppercase letter
     - At least one lowercase letter
     - At least one digit
@@ -19,8 +19,8 @@ def is_password_secure(password):
     """
     reasons = []
 
-    if len(password) < 12:
-        reasons.append("Password should be at least 12 characters long.")
+    if len(password) < 8:
+        reasons.append("Password should be at least 8 characters long.")
 
     if not any(char.isdigit() for char in password):
         reasons.append("Password should include at least one digit.")
@@ -274,3 +274,40 @@ def is_admin():
     cursor.close()
     conn.close()
     return jsonify({"admin": True}), 200
+
+@authentication_subpath.route('/changepassword', methods=['POST'])
+@jwt_required()
+def change_password():
+    current_user = get_jwt_identity()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Get request data
+    old_password = request.json.get('old_password', None)
+    new_password = request.json.get('new_password', None)
+
+    if not old_password or not new_password:
+        return jsonify({"msg": "Old and new passwords are required"}), 400
+    
+    # Get user's hashed password from db
+    cursor.execute("SELECT password_hash FROM users WHERE username = %s", (current_user,))
+    user_password = cursor.fetchone()[0]
+    if not user_password or not check_password_hash(user_password, old_password):
+        cursor.close()
+        conn.close()
+        return jsonify({"msg": "The old password is incorrect"}), 400
+    
+    secure, reasons = is_password_secure(new_password)
+    if not secure:
+        cursor.close()
+        conn.close()
+        return jsonify({"msg": "\n".join(reasons)}), 400
+    
+    # Update user's password
+    cursor.execute("UPDATE users SET password_hash = %s WHERE username = %s", (generate_password_hash(new_password), current_user))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify({"msg": "Password changed successfully"}), 200

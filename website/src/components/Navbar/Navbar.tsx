@@ -35,8 +35,8 @@ function Navbar() {
                 User Management
               </NavLink>
             )}
-            <NavLink to="/logout" className={linkStyle}>
-              Logout
+            <NavLink to="/account" className={linkStyle}>
+              Account
             </NavLink>
           </div>
         </div>

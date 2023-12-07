@@ -1,6 +1,8 @@
 // AuthService.ts
 import { AxiosResponse } from "axios";
+import { useState, useEffect } from 'react';
 import api from "./AxiosInterceptor";
+
 
 interface LoginResponse {
   access_token: string;
@@ -57,10 +59,16 @@ const checkAdminStatus = async (): Promise<boolean> => {
   }
 };
 
+const isAuth = (): boolean => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  return Boolean(user.access_token);
+};
+
 export default {
   register,
   login,
   logout,
   deleteUser,
-  checkAdminStatus
+  checkAdminStatus,
+  isAuth
 };

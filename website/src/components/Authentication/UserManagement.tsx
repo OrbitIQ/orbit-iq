@@ -45,7 +45,6 @@ const UserManagement = () => {
 
       <RegistrationModal isOpen={isModalOpen} onClose={handleCloseModal} />
 
-
       {/* User list in a basic table */}
       <div className="mb-6">
         <table className="min-w-full leading-normal">

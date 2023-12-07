@@ -16,6 +16,7 @@ import MainLayout from "./Layouts/MainLayout";
 import Register from "./components/Authentication/Register";
 import ToastErrorWrapper from "./components/Toast/ToastErrorWrapper";
 import UserManagement from "./components/Authentication/UserManagement";
+import Account from "./components/Authentication/Account";
 
 function App() {
   const queryClient = new QueryClient()
@@ -27,12 +28,12 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <Routes>
             <Route element={<MainLayout />}>
-              <Route path="/" element={<Navigate replace to="/data" />} />
+              <Route path="/" element={<DataPage />} />
               <Route path="/data" element={<DataPage />} />
               <Route path="/updates" element={<UpdatesPage />} />
               <Route path="/changelog" element={<ChangelogPage />} />
-              <Route index element={<DataPage />} />
               <Route path="/users" element={<UserManagement />} /> {/* TODO: Restrict to just admins, need to store state if admin */}
+              <Route path="/account" element={<Account /> } />
             </Route>
             <Route path="/logout" element={<Logout />} />
             <Route path="/login" element={<Login />} />

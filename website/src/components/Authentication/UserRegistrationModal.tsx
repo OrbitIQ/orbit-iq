@@ -12,6 +12,9 @@ const RegistrationModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
     try {
       await AuthService.register(username, fullName, password);
       onClose(); // Close modal on successful registration
+
+      // Reload window
+      window.location.reload();
     } catch (error) {
       console.error("Registration error:", error);
     }
