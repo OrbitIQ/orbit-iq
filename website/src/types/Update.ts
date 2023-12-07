@@ -1,13 +1,11 @@
 export interface UpdateData {
-    satellites: Update[];
+    proposed_changes: Update[];
 }
 
 export interface Update {
-    proposed_user: string;
-    created_at: Date;
-    proposed_notes: string;
-    is_approved: string;
+    [key: string]: any;
     official_name: string;
+    is_approved: string;
     reg_country: string;
     own_country: string;
     owner_name: string;
@@ -36,4 +34,8 @@ export interface Update {
     comment_note: string;
     source_orbit: string;
     source_satellite: Array<null | string>;
+    id: number;    
+    proposed_user: string;
+    proposed_notes: string;
+    created_at: Date;
 }

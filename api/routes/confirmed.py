@@ -27,6 +27,8 @@ def get_satellites():
             Defaults to 'launch_date' if not provided.
         - asc (optional): A boolean value specifying the sort order.
             Defaults to False if not provided.
+        - search (optional): A string specifying the search term to filter by.
+        - search_column (optional): A string specifying the column to search in. Default is 'official_name'
 
     Example Usage:
         - /confirmed/satellites?limit=10&page=2: Returns records 11-20
@@ -43,6 +45,8 @@ def get_satellites():
     page = request.args.get('page', default=1, type=int)
     sort_by = request.args.get('sort_by', default='launch_date', type=str)
     asc = request.args.get('asc', default=False, type=lambda v: v.lower() == 'true')
+    search = request.args.get('search', default=None, type=str)
+    search_column = request.args.get('search_column', default='official_name', type=str)
     
     # Calculate offset based on limit and page
     offset = (page - 1) * limit if limit else 0
@@ -52,12 +56,18 @@ def get_satellites():
 
     # Modify the SQL query to use LIMIT, OFFSET, and ORDER BY for pagination and sorting
     query = "SELECT * FROM official_satellites"
+
+    if search:
+        # use where & ilike to search for the term search
+        query += f" WHERE {search_column} ILIKE '%{search}%'"
+
     if sort_by:
         order = 'ASC' if asc else 'DESC'
         query += f" ORDER BY {sort_by} {order}, official_name DESC"
     else:
         query += " ORDER BY launch_date DESC, official_name DESC"
-    if limit:
+
+    if limit is not None:
         query += " LIMIT %s OFFSET %s"
         cursor.execute(query, (limit, offset))
     else:

@@ -159,7 +159,13 @@ def login():
     query = "SELECT password_hash FROM users WHERE username = %s"
     cursor.execute(query, (username,))
 
-    user_password = cursor.fetchone()[0]
+    res = cursor.fetchone()
+    if not res:
+        cursor.close()
+        conn.close()
+        return jsonify({"msg": "Bad username or password"}), 401
+
+    user_password = res[0]
     if not user_password or not check_password_hash(user_password, password):
         cursor.close()
         conn.close()

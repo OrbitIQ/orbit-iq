@@ -5,7 +5,7 @@ from utils.helpers import get_db_connection
 from psycopg2 import sql
 import psycopg2
 import datetime
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 proposed_changes_subpath = Blueprint('proposed_changes', __name__)
 
@@ -58,7 +58,7 @@ def create_proposed_change():
         sql.Literal(proposed_user),
         sql.Literal(created_at),
         sql.Literal(proposed_notes),
-        sql.Literal("pending"),
+        sql.Literal("pending"), # TODO: btw we might want to change this to any proposed changes, @davidteather will do this
         sql.Literal(data_dict['official_name']),
         sql.Literal(data_dict['reg_country']),
         sql.Literal(data_dict['own_country']),
@@ -369,8 +369,6 @@ def deny_proposed_change(id):
 @jwt_required()
 def save_all_approved_or_denied_changes():
     """
-    Request Data:
-        - approved_user (str): The user who approved the changes.
     Example Usage:
         POST /proposed/changes/persist
     Returns:
@@ -395,10 +393,17 @@ def save_all_approved_or_denied_changes():
     if not approved_changes:
         return jsonify({'error': 'No approved changes found.'}), 404
 
+    
+    # Get the user who is updating the changes
+    username = get_jwt_identity()
+    cur.execute("SELECT name FROM users WHERE username = %s;", (username,))
+    update_user = cur.fetchone()[0] + f" ({username})"
+
+
     # Execute SQL query to update is_approved status
     query = sql.SQL("UPDATE proposed_changes SET is_approved = {}, approved_user = {} WHERE is_approved = {};").format(
         sql.Literal("persisted"),
-        sql.Literal(request.form['approved_user']),
+        sql.Literal(update_user),
         sql.Literal("approved")
     )
     cur.execute(query)
@@ -448,10 +453,9 @@ def save_all_approved_or_denied_changes():
                 """, list(official_satellite_values.values())
             )
 
-
             # Prepare values for change log
             changelog_values = {
-                'update_user': 'admin',
+                'update_user': update_user,
                 'update_action': 'persisted',
                 'update_time': datetime.datetime.now(),
                 'update_notes': 'changes persisted from proposed table',
