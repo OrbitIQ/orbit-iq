@@ -6,7 +6,6 @@ import UpdatesPage from "./pages/UpdatesPage";
 import { Routes, Route, Navigate } from "react-router-dom"; // Import Navigate
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
-import { SatelliteDataProvider } from '@/Context/SatelliteDataContext';
 import {queryClientContext} from './context';
 
 function App() {
@@ -14,7 +13,6 @@ function App() {
 
   return (
     <>
-      <SatelliteDataProvider>
         <queryClientContext.Provider value = {{queryClient}}>
           <QueryClientProvider client={queryClient}>
             <Navbar />
@@ -27,7 +25,6 @@ function App() {
             <ReactQueryDevtools/>
           </QueryClientProvider>
         </queryClientContext.Provider>
-      </SatelliteDataProvider>
     </>
   );
 }
