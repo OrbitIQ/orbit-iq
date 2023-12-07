@@ -10,8 +10,9 @@ import {
 } from "@tanstack/react-table";
 
 import {useQuery} from "@tanstack/react-query";
-import CircularProgress from '@mui/material/CircularProgress';
-import Box from '@mui/material/Box';
+import BottomNavBar from "./BottomNavBar";
+
+import ProgressButton from "../ui/ProgressButton";
 
 import {
   Table,
@@ -22,18 +23,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import ColumnFilterDropdown from "./ColumnFilterDropdown";
+
+import SearchButton from "../ui/SearchButton";
 
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef, useCallback, } from "react";
 import { columnVisibilityDefaults } from "@/Constants/constants";
 import { DataTableProps } from "@/types/DataTableProps";
-import reactTableCreatorFactory from "../SatelliteTable/reactTableCreatorFactory";
+import reactTableCreatorFactory from "./reactTableCreatorFactory";
 import { Input } from "@/components/ui/input";
 
 const defaultColumns: Partial<ColumnDef<any>> = {
@@ -99,6 +97,7 @@ export function DataTable<TData, TValue>({
   setPagination
 }: DataTableProps<TData, TValue>) {
 
+  const [searchActive, setSearchActive] = useState<Boolean>(false);
 
 
   const { isLoading, error, data, isSuccess } = useQuery({
@@ -207,16 +206,7 @@ export function DataTable<TData, TValue>({
   if (isLoading){
     return (
       <div className="container mx-auto py-10">
-       <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center', // Horizontally center the content
-          alignItems: 'center',     // Vertically center the content
-          height: '100vh',          // Make the container take the full height of the viewport
-        }}
-      >
-          <CircularProgress />
-      </Box>
+        <ProgressButton/>
       </div>
     );
   }
@@ -239,32 +229,15 @@ export function DataTable<TData, TValue>({
             }
             className="max-w-sm"
           />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Filter Columns
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="max-h-64 overflow-y-auto">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+
+          <SearchButton searchActive={searchActive} handleClick={() => {
+            setSearchActive(!searchActive); 
+            
+          }}/>
+
+          <ColumnFilterDropdown table={table}/>
+
+
         </div>
 
         <div className="rounded-md border">
@@ -279,23 +252,8 @@ export function DataTable<TData, TValue>({
           </Table>
         </div>
 
+        <BottomNavBar handleNextPage={handleNextPage} handlePreviousPage={handlePreviousPage}/>
 
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <Button
-            variant="outline"
-            buttonSize="sm"
-            onClick={handlePreviousPage}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            buttonSize="sm"
-            onClick={handleNextPage}
-          >
-            Next
-          </Button>
-        </div>
       </div>
     );
   }  
@@ -311,33 +269,13 @@ export function DataTable<TData, TValue>({
             }
             className="max-w-sm"
           />
+          <SearchButton searchActive={searchActive} handleClick={() => {
+            setSearchActive(!searchActive); 
+            setData([]);
+          }}/>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Filter Columns
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="max-h-64 overflow-y-auto">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ColumnFilterDropdown table={table}/>
+
           <Button onClick={onExportExcel} variant="outline" className="ml-4">Export to Excel</Button>
         </div>
 
@@ -353,23 +291,8 @@ export function DataTable<TData, TValue>({
           </Table>
         </div>
 
+        <BottomNavBar handleNextPage={handleNextPage} handlePreviousPage={handlePreviousPage}/>
 
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <Button
-            variant="outline"
-            buttonSize="sm"
-            onClick={handlePreviousPage}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            buttonSize="sm"
-            onClick={handleNextPage}
-          >
-            Next
-          </Button>
-        </div>
       </div>
     );
 

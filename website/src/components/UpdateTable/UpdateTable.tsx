@@ -1,8 +1,7 @@
 import { DataTable } from "../Table/data-table";
 import Axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { proposedChangeURL } from "@/Constants/constants";
-import { UpdateData } from "@/types/Update";
 import UpdateColumns from "./columns";
 import fetchUpdateData from "@/requestLogic/fetchUpdateData";
 import { queryClientContext } from "@/context";
