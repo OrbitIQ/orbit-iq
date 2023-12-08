@@ -1,4 +1,5 @@
 import { DataTable } from "../Table/data-table";
+
 import { useState } from "react";
 import UpdateColumns from "./columns";
 import fetchUpdateData from "@/requestLogic/fetchUpdateData";
@@ -36,11 +37,13 @@ export default function UpdateTable() {
   const handleApprove: HandleChangeFunction = async (rowId: number) => {
     try {
       if (window.confirm("Are you sure you want to approve this record?")) {
+
         const response = await api.put(`/proposed/changes/approve/${rowId}`);
         if (response.status === 200) {
 
           const formData = new FormData();
           formData.append('approved_user', 'admin');
+
           const persistResponse = await api.post(`/proposed/changes/persist`,
           formData);
           console.log("Response received", persistResponse);
@@ -64,6 +67,7 @@ export default function UpdateTable() {
   const handleDeny: HandleChangeFunction = async (rowId: number) => {
     try {
       if (window.confirm("Are you sure you want to deny this item?")) {
+
         const response = await api.put(`/proposed/changes/deny/${rowId}`);
         if (response.status === 200) {
           console.log("Denied:", response.data.id);
