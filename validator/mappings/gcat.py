@@ -9,7 +9,7 @@ def from_gcat(record):
     # Skip debris records
     name = get_key(data, 'Name', '')
     name = name.strip()
-    if name.lower().startswith("deb "):
+    if name.lower().startswith("deb ") or name.lower().split(' ').count('debris') > 0:
         return None
 
     # Extract and validate necessary fields

@@ -5,11 +5,9 @@ import Modal from 'react-modal';
 Modal.setAppElement('#root');
 
 interface EditModalProps {
-  onSave: (updateUser: string, updateNotes: string, updateData: any) => void;
+  onSave: (updateNotes: string, updateData: any) => void;
   onCancel: () => void;
   isOpen: boolean;
-  // Add updateUser and updateNotes to the interface
-  updateUser?: string;
   updateNotes?: string;
   updateData: any;
 }
@@ -18,29 +16,18 @@ const EditModal = ({
   onSave,
   onCancel,
   isOpen,
-  updateUser: initialUpdateUser,
   updateNotes: initialUpdateNotes,
   updateData,
 }: EditModalProps) => {
-  const [updateUser, setUpdateUser] = useState(initialUpdateUser || '');
   const [updateNotes, setUpdateNotes] = useState(initialUpdateNotes || '');
 
   const handleSave = () => {
-    onSave(updateUser, updateNotes, updateData);
+    onSave(updateNotes, updateData);
   };
 
   return (
     <Modal isOpen={isOpen} onRequestClose={onCancel} contentLabel="Edit Modal" style={modalStyle}>
       <div>
-        <div style={inputContainerStyle}>
-          <label style={labelStyle}>User</label>
-          <input
-            type="text"
-            value={updateUser}
-            onChange={(e) => setUpdateUser(e.target.value)}
-            style={inputStyle}
-          />
-        </div>
         <div style={inputContainerStyle}>
           <label style={labelStyle}>Notes</label>
           <textarea
@@ -85,9 +72,6 @@ const modalStyle: ReactModal.Styles = {
     },
 };
 
-//const contentStyle: React.CSSProperties = {
-  // Add any additional styles for the content container here
-//};
 
 const inputContainerStyle: React.CSSProperties = {
   marginBottom: '15px',

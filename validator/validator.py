@@ -4,12 +4,14 @@ from proposed_change import ProposedChange, insert_proposed_change
 from utils.helpers import get_db_connection
 from mappings.gcat import from_gcat
 from mappings.aerospace import from_aerospace
+from mappings.in_the_sky import from_in_the_sky
 from typing import Optional
 import time
 
 source_id_to_mapper = {
     1: from_gcat,
-    2: from_aerospace
+    2: from_aerospace,
+    3: from_in_the_sky
 }
 
 # Needs to pull from crawler_dump table

@@ -1,6 +1,5 @@
-import Axios from 'axios';
 import { SatelliteData } from "../types/Satellite";
-import { confirmedSatellitesURL } from "@/Constants/constants";
+import api from '@/services/AxiosInterceptor';
 
 const sanitizeSatelliteDataJson = (data: SatelliteData): SatelliteData => {
   data.satellites.forEach((satellite) => {
@@ -26,8 +25,8 @@ const sanitizeSourceSatellite = (
 
 export default async function fetchSatelliteData(page: number, pageSize: number): Promise<SatelliteData>{
 
-    const satelliteData = await Axios.get<SatelliteData>(
-        `${confirmedSatellitesURL}?limit=${pageSize}&page=${page}`
+    const satelliteData = await api.get<SatelliteData>(
+        `/confirmed/satellites?limit=${pageSize}&page=${page}`
     );
 
     const rel = sanitizeSatelliteDataJson(satelliteData.data).satellites;

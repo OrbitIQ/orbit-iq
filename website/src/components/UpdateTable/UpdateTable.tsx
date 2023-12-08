@@ -1,11 +1,11 @@
 import { DataTable } from "../Table/data-table";
-import Axios from "axios";
+
 import { useState } from "react";
-import { proposedChangeURL } from "@/Constants/constants";
 import UpdateColumns from "./columns";
 import fetchUpdateData from "@/requestLogic/fetchUpdateData";
 import { queryClientContext } from "@/context";
 import {useContext} from "react";
+import api from "@/services/AxiosInterceptor";
 
 const onChangedData = () => {};
 
@@ -37,12 +37,14 @@ export default function UpdateTable() {
   const handleApprove: HandleChangeFunction = async (rowId: number) => {
     try {
       if (window.confirm("Are you sure you want to approve this record?")) {
-        const response = await Axios.put(`${proposedChangeURL}/approve/${rowId}`);
+
+        const response = await api.put(`/proposed/changes/approve/${rowId}`);
         if (response.status === 200) {
 
           const formData = new FormData();
           formData.append('approved_user', 'admin');
-          const persistResponse = await Axios.post(`${proposedChangeURL}/persist`,
+
+          const persistResponse = await api.post(`/proposed/changes/persist`,
           formData);
           console.log("Response received", persistResponse);
 
@@ -65,7 +67,8 @@ export default function UpdateTable() {
   const handleDeny: HandleChangeFunction = async (rowId: number) => {
     try {
       if (window.confirm("Are you sure you want to deny this item?")) {
-        const response = await Axios.put(`${proposedChangeURL}/deny/${rowId}`);
+
+        const response = await api.put(`/proposed/changes/deny/${rowId}`);
         if (response.status === 200) {
           console.log("Denied:", response.data.id);
 
@@ -102,7 +105,7 @@ export default function UpdateTable() {
       formData.append('created_at', new Date().toISOString());
       formData.append('proposed_notes', 'revert changes');
   
-      const response = await Axios.put(`${proposedChangeURL}/${rowId}`, formData); 
+      const response = await api.put(`/proposed/changes/${rowId}`, formData); 
       if (response.status === 200) {
         //Invalidate query, cause a re-fetch of the page. 
         queryContext?.queryClient.invalidateQueries({queryKey: ["update-log", pagination.pageIndex, pagination.pageSize]});

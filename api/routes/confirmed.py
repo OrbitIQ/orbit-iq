@@ -5,11 +5,14 @@ from utils.helpers import SessionLocal
 from sqlalchemy import text
 import csv
 from io import StringIO
+from flask_jwt_extended import jwt_required
 
 # Create a Blueprint for this subpath
 confirmed_subpath = Blueprint('confirmed', __name__)
 
+
 @confirmed_subpath.route('/satellites', methods=["GET"])
+@jwt_required()
 def get_satellites():
     """
     Retrieve satellites from the official_satellites table with optional pagination.
@@ -84,6 +87,7 @@ def get_satellites():
 
 # Add a route to retrieve a satellite by name
 @confirmed_subpath.route('/satellites/<official_name>', methods=["GET"])
+@jwt_required()
 def get_satellite_by_name(official_name):
     """
     Retrieve a satellite from the official_satellites table by name.
@@ -118,6 +122,7 @@ def get_satellite_by_name(official_name):
     return jsonify({'satellite': satellite_as_dict}), 200
 
 @confirmed_subpath.route('/satellites/export', methods=["GET"])
+@jwt_required()
 def export_to_excel():
     """
     Export the official_satellites data to an Excel file and return it as a downloadable response.
@@ -178,6 +183,7 @@ def export_to_excel():
 # Note: This route is for Testing purpose only, deleting test data from the official table is not allowed. 
 # It is not meant to be part of the API. DO NOT USE THIS IN PRODUCTION
 @confirmed_subpath.route('/satellites/<official_name>', methods=["DELETE"])
+@jwt_required()
 def delete_satellite_by_name(official_name):
     # DO NOT USE THIS IN PRODUCTION
     conn = get_db_connection()
