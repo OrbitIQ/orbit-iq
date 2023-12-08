@@ -230,10 +230,10 @@ export function DataTable<TData, TValue>({
             className="max-w-sm"
           />
 
-          <SearchButton searchActive={searchActive} handleClick={() => {
+          {/* <SearchButton searchActive={searchActive} handleClick={() => {
             setSearchActive(!searchActive); 
             
-          }}/>
+          }}/> */}
 
           <ColumnFilterDropdown table={table}/>
 
@@ -269,10 +269,10 @@ export function DataTable<TData, TValue>({
             }
             className="max-w-sm"
           />
-          <SearchButton searchActive={searchActive} handleClick={() => {
+          {/* <SearchButton searchActive={searchActive} handleClick={() => {
             setSearchActive(!searchActive); 
             setData([]);
-          }}/>
+          }}/> */}
 
           <ColumnFilterDropdown table={table}/>
 
