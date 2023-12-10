@@ -23,10 +23,10 @@ export default function UpdateTable() {
 
   const queryContext = useContext(queryClientContext);
 
-  const invalidateSatelliteDataEntries = () => {
+  const invalidateDataEntries = (dataCategory: string) => {
       queryContext?.queryClient.getQueryCache().getAll().forEach(cache =>
         {
-          if(cache.queryKey[0] === 'satellite-data'){
+          if(cache.queryKey[0] === dataCategory){
             console.log(`Invalidating key: ${cache.queryKey}`)
             queryContext?.queryClient.invalidateQueries({queryKey: cache.queryKey})
           }
@@ -50,11 +50,12 @@ export default function UpdateTable() {
 
           if (persistResponse.status === 200) {
               //Invalidate verified data cache so that the new change will reliably show up.
-              invalidateSatelliteDataEntries();
+              invalidateDataEntries('satellite-data');
               alert("Approval and persisting of changes confirmed.");
             }
 
           //Invalidate query, cause a re-fetch of the proposed-changes page. 
+          invalidateDataEntries('change-log');
           queryContext?.queryClient.invalidateQueries({queryKey: ["update-log", pagination.pageIndex, pagination.pageSize]});
         }
       }     
@@ -73,6 +74,7 @@ export default function UpdateTable() {
           console.log("Denied:", response.data.id);
 
           //Invalidate query, cause a re-fetch of the page. 
+          invalidateDataEntries('change-log');
           queryContext?.queryClient.invalidateQueries({queryKey: ["update-log", pagination.pageIndex, pagination.pageSize]});
         }
       }
@@ -109,7 +111,8 @@ export default function UpdateTable() {
       if (response.status === 200) {
         //Invalidate query, cause a re-fetch of the page. 
         queryContext?.queryClient.invalidateQueries({queryKey: ["update-log", pagination.pageIndex, pagination.pageSize]});
-        invalidateSatelliteDataEntries();
+        invalidateDataEntries('satellite-data');
+        invalidateDataEntries('change-log');
       }
     } catch (error) {
       console.error("Error changing status:", error);
