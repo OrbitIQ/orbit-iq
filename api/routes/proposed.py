@@ -104,7 +104,7 @@ def create_proposed_change():
 
 # select * from proposed changes
 @proposed_changes_subpath.route('/changes', methods=["GET"])
-#@jwt_required()
+@jwt_required()
 def get_proposed():
     """
     Retrieve proposed changes from the proposed_changes table with optional pagination.

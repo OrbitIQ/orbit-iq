@@ -129,7 +129,7 @@ def update(official_name):
 
 
 @edit_subpath.route('/history', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def get_all():
     """
     Retrieve all records from the official_satellites_changelog table with optional pagination and filtering.
@@ -196,7 +196,7 @@ def get_all():
     columns = [desc[0] for desc in cursor.description]
     records_as_dict = [dict(zip(columns, row)) for row in records]
 
-    return jsonify({'history_records': records_as_dict}), 200
+    return jsonify({'satellites': records_as_dict}), 200
 
 #TODO: choose an approriate one from export to csv/excel
 @edit_subpath.route('/history/export/csv', methods=['GET'])
