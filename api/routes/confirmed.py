@@ -161,9 +161,12 @@ def export_to_excel():
             
             # Process the rest of the row
             processed_row = [value if value is not None else "None" for value in row]
+            processed_rows.append(processed_row)
              
         # Convert the results to CSV format
         csv_data = ",".join(columns) + "\n"  # Column headers
+        for row in processed_rows[0:5]:
+            csv_data += ",".join([str(element) for element in row]) + "\n"
 
         output = StringIO()
         writer = csv.writer(output, quoting=csv.QUOTE_MINIMAL)
