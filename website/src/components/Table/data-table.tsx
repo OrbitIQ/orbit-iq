@@ -238,43 +238,6 @@ export function DataTable<TData, TValue>({
       </div>
     )
   }
-  if(onExportExcel === undefined){
-    return (
-      <div>
-        <div className="flex items-center py-4">
-          <div className="flex w-full max-w-sm items-center space-x-2">
-            <Input type="searchQuery" placeholder={`Enter ${selectedColumn.replace(/_/g, ' ')}...`} value={searchQuery} onChange={e => setSearchQuery(e.target.value)}  ref={(inp) => {
-              if(searchActive && inp !== null){
-                inp.focus()
-              }
-            }} />
-            <SearchFilterDropdown table = {table} selectedColumn={selectedColumn} setSelectedColumn={setSelectedColumn}/>
-          </div>
-
-
-          <ColumnFilterDropdown table={table}/>
-
-
-        </div>
-
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-                {renderTableHeaders(canEdit)}
-            </TableHeader>
-
-            <TableBody>
-              {renderTableBodyRows(canEdit, columns)}
-            </TableBody>
-          </Table>
-        </div>
-
-        <BottomNavBar handleNextPage={handleNextPage} handlePreviousPage={handlePreviousPage}/>
-
-      </div>
-    );
-  }  
-  else{
     return (
       <div>
         <div className="flex items-center py-4">
@@ -290,7 +253,9 @@ export function DataTable<TData, TValue>({
 
           <ColumnFilterDropdown table={table}/>
 
-          <Button onClick={onExportExcel} variant="outline" className="ml-4">Export to Excel</Button>
+          {onExportExcel !== undefined && 
+            <Button onClick={onExportExcel} variant="outline" className="ml-4">Export to Excel</Button>
+          }
         </div>
 
         <div className="rounded-md border">
@@ -310,6 +275,5 @@ export function DataTable<TData, TValue>({
       </div>
     );
 
-  }
 
 }
