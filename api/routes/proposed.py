@@ -104,7 +104,7 @@ def create_proposed_change():
 
 # select * from proposed changes
 @proposed_changes_subpath.route('/changes', methods=["GET"])
-@jwt_required()
+#@jwt_required()
 def get_proposed():
     """
     Retrieve proposed changes from the proposed_changes table with optional pagination.
@@ -135,21 +135,35 @@ def get_proposed():
     asc = request.args.get('asc', default=False, type=lambda v: v.lower() == 'true')
     # Calculate offset based on limit and page
     offset = (page - 1) * limit if limit else 0
+    search = request.args.get('search', default=None, type=str)
+    search_column = request.args.get('search_column', default='official_name', type=str)
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     # Modify the SQL query to use LIMIT, OFFSET, and ORDER BY for pagination and sorting
     query = "SELECT * FROM proposed_changes"
+
+    params = []
+    if search:
+        # use where & ilike to search for the term search
+        search_term = f"%{search}%"
+        query += f" WHERE {search_column} ILIKE %s"
+        params.append(search_term)
+
     if sort_by:
         order = 'ASC' if asc else 'DESC'
-        query += f" ORDER BY {sort_by} {order}"
-    if limit:
-        query += " LIMIT %s OFFSET %s"
-        cursor.execute(query, (limit, offset))
+        query += f" ORDER BY {sort_by} {order}, official_name DESC"
     else:
-        cursor.execute(query)
+        query += " ORDER BY launch_date DESC, official_name DESC"
+
+    if limit is not None:
+        query += " LIMIT %s OFFSET %s"
+        params.extend([limit, offset])
+  
+    cursor.execute(query, tuple(params))
     proposed_changes = cursor.fetchall()
+
 
     # Close the connection
     cursor.close()
