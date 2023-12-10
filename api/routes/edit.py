@@ -172,7 +172,7 @@ def get_all():
 
     if search:
         search_term = f"%{search}%"
-        query += f" WHERE {search_column} ILIKE %s"
+        query += f" WHERE CAST({search_column} AS TEXT) ILIKE %s"
         params.append(search_term)
 
     if sort_by:
