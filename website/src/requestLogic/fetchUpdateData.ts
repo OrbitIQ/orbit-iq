@@ -1,10 +1,17 @@
 import { UpdateData } from "@/types/Update";
 import api from '@/services/AxiosInterceptor';
 
-export default async function fetchUpdateData(page: number, pageSize: number): Promise<UpdateData>{
+export default async function fetchUpdateData(page: number, pageSize: number, search?: string, searchColumn?: string): Promise<UpdateData>{
+
+    let searchQuery = search !== undefined ? `/proposed/changes?limit=${pageSize}&page=${page}&search=${search}` : `/proposed/changes?limit=${pageSize}&page=${page}`
+
+    
+    if(search !== undefined && searchColumn !== undefined){
+        searchQuery += `&search_column=${searchColumn}`
+    }
 
     const updateData = await api.get<UpdateData>(
-        `/proposed/changes?limit=${pageSize}&page=${page}`
+        searchQuery
     );
 
     const rel = updateData.data;

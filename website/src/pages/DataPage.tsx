@@ -39,6 +39,13 @@ function DataPage() {
           //Invalidate prior query so we re-fetch.
           console.log(`Attempting to invalidate: ${[cacheKey, dataChange.pagination.pageIndex, dataChange.pagination.pageSize].toString()}`)
           queryContext?.queryClient.invalidateQueries({queryKey: [cacheKey, dataChange.pagination.pageIndex, dataChange.pagination.pageSize]});
+          queryContext?.queryClient.getQueryCache().getAll().forEach(cache =>
+            {
+              if(cache.queryKey[0] === `change-log`){
+                queryContext?.queryClient.invalidateQueries({queryKey: cache.queryKey})
+              }
+            }                         
+          );
           console.log(response);
         })
         .catch(function (error) {

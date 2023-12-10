@@ -11,6 +11,7 @@ import {
 
 import {useQuery} from "@tanstack/react-query";
 import BottomNavBar from "./BottomNavBar";
+import SearchFilterDropdown from "./SearchFilterDropdown";
 
 import ProgressButton from "../ui/ProgressButton";
 
@@ -25,7 +26,6 @@ import {
 
 import ColumnFilterDropdown from "./ColumnFilterDropdown";
 
-import SearchButton from "../ui/SearchButton";
 
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef, useCallback, } from "react";
@@ -97,15 +97,36 @@ export function DataTable<TData, TValue>({
   setPagination
 }: DataTableProps<TData, TValue>) {
 
+  //State for search
   const [searchActive, setSearchActive] = useState<Boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedColumn, setSelectedColumn] = useState<string>("official_name");
 
+
+  useEffect(() => {
+    if(searchQuery.length===0) {
+      setSearchActive(false)
+    }
+    else{
+      setSearchActive(true);
+    }
+  }, [searchQuery])
+
+  //reset pagination to defaults if there is a change to whether or not the search query is active.
+  useEffect(() => {
+    setPagination({
+    pageIndex: 1,
+    pageSize: 10, 
+  });
+  }, [searchActive])
 
   const { isLoading, error, data, isSuccess } = useQuery({
-      queryKey: [cacheKey, pagination.pageIndex, pagination.pageSize],
-      queryFn: () => fetchFunction(pagination.pageIndex, pagination.pageSize),
+      queryKey: searchActive ? [cacheKey, searchQuery, selectedColumn, pagination.pageIndex, pagination.pageSize] : [cacheKey, pagination.pageIndex, pagination.pageSize],
+      queryFn: () => searchActive ? fetchFunction(pagination.pageIndex, pagination.pageSize, searchQuery, selectedColumn) : fetchFunction(pagination.pageIndex, pagination.pageSize),
       staleTime: Infinity,
     // @ts-ignore
-      keepPreviousData: false
+      keepPreviousData: false,
+      cacheTime: searchActive ? 60000 : 300000 //Only cache search-query calls for 1 minute. 5-min for normal (react-query default)
     }
   );
 
@@ -221,19 +242,15 @@ export function DataTable<TData, TValue>({
     return (
       <div>
         <div className="flex items-center py-4">
-          <Input
-            placeholder="Filter official names..."
-            value={(table.getColumn("official_name")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("official_name")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
-          />
+          <div className="flex w-full max-w-sm items-center space-x-2">
+            <Input type="searchQuery" placeholder={`Enter ${selectedColumn.replace(/_/g, ' ')}...`} value={searchQuery} onChange={e => setSearchQuery(e.target.value)}  ref={(inp) => {
+              if(searchActive && inp !== null){
+                inp.focus()
+              }
+            }} />
+            <SearchFilterDropdown table = {table} selectedColumn={selectedColumn} setSelectedColumn={setSelectedColumn}/>
+          </div>
 
-          {/* <SearchButton searchActive={searchActive} handleClick={() => {
-            setSearchActive(!searchActive); 
-            
-          }}/> */}
 
           <ColumnFilterDropdown table={table}/>
 
@@ -261,18 +278,15 @@ export function DataTable<TData, TValue>({
     return (
       <div>
         <div className="flex items-center py-4">
-          <Input
-            placeholder="Filter official names..."
-            value={(table.getColumn("official_name")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("official_name")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
-          />
-          {/* <SearchButton searchActive={searchActive} handleClick={() => {
-            setSearchActive(!searchActive); 
-            setData([]);
-          }}/> */}
+
+          <div className="flex w-full max-w-sm items-center space-x-2">
+            <Input type="searchQuery" placeholder={`Enter ${selectedColumn.replace(/_/g, ' ')}...`} value={searchQuery} onChange={e => setSearchQuery(e.target.value)}  ref={(inp) => {
+              if(searchActive && inp !== null){
+                inp.focus()
+              }
+            }} />
+            <SearchFilterDropdown table = {table} selectedColumn={selectedColumn} setSelectedColumn={setSelectedColumn}/>
+          </div>
 
           <ColumnFilterDropdown table={table}/>
 

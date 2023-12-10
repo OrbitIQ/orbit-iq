@@ -23,10 +23,17 @@ const sanitizeSourceSatellite = (
   });
 };
 
-export default async function fetchSatelliteData(page: number, pageSize: number): Promise<SatelliteData>{
+export default async function fetchSatelliteData(page: number, pageSize: number, search?: string, searchColumn? : string): Promise<SatelliteData>{
+
+     let searchQuery = search !== undefined ? `/confirmed/satellites?limit=${pageSize}&page=${page}&search=${search}` : `/confirmed/satellites?limit=${pageSize}&page=${page}`
+
+     if(search !== undefined && searchColumn !== undefined){
+        searchQuery += `&search_column=${searchColumn}`
+     }
+
 
     const satelliteData = await api.get<SatelliteData>(
-        `/confirmed/satellites?limit=${pageSize}&page=${page}`
+      searchQuery
     );
 
     const rel = sanitizeSatelliteDataJson(satelliteData.data).satellites;

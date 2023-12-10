@@ -27,7 +27,7 @@ export default function UpdateTable() {
       queryContext?.queryClient.getQueryCache().getAll().forEach(cache =>
         {
           if(cache.queryKey[0] === dataCategory){
-            console.log(`Invalidating key: ${cache.queryKey}`)
+            // console.log(`Invalidating key: ${cache.queryKey}`)
             queryContext?.queryClient.invalidateQueries({queryKey: cache.queryKey})
           }
         }                         
