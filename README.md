@@ -91,6 +91,20 @@ If you're developing for the website, you might not want to run the website serv
    docker-compose down
    ```
 
+### Tests:
+
+1. Build and Run the Testing Services:
+
+   ```bash
+   docker-compose -f docker-compose.test.yml up --build integration_api_test
+   ```
+
+2. Or directly run the Testing Services:
+
+   ```bash
+   docker-compose -f docker-compose.test.yml up integration_api_test
+   ```
+
 ## Notes
 
 - Ensure that the ports 8080 (for API), 3000 (for Website), and 5432 (for PostgreSQL) are available on your machine, if you get an error in the docker logs about the port being in use, you should stop the service using that port.
