@@ -57,9 +57,12 @@ def get_satellites():
     # Modify the SQL query to use LIMIT, OFFSET, and ORDER BY for pagination and sorting
     query = "SELECT * FROM official_satellites"
 
+    params = []
     if search:
         # use where & ilike to search for the term search
-        query += f" WHERE {search_column} ILIKE '%{search}%'"
+        search_term = f"%{search}%"
+        query += f" WHERE {search_column} ILIKE %s"
+        params.append(search_term)
 
     if sort_by:
         order = 'ASC' if asc else 'DESC'
@@ -69,10 +72,9 @@ def get_satellites():
 
     if limit is not None:
         query += " LIMIT %s OFFSET %s"
-        cursor.execute(query, (limit, offset))
-    else:
-        cursor.execute(query)
-    
+        params.extend([limit, offset])
+  
+    cursor.execute(query, tuple(params))
     satellites = cursor.fetchall()
 
     # Close the connection
