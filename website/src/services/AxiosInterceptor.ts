@@ -27,15 +27,16 @@ api.interceptors.response.use(
   response => response,
   error => {
     console.log(error.response.status)
-    if (error.response && error.response.status == 401 || (error.response.status == 422 && error.response.data.msg == 'Signature verification failed')) {
-      // JWT expired or unauthorized access
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/logout'; // Redirect to logout if not already on login page 
-      }
-    } else if (error.response && error.response.data && error.response.data.msg) {
+    if (error.response && error.response.data && error.response.data.msg) {
       // Emit a custom event with the error message
       eventEmitter.emit('apiError', error.response.data.msg);
-    }
+    } 
+    if ((error.response && error.response.status == 401) || (error.response.status == 422 && error.response.data.msg == 'Signature verification failed')) {
+      // JWT expired or unauthorized access 
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+        window.location.href = '/logout'; // Redirect to logout if not already on login page 
+      }
+    } 
     return Promise.reject(error);
   }
 );

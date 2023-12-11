@@ -132,23 +132,61 @@ def update(official_name):
 @jwt_required()
 def get_all():
     """
-    Retrieve all records from the official_satellites_changelog table.
+    Retrieve all records from the official_satellites_changelog table with optional pagination and filtering.
 
-    Parameters:
-        - None
-
-    Returns:
-        A JSON representation of the satellite records.
+    URL Parameters:
+        - limit (optional): An integer specifying the number of records to return.
+            If not provided, all records are returned.
+        - page (optional): An integer specifying the page number when using pagination.
+            Defaults to 1 if not provided. Used in conjunction with the 'limit' parameter 
+            to determine the records offset.
+        - sort_by (optional): A string specifying the column name to sort by.
+            Defaults to a specific column if not provided.
+        - asc (optional): A boolean value specifying the sort order.
+            Defaults to False if not provided.
+        - search (optional): A string specifying the search term to filter by.
+        - search_column (optional): A string specifying the column to search in. Default is a specific column
 
     Example Usage:
-        GET /edit/history
+        GET /edit/history?limit=10&page=2
+        GET /edit/history?search=term&search_column=column_name
     """
+
+    # Get the optional limit, page, sort_by, and asc parameters from the request URL
+    limit = request.args.get('limit', default=None, type=int)
+    page = request.args.get('page', default=1, type=int)
+    sort_by = request.args.get('sort_by', default='update_time', type=str)
+    asc = request.args.get('asc', default=False, type=lambda v: v.lower() == 'true')
+    search = request.args.get('search', default=None, type=str)
+    search_column = request.args.get('search_column', default='official_name', type=str)  # Replace 'default_search_column'
+    
+    # Calculate offset based on limit and page
+    offset = (page - 1) * limit if limit else 0
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # The SQL query to retrieve all satellites
-    cursor.execute("SELECT * FROM official_satellites_changelog")
-    satellites = cursor.fetchall()
+    # Modify the SQL query to use LIMIT, OFFSET, and ORDER BY for pagination and sorting
+    query = "SELECT * FROM official_satellites_changelog"
+    params = []
+
+    if search:
+        search_term = f"%{search}%"
+        query += f" WHERE CAST({search_column} AS TEXT) ILIKE %s"
+        params.append(search_term)
+
+    if sort_by:
+        order = 'ASC' if asc else 'DESC'
+        query += f" ORDER BY {sort_by} {order}, official_name DESC"
+    else:
+        query += " ORDER BY official_name DESC"
+
+    if limit is not None:
+        query += " LIMIT %s OFFSET %s"
+        params.extend([limit, offset])
+
+    cursor.execute(query, tuple(params))
+    records = cursor.fetchall()
 
     # Close the connection
     cursor.close()
@@ -156,9 +194,9 @@ def get_all():
 
     # Convert the results to a list of dictionaries for JSON serialization
     columns = [desc[0] for desc in cursor.description]
-    satellites_as_dict = [dict(zip(columns, row)) for row in satellites]
+    records_as_dict = [dict(zip(columns, row)) for row in records]
 
-    return jsonify({'satellites': satellites_as_dict}), 200
+    return jsonify({'satellites': records_as_dict}), 200
 
 #TODO: choose an approriate one from export to csv/excel
 @edit_subpath.route('/history/export/csv', methods=['GET'])

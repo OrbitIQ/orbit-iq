@@ -70,12 +70,16 @@ def register():
         return jsonify({"msg": "User created successfully"}), 201
     
     # Lets make sure this user is using a jwt that's valid
-    verify_jwt_in_request()
-    identity = get_jwt_identity()
-    if not identity:
+    # get headers authorization
+    auth = request.headers.get('Authorization', None)
+
+    if not auth:
         cursor.close()
         conn.close()
-        return jsonify({"msg": "An admin account already exists, they must create the account for you."}), 401
+        return jsonify({"msg": "An admin account already exists, an admin must create an account for you."}), 401
+
+    verify_jwt_in_request()
+    identity = get_jwt_identity()
 
     # check if user making this request is an admin (priviledged to make other accts)
     query = "SELECT is_admin FROM users WHERE username = %s"
@@ -92,7 +96,7 @@ def register():
     if cursor.fetchone():
         cursor.close()
         conn.close()
-        return jsonify({"msg": "Username already exists"}), 409
+        return jsonify({"msg": "Username already exists"}), 400
     
     query = "INSERT INTO users (username, name, password_hash) VALUES (%s, %s, %s)"
     cursor.execute(query, (username, name, generate_password_hash(password)))

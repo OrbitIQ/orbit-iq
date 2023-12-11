@@ -1,4 +1,3 @@
-import psycopg2
 from psycopg2 import extras
 from proposed_change import ProposedChange, insert_proposed_change
 from utils.helpers import get_db_connection
@@ -41,15 +40,19 @@ def map_to_proposed_change(record) -> Optional[ProposedChange]:
 
 # Send it to the proposed_changes table
 if __name__ == "__main__":
-    time.sleep(10) # TODO: remove this in production, just waiting for crawler to finish while debugging, this function will be scheduled to run every X hours
-    conn = get_db_connection()
-    records = crawler_dump(conn=conn)
+    time.sleep(10) 
+    
+    HOURS_SLEEP = 24
+    while True:
+        conn = get_db_connection()
+        records = crawler_dump(conn=conn)
 
-    for record in records:
-        proposed_change = map_to_proposed_change(record)
+        for record in records:
+            proposed_change = map_to_proposed_change(record)
 
-        # TODO: When we get multiple sources we will need to try to combine the proposed changes together into one object then put it in insert_proposed_change
-        if proposed_change is not None:
-            insert_proposed_change(proposed_change, [record['id']])
+            # TODO: When we get multiple sources we will need to try to combine the proposed changes together into one object then put it in insert_proposed_change
+            if proposed_change is not None:
+                insert_proposed_change(proposed_change, [record['id']])
 
-    conn.close()
+        conn.close()
+        time.sleep(HOURS_SLEEP * 60 * 60)
