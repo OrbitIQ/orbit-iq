@@ -147,11 +147,8 @@ export function DataTable<TData, TValue>({
     isSuccess ? (isProposedChanges ? data.proposed_changes : data.satellites) as TData[] : []
   );
   
+  //Used for togglign edit button, NOT the same piece of state as isEditable.
   const [canEdit, setCanEdit] = useState(false)
-
-  useEffect(() => {
-    setCanEdit(isEditable)
-  }, [isEditable])
 
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
     []
