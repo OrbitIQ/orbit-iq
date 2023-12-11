@@ -22,36 +22,42 @@ export default function EditSlider({ canEdit, setCanEdit, cacheKey, updateData, 
         setIsEditModalOpen(false);
     };
 
-    const handleEditModalSave = (update_notes: string, updateData: any) => {
-        // Save the edited data by calling Axios API endpoint
-        updateData.forEach((dataChange: any) => {
-        api.put(`/edit/${dataChange.rowChange.official_name}`, {
-            "data": dataChange.rowChange,
-            "update_notes": update_notes,
-        })
-            .then(function (response) {
-            //Invalidate prior query so we re-fetch.
-            console.log(`Attempting to invalidate: ${[cacheKey, dataChange.pagination.pageIndex, dataChange.pagination.pageSize].toString()}`)
-            queryContext?.queryClient.invalidateQueries({queryKey: [cacheKey, dataChange.pagination.pageIndex, dataChange.pagination.pageSize]});
-            queryContext?.queryClient.getQueryCache().getAll().forEach(cache =>
-                {
-                if(cache.queryKey[0] === `change-log`){
-                    queryContext?.queryClient.invalidateQueries({queryKey: cache.queryKey})
-                }
-                }                         
+    const handleEditModalSave = async (update_notes: string, updateData: any) => {
+        try {
+            // Use Promise.all to wait for all API calls to complete
+            await Promise.all(
+                updateData.map(async (dataChange: any) => {
+                    // Use await to wait for the API call to complete
+                    await api.put(`/edit/${dataChange.rowChange.official_name}`, {
+                        "data": dataChange.rowChange,
+                        "update_notes": update_notes,
+                    });
+                    // Invalidate prior query so we re-fetch.
+                    console.log(`Attempting to invalidate: ${[cacheKey, dataChange.pagination.pageIndex, dataChange.pagination.pageSize].toString()}`);
+                    queryContext?.queryClient.invalidateQueries({ queryKey: [cacheKey, dataChange.pagination.pageIndex, dataChange.pagination.pageSize] });
+    
+                    queryContext?.queryClient.getQueryCache().getAll().forEach(cache => {
+                        if (cache.queryKey[0] === `change-log`) {
+                            queryContext?.queryClient.invalidateQueries({ queryKey: cache.queryKey });
+                        }
+                    });
+                    return Promise.resolve(); // Resolve the promise for this API call
+                })
             );
-            console.log(response);
-            })
-            .catch(function (error) {
+    
+            // If all API calls succeed, show the success alert
+            alert("SUCCESS! Data saved.");
+            setCanEdit(false);
+        } catch (error) {
+            // If any API call fails, catch the error and show an error alert, then reload the page.
+            alert("ERROR! You cannot change the Official Name. Please try again.");
+            window.location.reload();
             console.log(error);
-            });
-        });
-        // TODO: add better confirmation message when data is saved.
-        alert("Data saved.");
-        setUpdateData([])
-        // Close the modal
-        setIsEditModalOpen(false);
-        setCanEdit(false);
+        } finally {
+            // Close the modal regardless of success or failure
+            setUpdateData([]);
+            setIsEditModalOpen(false);
+        }
     };
 
 
