@@ -27,15 +27,16 @@ import {
 
 import ColumnFilterDropdown from "./ColumnFilterDropdown";
 
-
 import { Button } from "@/components/ui/button";
-import { useState, useEffect, useRef, useCallback, useContext } from "react";
+import { useState, useEffect, useRef, useCallback} from "react";
 import { columnVisibilityDefaults } from "@/Constants/constants";
 import { DataTableProps } from "@/types/DataTableProps";
 import reactTableCreatorFactory from "./reactTableCreatorFactory";
 import { Input } from "@/components/ui/input";
 import EditSlider from "./EditSlider";
 
+
+//For editable columns
 const defaultColumns: Partial<ColumnDef<any>> = {
   cell: ({ getValue, row: { index }, column: { id }, table }) => {
     const initialValue = getValue()
@@ -178,6 +179,7 @@ export function DataTable<TData, TValue>({
     columnVisibilityDefaults
   );
 
+  //TODO: Should ask for api endpoint to return records left for pagination calculation
   const handlePreviousPage = () => {
     if (pagination.pageIndex > 1) {
       setPagination({
@@ -215,11 +217,17 @@ export function DataTable<TData, TValue>({
     if (rows?.length) {
       return rows.map((row) => (
         <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-          {row.getVisibleCells().map((cell) => (
+          {row.getVisibleCells().map((cell) => 
+          canEdit ?           
+          (
             <TableCell key={cell.id}>
               {flexRender(cell.column.columnDef.cell, cell.getContext())}
             </TableCell>
-          ))}
+          ): 
+            <TableCell key={cell.id} style={{ padding: '0.5608% 0.4629%' }}>
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </TableCell>
+          )}
         </TableRow>
       ));
     } else {
