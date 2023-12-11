@@ -39,7 +39,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
           </Routes>
-          <ReactQueryDevtools/>
+          {/* <ReactQueryDevtools/>*/} {/*<- USE THIS IF DEBUGGING REACT-QUERY/ANYTHING RELATED TO PAGINATION */}
         </QueryClientProvider>
       </queryClientContext.Provider>
     </ToastProvider>

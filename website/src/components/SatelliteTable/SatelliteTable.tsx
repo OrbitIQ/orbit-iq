@@ -24,7 +24,7 @@ const handleExcelExport = () => {
     });
 }
 
-export default function SatelliteTable({ isEditable, handleChangedData, cacheKey }: { isEditable: boolean; handleChangedData: any; cacheKey: any; }) {
+export default function SatelliteTable({ cacheKey }: { cacheKey: any; }) {
 
   const [pagination, setPagination] = useState({
     pageIndex: 1,
@@ -34,9 +34,10 @@ export default function SatelliteTable({ isEditable, handleChangedData, cacheKey
   return (
       <div className="container mx-auto py-10">
         {/* @ts-ignore */}
-        <DataTable columns={satelliteColumns} isEditable={isEditable} fetchFunction={fetchSatelliteData} onChangedData={handleChangedData} cacheKey={cacheKey} onExportExcel = {handleExcelExport}
+        <DataTable columns={satelliteColumns} fetchFunction={fetchSatelliteData} cacheKey={cacheKey} onExportExcel = {handleExcelExport}
         pagination={pagination} 
         setPagination={setPagination}
+        isEditable={true}
         />
       </div>
   );

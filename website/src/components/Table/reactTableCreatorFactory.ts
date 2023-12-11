@@ -19,7 +19,6 @@ export default function reactTableCreatorFactory (data, columns, getCoreRowModel
   onColumnVisibilityChange: setColumnVisibility,
   onColumnFiltersChange: setColumnFilters,
   getFilteredRowModel: getFilteredRowModel(),
-
   state: {
     columnVisibility,
     columnFilters,

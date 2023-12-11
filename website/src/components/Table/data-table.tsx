@@ -1,5 +1,6 @@
 "use client";
 
+
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -10,8 +11,8 @@ import {
 } from "@tanstack/react-table";
 
 import {useQuery} from "@tanstack/react-query";
-import BottomNavBar from "./BottomNavBar";
-
+import PaginationControls from "./PaginationControls";
+import SearchFilterDropdown from "./SearchFilterDropdown";
 import ProgressButton from "../ui/ProgressButton";
 
 import {
@@ -23,17 +24,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+
 import ColumnFilterDropdown from "./ColumnFilterDropdown";
 
-import SearchButton from "../ui/SearchButton";
-
 import { Button } from "@/components/ui/button";
-import { useState, useEffect, useRef, useCallback, } from "react";
+import { useState, useEffect, useRef, useCallback} from "react";
 import { columnVisibilityDefaults } from "@/Constants/constants";
 import { DataTableProps } from "@/types/DataTableProps";
 import reactTableCreatorFactory from "./reactTableCreatorFactory";
 import { Input } from "@/components/ui/input";
+import EditSlider from "./EditSlider";
 
+
+//For editable columns
 const defaultColumns: Partial<ColumnDef<any>> = {
   cell: ({ getValue, row: { index }, column: { id }, table }) => {
     const initialValue = getValue()
@@ -85,7 +88,7 @@ export function DataTable<TData, TValue>({
   fetchFunction,
   // @ts-ignore
   cacheKey,
-  onChangedData,
+  // onChangedData,
   // @ts-ignore
   onExportExcel,
   //Hacky, solution TODO: FIX
@@ -97,15 +100,47 @@ export function DataTable<TData, TValue>({
   setPagination
 }: DataTableProps<TData, TValue>) {
 
+  //State for search
   const [searchActive, setSearchActive] = useState<Boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedColumn, setSelectedColumn] = useState<string>("official_name");
 
+
+  const [updateData, setUpdateData] = useState({});
+
+
+
+  const handleChangedData = (changedData: any) => {
+    // Update the state or perform any action with the received data
+    setUpdateData(changedData);
+  };
+
+
+
+  useEffect(() => {
+    if(searchQuery.length===0) {
+      setSearchActive(false)
+    }
+    else{
+      setSearchActive(true);
+    }
+  }, [searchQuery])
+
+  //reset pagination to defaults if there is a change to whether or not the search query is active.
+  useEffect(() => {
+    setPagination({
+    pageIndex: 1,
+    pageSize: 10, 
+  });
+  }, [searchActive])
 
   const { isLoading, error, data, isSuccess } = useQuery({
-      queryKey: [cacheKey, pagination.pageIndex, pagination.pageSize],
-      queryFn: () => fetchFunction(pagination.pageIndex, pagination.pageSize),
+      queryKey: searchActive ? [cacheKey, searchQuery, selectedColumn, pagination.pageIndex, pagination.pageSize] : [cacheKey, pagination.pageIndex, pagination.pageSize],
+      queryFn: () => searchActive ? fetchFunction(pagination.pageIndex, pagination.pageSize, searchQuery, selectedColumn) : fetchFunction(pagination.pageIndex, pagination.pageSize),
       staleTime: Infinity,
     // @ts-ignore
-      keepPreviousData: false
+      keepPreviousData: false,
+      cacheTime: searchActive ? 60000 : 300000 //Only cache search-query calls for 1 minute. 5-min for normal (react-query default)
     }
   );
 
@@ -113,13 +148,13 @@ export function DataTable<TData, TValue>({
     isSuccess ? (isProposedChanges ? data.proposed_changes : data.satellites) as TData[] : []
   );
   
-  const [canEdit, setCanEdit] = useState(isEditable)
+  //Used for togglign edit button, NOT the same piece of state as isEditable.
+  const [canEdit, setCanEdit] = useState(false)
+
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
     []
   )
   const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper()
-
-
 
   useEffect(() => {
     // Update newData when the API call is successful
@@ -132,29 +167,27 @@ export function DataTable<TData, TValue>({
   // we will keep track of a list of changed data
   const [changedData, setChangedData] = useState<TData[]>([])
 
-  useEffect(() => {
-    setCanEdit(isEditable)
-  }, [isEditable])
 
 
   useEffect(() => {
     // Invoke the callback function with the updated changedData
-    onChangedData(changedData);
-  }, [changedData, onChangedData]);
+    handleChangedData(changedData);
+  }, [changedData, handleChangedData]);
 
 
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     columnVisibilityDefaults
   );
 
-    const handlePreviousPage = () => {
+  //TODO: Should ask for api endpoint to return records left for pagination calculation
+  const handlePreviousPage = () => {
     if (pagination.pageIndex > 1) {
       setPagination({
         ...pagination,
         pageIndex: pagination.pageIndex - 1,
       });
     }
-  };
+  }
 
   const handleNextPage = () => {
     setPagination({
@@ -184,11 +217,17 @@ export function DataTable<TData, TValue>({
     if (rows?.length) {
       return rows.map((row) => (
         <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-          {row.getVisibleCells().map((cell) => (
+          {row.getVisibleCells().map((cell) => 
+          canEdit ?           
+          (
             <TableCell key={cell.id}>
               {flexRender(cell.column.columnDef.cell, cell.getContext())}
             </TableCell>
-          ))}
+          ): 
+            <TableCell key={cell.id} style={{ padding: '0.5608% 0.4629%' }}>
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </TableCell>
+          )}
         </TableRow>
       ));
     } else {
@@ -205,97 +244,69 @@ export function DataTable<TData, TValue>({
   
   if (isLoading){
     return (
-      <div className="container mx-auto py-10">
-        <ProgressButton/>
+      <div className="flex justify-center items-center min-h-screen">
+          <ProgressButton />
       </div>
     );
   }
   if(error){
     return(
-      <div>
-        <h1>An error occured</h1>
+      <div className="flex justify-center items-center h-screen">
+        <h1 className="text-3xl font-semibold text-gray-800">An error occurred</h1>
       </div>
+    
     )
   }
-  if(onExportExcel === undefined){
-    return (
-      <div>
-        <div className="flex items-center py-4">
-          <Input
-            placeholder="Filter official names..."
-            value={(table.getColumn("official_name")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("official_name")?.setFilterValue(event.target.value)
+
+  return (
+  <div>
+    <div className="flex items-center py-4">
+      <div className="flex w-full max-w-sm items-center space-x-2">
+        <Input
+          type="searchQuery"
+          placeholder={`Enter ${selectedColumn.replace(/_/g, ' ')}...`}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          ref={(inp) => {
+            if (searchActive && inp !== null) {
+              inp.focus();
             }
-            className="max-w-sm"
-          />
-
-          {/* <SearchButton searchActive={searchActive} handleClick={() => {
-            setSearchActive(!searchActive); 
-            
-          }}/> */}
-
-          <ColumnFilterDropdown table={table}/>
-
-
-        </div>
-
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-                {renderTableHeaders(canEdit)}
-            </TableHeader>
-
-            <TableBody>
-              {renderTableBodyRows(canEdit, columns)}
-            </TableBody>
-          </Table>
-        </div>
-
-        <BottomNavBar handleNextPage={handleNextPage} handlePreviousPage={handlePreviousPage}/>
-
+          }}
+        />
+        <SearchFilterDropdown table={table} selectedColumn={selectedColumn} setSelectedColumn={setSelectedColumn} />
       </div>
-    );
-  }  
-  else{
-    return (
-      <div>
-        <div className="flex items-center py-4">
-          <Input
-            placeholder="Filter official names..."
-            value={(table.getColumn("official_name")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("official_name")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
-          />
-          {/* <SearchButton searchActive={searchActive} handleClick={() => {
-            setSearchActive(!searchActive); 
-            setData([]);
-          }}/> */}
 
-          <ColumnFilterDropdown table={table}/>
+      <ColumnFilterDropdown table={table} />
 
-          <Button onClick={onExportExcel} variant="outline" className="ml-4">Export to Excel</Button>
-        </div>
+      {onExportExcel !== undefined && (
+        <Button onClick={onExportExcel} variant="outline" className="ml-4">
+          Export to Excel
+        </Button>
+      )}
+    </div>
 
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-                {renderTableHeaders(canEdit)}
-            </TableHeader>
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>{renderTableHeaders(canEdit)}</TableHeader>
+        <TableBody>{renderTableBodyRows(canEdit, columns)}</TableBody>
+      </Table>
+    </div>
 
-            <TableBody>
-              {renderTableBodyRows(canEdit, columns)}
-            </TableBody>
-          </Table>
-        </div>
-
-        <BottomNavBar handleNextPage={handleNextPage} handlePreviousPage={handlePreviousPage}/>
-
+    {isEditable ?
+      <div className="flex items-center justify-between py-2">
+        <EditSlider canEdit={canEdit} setCanEdit={setCanEdit} cacheKey={cacheKey} updateData={updateData} setUpdateData={setUpdateData}/>
+        <PaginationControls handleNextPage={handleNextPage} handlePreviousPage={handlePreviousPage}/>
       </div>
-    );
+      :
+      <PaginationControls handleNextPage={handleNextPage} handlePreviousPage={handlePreviousPage}/>
+    }
+  </div>
+);
 
-  }
+
+
+
+
+
 
 }
