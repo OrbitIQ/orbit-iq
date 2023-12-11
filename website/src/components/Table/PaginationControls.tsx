@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 
-export default function BottomNavBar({handlePreviousPage, handleNextPage}: {handlePreviousPage: () => void, handleNextPage: ()=> void}){
+export default function PaginationControls({handlePreviousPage, handleNextPage}: {handlePreviousPage: () => void, handleNextPage: ()=> void}){
     return(
 
         <div className="flex items-center justify-end space-x-2 py-4">
