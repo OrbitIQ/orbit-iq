@@ -13,10 +13,6 @@ import {
 import {useQuery} from "@tanstack/react-query";
 import PaginationControls from "./PaginationControls";
 import SearchFilterDropdown from "./SearchFilterDropdown";
-import EditModal from "@/components/SatelliteTable/EditModal";
-
-
-
 import ProgressButton from "../ui/ProgressButton";
 
 import {
@@ -28,8 +24,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { Switch } from "../ui/switch";
-import { Label } from "../ui/label";
 
 import ColumnFilterDropdown from "./ColumnFilterDropdown";
 
@@ -153,7 +147,12 @@ export function DataTable<TData, TValue>({
     isSuccess ? (isProposedChanges ? data.proposed_changes : data.satellites) as TData[] : []
   );
   
-  const [canEdit, setCanEdit] = useState(isEditable)
+  const [canEdit, setCanEdit] = useState(false)
+
+  useEffect(() => {
+    setCanEdit(isEditable)
+  }, [isEditable])
+
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
     []
   )
@@ -170,9 +169,6 @@ export function DataTable<TData, TValue>({
   // we will keep track of a list of changed data
   const [changedData, setChangedData] = useState<TData[]>([])
 
-  useEffect(() => {
-    setCanEdit(isEditable)
-  }, [isEditable])
 
 
   useEffect(() => {
@@ -291,10 +287,14 @@ export function DataTable<TData, TValue>({
       </Table>
     </div>
 
-    <div className="flex items-center justify-between py-2">
-      <EditSlider canEdit={canEdit} setCanEdit={setCanEdit} cacheKey={cacheKey} updateData={updateData} setUpdateData={setUpdateData}/>
+    {isEditable ?
+      <div className="flex items-center justify-between py-2">
+        <EditSlider canEdit={canEdit} setCanEdit={setCanEdit} cacheKey={cacheKey} updateData={updateData} setUpdateData={setUpdateData}/>
+        <PaginationControls handleNextPage={handleNextPage} handlePreviousPage={handlePreviousPage}/>
+      </div>
+      :
       <PaginationControls handleNextPage={handleNextPage} handlePreviousPage={handlePreviousPage}/>
-    </div>
+    }
   </div>
 );
 

@@ -37,6 +37,7 @@ export default function SatelliteTable({ cacheKey }: { cacheKey: any; }) {
         <DataTable columns={satelliteColumns} fetchFunction={fetchSatelliteData} cacheKey={cacheKey} onExportExcel = {handleExcelExport}
         pagination={pagination} 
         setPagination={setPagination}
+        isEditable={true}
         />
       </div>
   );
