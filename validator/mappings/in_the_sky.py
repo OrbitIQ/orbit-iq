@@ -25,9 +25,9 @@ def from_in_the_sky(record):
         # assume debris is not a satellite
         return None
 
-    if str(data['norad']) != str(data['NORAD ID']):
+    if str(data['norad']) != str(data.get('NORAD ID')):
         # uh oh
-        logging.getLogger(__name__).warning(f"Skipping record {record}: NORAD ID '{data['norad']}' does not match NORAD ID '{data['NORAD ID']}'")
+        logging.getLogger(__name__).warning(f"Skipping record {record}: NORAD ID '{data['norad']}' does not match NORAD ID '{data.get('NORAD ID')}'")
         return None
 
     if status == "unknown" or not status:
