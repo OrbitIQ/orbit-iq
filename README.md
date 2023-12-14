@@ -18,13 +18,25 @@ TODO
 This was a project created as part of Amber Field's CS 639 Capstone class at The University of Wisconsin - Madison. Here's the team that worked on it!
 
 <div align="center">
-    <img src="https://github.com/AdamSchmidty.png" width="100" height="100" alt="Adam Schmidt">
-    <img src="https://github.com/davidteather.png" width="100" height="100" alt="David Teather">
-    <img src="https://github.com/Gugu0099.png" width="100" height="100" alt="Gulinazi Julati">
-    <img src="https://github.com/nori210.png" width="100" height="100" alt="Georgia Li">
-    <img src="https://github.com/rudyb2001.png" width="100" height="100" alt="Rudy Banerjee">
-    <img src="https://github.com/stevenlai1688.png" width="100" height="100" alt="Steven Lai">
-</div>
+    <a href="https://github.com/AdamSchmidty">
+      <img src="https://github.com/AdamSchmidty.png" width="100" height="100" alt="Adam Schmidt">
+    </a>
+    <a href="https://github.com/davidteather">
+      <img src="https://github.com/davidteather.png" width="100" height="100" alt="David Teather">
+    </a>
+    <a href="https://github.com/Gugu0099">
+      <img src="https://github.com/Gugu0099.png" width="100" height="100" alt="Gulinazi Julati">
+    </a>
+    <a href="https://github.com/nori210">
+      <img src="https://github.com/nori210.png" width="100" height="100" alt="Georgia Li">
+    </a>
+    <a href="https://github.com/rudyb2001">
+      <img src="https://github.com/rudyb2001.png" width="100" height="100" alt="Rudy Banerjee">
+    </a>
+    <a href="https://github.com/stevenlai1688">
+      <img src="https://github.com/stevenlai1688.png" width="100" height="100" alt="Steven Lai">
+    </a>
+  </div>
 
 | GitHub Profile | LinkedIn Profile | Full Name         |
 | -------------- | ---------------- | ----------------- |
