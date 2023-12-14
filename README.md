@@ -1,4 +1,69 @@
-# orbit-iq
+# OrbitIQ
+
+This is a project created for helping maintainers of the [Union of Concerned Scientists (UCS)'s Satellite Database](https://www.ucsusa.org/resources/satellite-database) to keep track of satellites and their data. It web scrapes various websites for satellite data and then uses that data to create proposed changes to the UCS Satellite Database. The maintainers can then review the proposed changes and accept or reject them.
+
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+
+## Demo
+TODO
+
+## Built With
+[![Docker][Docker]][docker-url] [![React][React.js]][React-url] [![TailwindCSS][TailwindCSS]][tailwindcss-url] [![Python][Python]][python-url] [![Flask][Flask]][flask-url] [![PostgreSQL][PostgreSQL]][postgresql-url]
+
+## Contributors
+This was a project created as part of Amber Field's CS 639 Capstone class at The University of Wisconsin - Madison. Here's the team that worked on it!
+
+<div align="center">
+  <div style="display: flex; flex-wrap: wrap; justify-content: center;">
+    <div style="margin: 10px;">
+      <a href="https://github.com/AdamSchmidty">
+        <img src="https://github.com/AdamSchmidty.png" width="100" height="100" alt="Profile Picture">
+      </a>
+      <br>
+      <a href="https://www.linkedin.com/in/adam-m-schmidt">Adam Schmidt</a>
+    </div>
+    <div style="margin: 10px;">
+      <a href="https://github.com/davidteather">
+        <img src="https://github.com/davidteather.png" width="100" height="100" alt="Profile Picture">
+      </a>
+      <br>
+      <a href="https://www.linkedin.com/in/davidteather">David Teather</a>
+    </div>
+    <div style="margin: 10px;">
+      <a href="https://github.com/Gugu0099">
+        <img src="https://github.com/Gugu0099.png" width="100" height="100" alt="Profile Picture">
+      </a>
+      <br>
+      <a href="https://www.linkedin.com/in/gulinazi-julati/">Gulinazi Julati</a>
+    </div>
+    <div style="margin: 10px;">
+      <a href="https://github.com/nori210">
+        <img src="https://github.com/nori210.png" width="100" height="100" alt="Profile Picture">
+      </a>
+      <br>
+      <a href="https://www.linkedin.com/in/jiaxuan-li-1ba857294">Georgia Li</a>
+    </div>
+    <div style="margin: 10px;">
+      <a href="https://github.com/rudyb2001">
+        <img src="https://github.com/rudyb2001.png" width="100" height="100" alt="Profile Picture">
+      </a>
+      <br>
+      <a href="https://www.linkedin.com/in/anirudhbanerjee">Rudy Banerjee</a>
+    </div>
+    <div style="margin: 10px;">
+      <a href="https://github.com/stevenlai1688">
+        <img src="https://github.com/stevenlai1688.png" width="100" height="100" alt="Profile Picture">
+      </a>
+      <br>
+      <a href="https://www.linkedin.com/in/steven-yisiang-lai">Steven Lai</a>
+   </div>
+  </div>
+</div>
+
 
 ## Overview
 
@@ -121,3 +186,30 @@ If you're developing for the website, you might not want to run the website serv
 `crawler_dump` - Pretty unstructured data of the data that the web crawler finds. This is just raw data that is used by the `validator` to create proposed changes
 
 `proposed_changes` - These are proposed changes that the `validator` creates from combining data from the `crawler_dump` data and doing data integrity and validation on the data the web crawler has detected which may be incorrect.
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[contributors-shield]: https://img.shields.io/github/contributors/OrbitIQ/orbit-iq.svg?style=for-the-badge
+[contributors-url]: https://github.com/OrbitIQ/orbit-iq/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/OrbitIQ/orbit-iq.svg?style=for-the-badge
+[forks-url]: https://github.com/OrbitIQ/orbit-iq/network/members
+[stars-shield]: https://img.shields.io/github/stars/OrbitIQ/orbit-iq.svg?style=for-the-badge
+[stars-url]: https://github.com/OrbitIQ/orbit-iq/stargazers
+[issues-shield]: https://img.shields.io/github/issues/OrbitIQ/orbit-iq.svg?style=for-the-badge
+[issues-url]: https://github.com/OrbitIQ/orbit-iq/issues
+[license-shield]: https://img.shields.io/github/license/OrbitIQ/orbit-iq.svg?style=for-the-badge
+[license-url]: https://github.com/OrbitIQ/orbit-iq/blob/master/LICENSE.txt
+[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
+[React-url]: https://reactjs.org/
+[Docker]: https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=FFFFFF
+[Docker-url]: https://www.docker.com/
+[Flask]: https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=FFFFFF
+[Flask-url]: https://flask.palletsprojects.com/en/3.0.x/
+[Python]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=FFFFFF
+[Python-url]: https://www.python.org/
+[PostgreSQL]: https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=FFFFFF
+[postgresql-url]: https://www.postgresql.org/
+[TailwindCSS]: https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=FFFFFF
+[tailwindcss-url]: https://tailwindcss.com/
+[product-screenshot]: images/screenshot.png
+[demo-url]: todo

@@ -70,31 +70,36 @@ def main():
     logging.basicConfig(level=logging.INFO)
 
     while True:
-        logging.info("Starting crawler")
-        setup_sources() # create sources table and add sources
+        try:
+            logging.getLogger().info("Starting crawler")
+            setup_sources() # create sources table and add sources
 
-        start_count = count_crawler_dump()
+            start_count = count_crawler_dump()
 
-        gcat()
+            gcat()
 
-        after_gcat_count = count_crawler_dump()
+            after_gcat_count = count_crawler_dump()
 
-        aerospace()
+            aerospace()
 
-        after_aerospace_count = count_crawler_dump()
+            after_aerospace_count = count_crawler_dump()
 
-        print("We are now going to crawl in-the-sky.org, this will take a while")
-        in_the_sky() # this one is slow so we do it last
+            print("We are now going to crawl in-the-sky.org, this will take a while")
+            in_the_sky() # this one is slow so we do it last
 
-        after_count = count_crawler_dump()
+            after_count = count_crawler_dump()
 
-        print(f"Added {after_count - start_count} new records to crawler_dump")
-        print(f"\tGCAT: {after_gcat_count - start_count}")
-        print(f"\tAerospace Reentry: {after_aerospace_count - after_gcat_count}")
-        print(f"\tin-the-sky.org: {after_count - after_aerospace_count}")
+            print(f"Added {after_count - start_count} new records to crawler_dump")
+            print(f"\tGCAT: {after_gcat_count - start_count}")
+            print(f"\tAerospace Reentry: {after_aerospace_count - after_gcat_count}")
+            print(f"\tin-the-sky.org: {after_count - after_aerospace_count}")
 
+        except Exception as e:
+            logging.getLogger().error(e)
+            raise e
+        
         SLEEP_HOURS = 24
-        print(f"Sleeping for {SLEEP_HOURS} hours")
+        logging.getLogger().info(f"Sleeping for {SLEEP_HOURS} hours")
         time.sleep(SLEEP_HOURS * 60 * 60)
 
 if __name__ == "__main__":

@@ -47,20 +47,24 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     while True:
-        logging.info("Starting validator")
+        try:
+            logging.info("Starting validator")
 
-        conn = get_db_connection()
-        records = crawler_dump(conn=conn)
+            conn = get_db_connection()
+            records = crawler_dump(conn=conn)
 
-        for record in records:
-            proposed_change = map_to_proposed_change(record)
+            for record in records:
+                proposed_change = map_to_proposed_change(record)
 
-            # TODO: When we get multiple sources we will need to try to combine the proposed changes together into one object then put it in insert_proposed_change
-            if proposed_change is not None:
-                insert_proposed_change(proposed_change, [record['id']])
+                # TODO: When we get multiple sources we will need to try to combine the proposed changes together into one object then put it in insert_proposed_change
+                if proposed_change is not None:
+                    insert_proposed_change(proposed_change, [record['id']])
 
-        conn.close()
+            conn.close()
 
-        logging.info(f"Validator waiting for {HOURS_SLEEP} hours")
+            logging.info(f"Validator waiting for {HOURS_SLEEP} hours")
+        except Exception as e:
+            logging.getLogger().error(e)
+            logging.getLogger().error("Validator failed")
 
         time.sleep(HOURS_SLEEP * 60 * 60)

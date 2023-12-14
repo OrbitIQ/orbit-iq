@@ -37,15 +37,6 @@ while tries < 5:
     
 cursor = conn.cursor()
 
-# TODO: remove this with production data, this is used for tests only
-cursor.execute("""
-    DROP TABLE IF EXISTS proposed_changes CASCADE;
-    DROP TABLE IF EXISTS crawler_dump_proposed_changes CASCADE;
-    DROP TYPE IF EXISTS approval;
-    DROP TABLE IF EXISTS official_satellites_changelog CASCADE;
-    DROP TABLE IF EXISTS official_satellites CASCADE;          
-""")
-
 # Create table if it doesn't exist
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS official_satellites ( 
