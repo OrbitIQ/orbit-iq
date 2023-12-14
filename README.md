@@ -18,52 +18,43 @@ TODO
 This was a project created as part of Amber Field's CS 639 Capstone class at The University of Wisconsin - Madison. Here's the team that worked on it!
 
 <div align="center">
-  <div style="display: flex; flex-wrap: wrap; justify-content: center;">
-    <div style="margin: 10px;">
-      <a href="https://github.com/AdamSchmidty">
-        <img src="https://github.com/AdamSchmidty.png" width="100" height="100" alt="Profile Picture">
-      </a>
-      <br>
-      <a href="https://www.linkedin.com/in/adam-m-schmidt">Adam Schmidt</a>
-    </div>
-    <div style="margin: 10px;">
-      <a href="https://github.com/davidteather">
-        <img src="https://github.com/davidteather.png" width="100" height="100" alt="Profile Picture">
-      </a>
-      <br>
-      <a href="https://www.linkedin.com/in/davidteather">David Teather</a>
-    </div>
-    <div style="margin: 10px;">
-      <a href="https://github.com/Gugu0099">
-        <img src="https://github.com/Gugu0099.png" width="100" height="100" alt="Profile Picture">
-      </a>
-      <br>
-      <a href="https://www.linkedin.com/in/gulinazi-julati/">Gulinazi Julati</a>
-    </div>
-    <div style="margin: 10px;">
-      <a href="https://github.com/nori210">
-        <img src="https://github.com/nori210.png" width="100" height="100" alt="Profile Picture">
-      </a>
-      <br>
-      <a href="https://www.linkedin.com/in/jiaxuan-li-1ba857294">Georgia Li</a>
-    </div>
-    <div style="margin: 10px;">
-      <a href="https://github.com/rudyb2001">
-        <img src="https://github.com/rudyb2001.png" width="100" height="100" alt="Profile Picture">
-      </a>
-      <br>
-      <a href="https://www.linkedin.com/in/anirudhbanerjee">Rudy Banerjee</a>
-    </div>
-    <div style="margin: 10px;">
-      <a href="https://github.com/stevenlai1688">
-        <img src="https://github.com/stevenlai1688.png" width="100" height="100" alt="Profile Picture">
-      </a>
-      <br>
-      <a href="https://www.linkedin.com/in/steven-yisiang-lai">Steven Lai</a>
-   </div>
-  </div>
+  <p align="center">
+    <a href="https://github.com/AdamSchmidty">
+      <img src="https://github.com/AdamSchmidty.png" width="100" height="100" alt="Profile Picture">
+    </a>
+    <a href="https://www.linkedin.com/in/adam-m-schmidt">Adam Schmidt</a>
+  </p>
+  <p align="center">
+    <a href="https://github.com/davidteather">
+      <img src="https://github.com/davidteather.png" width="100" height="100" alt="Profile Picture">
+    </a>
+    <a href="https://www.linkedin.com/in/davidteather">David Teather</a>
+  </p>
+  <p align="center">
+    <a href="https://github.com/Gugu0099">
+      <img src="https://github.com/Gugu0099.png" width="100" height="100" alt="Profile Picture">
+    </a>
+    <a href="https://www.linkedin.com/in/gulinazi-julati/">Gulinazi Julati</a>
+  </p>
+  <p align="center">
+    <a href="https://github.com/nori210">
+      <img src="https://github.com/nori210.png" width="100" height="100" alt="Profile Picture">
+    </a>
+    <a href="https://www.linkedin.com/in/jiaxuan-li-1ba857294">Georgia Li</a>
+  </p>
+  <p align="center">
+    <a href="https://github.com/rudyb2001">
+      <img src="https://github.com/rudyb2001.png" width="100" height="100" alt="Profile Picture">
+    </a>
+    <a href="https://www.linkedin.com/in/anirudhbanerjee">Rudy Banerjee</a>
+  </p>
+  <p align="center">
+    <a href="https://github.com/stevenlai1688">
+      <img src="https://github.com/stevenlai1688.png" width="100" height="100" alt="Profile Picture">
+    </a>
+    <a href="https://www.linkedin.com/in/steven-yisiang-lai">Steven Lai</a>
+  </p>
 </div>
-
 
 ## Overview
 
