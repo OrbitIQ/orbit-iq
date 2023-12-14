@@ -28,6 +28,8 @@ This was a project created as part of Amber Field's CS 639 Capstone class at The
 
 The `orbit-iq` project comprises several services, which are defined in the `docker-compose.yml`:
 
+(note: We have a more detailed readme [./detailed-readme.pdf](./detailed-readme.pdf), unfortunantely it's not in markdown format due to project requirements. But it's pretty detailed)
+
 1. **API**: This is the backend service, built from the context in `./api`. It runs on port `8080`.
 2. **Website**: This is the frontend service, built from the context in `./website`. It runs on port `3000`.
 3. **Database (DB)**: A PostgreSQL database service running on port `5432`.
