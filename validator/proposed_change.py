@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Optional, List
 from dataclasses import asdict
 from utils.helpers import get_db_connection
+import logging
 
 @dataclass
 class ProposedChange:
@@ -44,9 +45,32 @@ class ProposedChange:
 
 def insert_proposed_change(proposed_change: ProposedChange, used_row_ids: List[int]):
     # TODO: We probably only want to update the satellite if there are changes
-    # from what's currently in the database
+    # from what's currently in the database on official_satellites
     conn = get_db_connection()
     cursor = conn.cursor()
+
+     # Fetch current data from official_satellites
+    cursor.execute("SELECT * FROM official_satellites WHERE official_name = %s", (proposed_change.official_name,))
+    current_data = cursor.fetchone()
+
+    # Compare current data with proposed_change
+    is_different = False
+    if current_data is not None:
+        # Convert current_data (tuple) to a dictionary for easy comparison
+        columns = [desc[0] for desc in cursor.description]
+        current_data_dict = dict(zip(columns, current_data))
+
+        for field in asdict(proposed_change):
+            if field in current_data_dict and getattr(proposed_change, field) != current_data_dict[field]:
+                is_different = True
+                break
+    else:
+        # If there is no current data, it means this is a new entry
+        is_different = True
+
+    if not is_different:
+        logging.getLogger().info(f"Proposed change for {proposed_change.official_name} is the same as current data. Skipping...")
+        return None
 
     sql = """
         INSERT INTO proposed_changes (

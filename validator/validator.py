@@ -6,6 +6,7 @@ from mappings.aerospace import from_aerospace
 from mappings.in_the_sky import from_in_the_sky
 from typing import Optional
 import time
+import logging
 
 source_id_to_mapper = {
     1: from_gcat,
@@ -40,10 +41,14 @@ def map_to_proposed_change(record) -> Optional[ProposedChange]:
 
 # Send it to the proposed_changes table
 if __name__ == "__main__":
-    time.sleep(10) 
+    time.sleep(60) 
     
     HOURS_SLEEP = 24
+    logging.basicConfig(level=logging.INFO)
+
     while True:
+        logging.info("Starting validator")
+
         conn = get_db_connection()
         records = crawler_dump(conn=conn)
 
@@ -55,4 +60,7 @@ if __name__ == "__main__":
                 insert_proposed_change(proposed_change, [record['id']])
 
         conn.close()
+
+        logging.info(f"Validator waiting for {HOURS_SLEEP} hours")
+
         time.sleep(HOURS_SLEEP * 60 * 60)
