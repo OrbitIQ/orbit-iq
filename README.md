@@ -17,35 +17,11 @@ TODO
 ## Contributors
 This was a project created as part of Amber Field's CS 639 Capstone class at The University of Wisconsin - Madison. Here's the team that worked on it!
 
-<div align="center">
-    <a href="https://github.com/AdamSchmidty">
-      <img src="https://github.com/AdamSchmidty.png" width="100" height="100" alt="Adam Schmidt">
-    </a>
-    <a href="https://github.com/davidteather">
-      <img src="https://github.com/davidteather.png" width="100" height="100" alt="David Teather">
-    </a>
-    <a href="https://github.com/Gugu0099">
-      <img src="https://github.com/Gugu0099.png" width="100" height="100" alt="Gulinazi Julati">
-    </a>
-    <a href="https://github.com/nori210">
-      <img src="https://github.com/nori210.png" width="100" height="100" alt="Georgia Li">
-    </a>
-    <a href="https://github.com/rudyb2001">
-      <img src="https://github.com/rudyb2001.png" width="100" height="100" alt="Rudy Banerjee">
-    </a>
-    <a href="https://github.com/stevenlai1688">
-      <img src="https://github.com/stevenlai1688.png" width="100" height="100" alt="Steven Lai">
-    </a>
-  </div>
 
-| GitHub Profile | LinkedIn Profile | Full Name         |
-| -------------- | ---------------- | ----------------- |
-| [AdamSchmidty](https://github.com/AdamSchmidty) | [LinkedIn](https://www.linkedin.com/in/adam-m-schmidt) | Adam Schmidt |
-| [davidteather](https://github.com/davidteather) | [LinkedIn](https://www.linkedin.com/in/davidteather) | David Teather |
-| [Gugu0099](https://github.com/Gugu0099) | [LinkedIn](https://www.linkedin.com/in/gulinazi-julati/) | Gulinazi Julati |
-| [nori210](https://github.com/nori210) | [LinkedIn](https://www.linkedin.com/in/jiaxuan-li-1ba857294) | Georgia Li |
-| [rudyb2001](https://github.com/rudyb2001) | [LinkedIn](https://www.linkedin.com/in/anirudhbanerjee) | Rudy Banerjee |
-| [stevenlai1688](https://github.com/stevenlai1688) | [LinkedIn](https://www.linkedin.com/in/steven-yisiang-lai) | Steven Lai |
+
+| [![Adam Schmidt](https://github.com/AdamSchmidty.png)](https://github.com/AdamSchmidty) [**Adam Schmidt**](https://www.linkedin.com/in/adam-m-schmidt) | [![David Teather](https://github.com/davidteather.png)](https://github.com/davidteather) [**David Teather**](https://www.linkedin.com/in/davidteather) | [![Gulinazi Julati](https://github.com/Gugu0099.png)](https://github.com/Gugu0099) [**Gulinazi Julati**](https://www.linkedin.com/in/gulinazi-julati/) |
+| --- | --- | --- |
+| [![Georgia Li](https://github.com/nori210.png)](https://github.com/nori210) [**Georgia Li**](https://www.linkedin.com/in/jiaxuan-li-1ba857294) | [![Rudy Banerjee](https://github.com/rudyb2001.png)](https://github.com/rudyb2001) [**Rudy Banerjee**](https://www.linkedin.com/in/anirudhbanerjee) | [![Steven Lai](https://github.com/stevenlai1688.png)](https://github.com/stevenlai1688) [**Steven Lai**](https://www.linkedin.com/in/steven-yisiang-lai) |
 
 
 ## Overview
