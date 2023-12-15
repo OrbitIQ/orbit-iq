@@ -162,7 +162,7 @@ If you're developing for the website, you might not want to run the website serv
 [issues-shield]: https://img.shields.io/github/issues/OrbitIQ/orbit-iq.svg?style=for-the-badge
 [issues-url]: https://github.com/OrbitIQ/orbit-iq/issues
 [license-shield]: https://img.shields.io/github/license/OrbitIQ/orbit-iq.svg?style=for-the-badge
-[license-url]: https://github.com/OrbitIQ/orbit-iq/blob/master/LICENSE.txt
+[license-url]: https://github.com/OrbitIQ/orbit-iq/blob/master/LICENSE
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
 [React-url]: https://reactjs.org/
 [Docker]: https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=FFFFFF
