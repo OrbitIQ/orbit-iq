@@ -9,7 +9,10 @@ This is a project created for helping maintainers of the [Union of Concerned Sci
 [![MIT License][license-shield]][license-url]
 
 ## Demo
-TODO
+
+[![YouTube Video](./assets/demo-thumbnail.png?raw=true)](https://youtu.be/rAHv2bhhdoE) 
+
+View the full demo on [YouTube](https://youtu.be/rAHv2bhhdoE) (sorry I was a little sick recording this)
 
 ## Built With
 [![Docker][Docker]][docker-url] [![React][React.js]][React-url] [![TailwindCSS][TailwindCSS]][tailwindcss-url] [![Python][Python]][python-url] [![Flask][Flask]][flask-url] [![PostgreSQL][PostgreSQL]][postgresql-url]
